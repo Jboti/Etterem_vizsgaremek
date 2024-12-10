@@ -47,14 +47,8 @@ module.exports = (sequelize, DataTypes) => {
       {
         timestamps: false,
       }
-    );
+    )
   
-    User.associate = (models) => {
-      User.hasMany(models.OrderConnection, {
-        foreignKey: 'userId',
-      });
-    };
-  
-    return User;
-};  
+    return User
+}
   

@@ -23,17 +23,8 @@ module.exports = (sequelize, DataTypes) => {
       {
         timestamps: false,
       }
-    );
+    )
   
-    Purchase.associate = (models) => {
-      Purchase.hasMany(models.OrderConnection, {
-        foreignKey: 'orderId',
-      });
-      Purchase.hasMany(models.OrderDishConnection, {
-        foreignKey: 'orderId',
-      });
-    };
-  
-    return Purchase;
-};
+    return Purchase
+}
   

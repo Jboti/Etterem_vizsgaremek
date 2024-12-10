@@ -35,8 +35,8 @@ module.exports = (sequelize, DataTypes) => {
       {
         timestamps: false,
       }
-    );
+    )
   
-    return Dish;
-};
+    return Dish
+}
   

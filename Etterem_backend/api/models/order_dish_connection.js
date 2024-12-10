@@ -14,19 +14,8 @@ module.exports = (sequelize, DataTypes) => {
       {
         timestamps: false,
       }
-    );
+    )
   
-    OrderDishConnection.associate = (models) => {
-      OrderDishConnection.belongsTo(models.Purchase, {
-        foreignKey: 'orderId',
-        onDelete: 'CASCADE',
-      });
-      OrderDishConnection.belongsTo(models.Dish, {
-        foreignKey: 'dishId',
-        onDelete: 'CASCADE',
-      });
-    };
-  
-    return OrderDishConnection;
-};
+    return OrderDishConnection
+}
   

@@ -23,15 +23,8 @@ module.exports = (sequelize, DataTypes) => {
       {
         timestamps: false,
       }
-    );
+    )
   
-    Allergenable.associate = (models) => {
-      Allergenable.belongsTo(models.Allergy, {
-        foreignKey: 'allergenId',
-        onDelete: 'CASCADE',
-      });
-    };
-  
-    return Allergenable;
-};
+    return Allergenable
+}
   

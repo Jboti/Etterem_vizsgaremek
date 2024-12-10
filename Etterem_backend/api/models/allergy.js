@@ -15,14 +15,8 @@ module.exports = (sequelize, DataTypes) => {
       {
         timestamps: false,
       }
-    );
-  
-    Allergy.associate = (models) => {
-      Allergy.hasMany(models.Allergenable, {
-        foreignKey: 'allergenId',
-      });
-    };
-  
-    return Allergy;
-};
+    )
+
+    return Allergy
+}
   

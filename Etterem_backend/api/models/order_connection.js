@@ -19,8 +19,8 @@ module.exports = (sequelize, DataTypes) => {
       {
         timestamps: false,
       }
-    );
+    )
   
-    return OrderConnection;
-};
+    return OrderConnection
+}
   

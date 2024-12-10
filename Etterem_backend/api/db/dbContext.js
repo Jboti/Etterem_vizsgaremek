@@ -1,8 +1,6 @@
 require('dotenv').config()
 const { Sequelize, DataTypes } = require("sequelize")
 
-console.log("asdsadasdassadasasdasdasd")
-
 const sequelize = new Sequelize
 (
     process.env.DB_NAME,
@@ -32,13 +30,14 @@ const db = {}
 db.Sequelize = Sequelize
 db.sequelize = sequelize
 
-db.user = require("../models/user")(db.sequelize, DataTypes)
-db.order_connection = require("../models/order_connection")(db.sequelize, DataTypes)
-db.purchase = require("../models/purchase")(db.sequelize, DataTypes)
-db.order_dish_connection = require("../models/order_dish_connection")(db.sequelize, DataTypes)
-db.dish = require("../models/dish")(db.sequelize, DataTypes)
-db.allergenables = require("../models/allergenables")(db.sequelize, DataTypes)
-db.allergy = require("../models/allergy")(db.sequelize, DataTypes)
+const { User, Allergenable, Allergy,Dish,OrderConnection,OrderDishConnection,Purchase} = require("../models")(db.sequelize, DataTypes)
+db.user = User;
+db.order_connection = OrderConnection
+db.purchase = Purchase
+db.order_dish_connection = OrderDishConnection
+db.dish = Dish
+db.allergenables = Allergenable
+db.allergy = Allergy
 
 
 db.sequelize.sync({force: true})
