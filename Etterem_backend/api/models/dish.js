@@ -1,3 +1,5 @@
+const { type } = require("os")
+
 module.exports = (sequelize, DataTypes) => {
     const Dish = sequelize.define(
       "dish",
@@ -24,13 +26,17 @@ module.exports = (sequelize, DataTypes) => {
           allowNull: false,
         },
         customizationOptions: {
-          type: DataTypes.TEXT,
+          type: DataTypes.JSON,
           allowNull: false,
         },
         description: {
           type: DataTypes.TEXT,
           allowNull: false,
         },
+        type: {
+          type: DataTypes.STRING(255),
+          allowNull: false,
+        }
       },
       {
         timestamps: false,

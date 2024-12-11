@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2024. Dec 02. 11:16
+-- Létrehozás ideje: 2024. Dec 11. 10:09
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.2.12
 
@@ -28,19 +28,21 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `allergenables` (
-  `id` int(11) NOT NULL COMMENT 'Polymorphic relaitonship tábla',
-  `allergenable_type` varchar(255) NOT NULL COMMENT '(user v dish) tábla neve',
-  `allergenable_id` int(11) NOT NULL COMMENT '(user v dish) id',
-  `allergen_id` int(11) NOT NULL COMMENT 'allergy id'
+  `id` int(11) NOT NULL,
+  `allergenableType` varchar(255) NOT NULL,
+  `allergenableId` int(11) NOT NULL,
+  `allergenId` int(11) NOT NULL,
+  `allergenable_id` int(11) DEFAULT NULL,
+  `allergen_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `allergy`
+-- Tábla szerkezet ehhez a táblához `allergies`
 --
 
-CREATE TABLE `allergy` (
+CREATE TABLE `allergies` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -48,26 +50,28 @@ CREATE TABLE `allergy` (
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `dish`
+-- Tábla szerkezet ehhez a táblához `dishes`
 --
 
-CREATE TABLE `dish` (
+CREATE TABLE `dishes` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `created` date NOT NULL DEFAULT current_timestamp(),
+  `created` date DEFAULT NULL,
   `price` int(11) NOT NULL,
   `available` tinyint(1) NOT NULL,
-  `customization_options` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  `description` longtext NOT NULL
+  `customizationOptions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`customizationOptions`)),
+  `description` text NOT NULL,
+  `type` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `order_connection`
+-- Tábla szerkezet ehhez a táblához `orderconnections`
 --
 
-CREATE TABLE `order_connection` (
+CREATE TABLE `orderconnections` (
+  `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `order_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -75,46 +79,47 @@ CREATE TABLE `order_connection` (
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `order_dish_connection`
+-- Tábla szerkezet ehhez a táblához `orderdishconnections`
 --
 
-CREATE TABLE `order_dish_connection` (
-  `order_id` int(11) NOT NULL,
-  `dish_id` int(11) NOT NULL,
+CREATE TABLE `orderdishconnections` (
+  `id` int(11) NOT NULL,
   `amount` int(11) NOT NULL,
-  `customizations` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`customizations`))
+  `customizations` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`customizations`)),
+  `order_id` int(11) DEFAULT NULL,
+  `dish_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `purchase`
+-- Tábla szerkezet ehhez a táblához `purchases`
 --
 
-CREATE TABLE `purchase` (
+CREATE TABLE `purchases` (
   `id` int(11) NOT NULL,
   `date` int(11) NOT NULL,
-  `total_price` int(11) NOT NULL,
+  `totalPrice` int(11) NOT NULL,
   `message` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `user`
+-- Tábla szerkezet ehhez a táblához `users`
 --
 
-CREATE TABLE `user` (
+CREATE TABLE `users` (
   `id` int(11) NOT NULL,
-  `timestamp` date NOT NULL DEFAULT current_timestamp(),
+  `timestamp` date DEFAULT NULL,
   `created` date NOT NULL,
-  `user_name` varchar(255) NOT NULL,
-  `full_name` varchar(255) NOT NULL,
+  `userName` varchar(255) NOT NULL,
+  `fullName` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `points` int(11) NOT NULL,
-  `is_admin` tinyint(1) NOT NULL,
-  `is_active` tinyint(1) NOT NULL
+  `isAdmin` tinyint(1) NOT NULL,
+  `isActive` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -129,41 +134,43 @@ ALTER TABLE `allergenables`
   ADD KEY `allergen_id` (`allergen_id`);
 
 --
--- A tábla indexei `allergy`
+-- A tábla indexei `allergies`
 --
-ALTER TABLE `allergy`
+ALTER TABLE `allergies`
   ADD PRIMARY KEY (`id`);
 
 --
--- A tábla indexei `dish`
+-- A tábla indexei `dishes`
 --
-ALTER TABLE `dish`
+ALTER TABLE `dishes`
   ADD PRIMARY KEY (`id`);
 
 --
--- A tábla indexei `order_connection`
+-- A tábla indexei `orderconnections`
 --
-ALTER TABLE `order_connection`
-  ADD KEY `fk_order_connection_user` (`user_id`),
-  ADD KEY `fk_order_connection_purchase` (`order_id`);
+ALTER TABLE `orderconnections`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `order_id` (`order_id`);
 
 --
--- A tábla indexei `order_dish_connection`
+-- A tábla indexei `orderdishconnections`
 --
-ALTER TABLE `order_dish_connection`
-  ADD KEY `order_id` (`order_id`,`dish_id`),
+ALTER TABLE `orderdishconnections`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `order_id` (`order_id`),
   ADD KEY `dish_id` (`dish_id`);
 
 --
--- A tábla indexei `purchase`
+-- A tábla indexei `purchases`
 --
-ALTER TABLE `purchase`
+ALTER TABLE `purchases`
   ADD PRIMARY KEY (`id`);
 
 --
--- A tábla indexei `user`
+-- A tábla indexei `users`
 --
-ALTER TABLE `user`
+ALTER TABLE `users`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -174,30 +181,42 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT a táblához `allergenables`
 --
 ALTER TABLE `allergenables`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Polymorphic relaitonship tábla';
-
---
--- AUTO_INCREMENT a táblához `allergy`
---
-ALTER TABLE `allergy`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT a táblához `dish`
+-- AUTO_INCREMENT a táblához `allergies`
 --
-ALTER TABLE `dish`
+ALTER TABLE `allergies`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT a táblához `purchase`
+-- AUTO_INCREMENT a táblához `dishes`
 --
-ALTER TABLE `purchase`
+ALTER TABLE `dishes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT a táblához `user`
+-- AUTO_INCREMENT a táblához `orderconnections`
 --
-ALTER TABLE `user`
+ALTER TABLE `orderconnections`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT a táblához `orderdishconnections`
+--
+ALTER TABLE `orderdishconnections`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT a táblához `purchases`
+--
+ALTER TABLE `purchases`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT a táblához `users`
+--
+ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -208,21 +227,21 @@ ALTER TABLE `user`
 -- Megkötések a táblához `allergenables`
 --
 ALTER TABLE `allergenables`
-  ADD CONSTRAINT `allergenables_ibfk_1` FOREIGN KEY (`allergen_id`) REFERENCES `allergy` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `allergenables_ibfk_1` FOREIGN KEY (`allergen_id`) REFERENCES `allergies` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Megkötések a táblához `order_connection`
+-- Megkötések a táblához `orderconnections`
 --
-ALTER TABLE `order_connection`
-  ADD CONSTRAINT `fk_order_connection_purchase` FOREIGN KEY (`order_id`) REFERENCES `purchase` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_order_connection_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `orderconnections`
+  ADD CONSTRAINT `orderconnections_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `orderconnections_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `purchases` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
--- Megkötések a táblához `order_dish_connection`
+-- Megkötések a táblához `orderdishconnections`
 --
-ALTER TABLE `order_dish_connection`
-  ADD CONSTRAINT `order_dish_connection_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `purchase` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `order_dish_connection_ibfk_2` FOREIGN KEY (`dish_id`) REFERENCES `dish` (`id`) ON DELETE CASCADE;
+ALTER TABLE `orderdishconnections`
+  ADD CONSTRAINT `orderdishconnections_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `purchases` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `orderdishconnections_ibfk_2` FOREIGN KEY (`dish_id`) REFERENCES `dishes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

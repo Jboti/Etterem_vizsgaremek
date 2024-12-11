@@ -7,9 +7,47 @@ class userRepository
         this.User = db.user
     }
 
+
+    async getUser(id)
+    {
+        return await this.User.findOne(
+            {
+                where:
+                {
+                    id: id,
+                }
+            })
+    }
+
+    async updateUserName(user)
+    {
+        await this.User.update(
+            {
+                userName: user.userName,
+            },
+            {
+                where:
+                {
+                    id : user.id
+                }
+            })
+    }
+
     async createUser(user)
     {
         await this.User.create(user)
+        console.log('createUser ')
+    }
+
+    async deleteUser(user)
+    {
+        await this.User.destroy(
+            {
+                where:
+                {
+                    id: user.id
+                }
+            })
     }
 }
 

@@ -30,7 +30,7 @@ const db = {}
 db.Sequelize = Sequelize
 db.sequelize = sequelize
 
-const { User, Allergenable, Allergy,Dish,OrderConnection,OrderDishConnection,Purchase} = require("../models")(db.sequelize, DataTypes)
+const { User, Allergenable, Allergy, Dish, OrderConnection, OrderDishConnection, Purchase} = require("../models")(db.sequelize, DataTypes)
 db.user = User;
 db.order_connection = OrderConnection
 db.purchase = Purchase

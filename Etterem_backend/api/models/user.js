@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         created: {
           type: DataTypes.DATEONLY,
-          allowNull: false,
+          defaultValue: DataTypes.NOW,
         },
         userName: {
           type: DataTypes.STRING(255),
@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
         email: {
           type: DataTypes.STRING(255),
           allowNull: false,
+          unique: true,
         },
         password: {
           type: DataTypes.STRING(255),
