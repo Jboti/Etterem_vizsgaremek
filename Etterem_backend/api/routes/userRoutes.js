@@ -5,14 +5,17 @@ const userController = require('../controllers/userController')
 
 router.get("/", userController.getUser)
 
+//működő user beszúrás
 const userRepo = require('../repositories/userRepository')
 
 async function createInitialUser() {
     try {
+        const currentDate = new Date();
+       
         await userRepo.createUser({
             id: null,
-            timestamp: null,
-            created: null,
+            timestamp: currentDate.toISOString(),
+            created: currentDate.toISOString(),
             userName: 'béla',
             fullName: 'Big Béla',
             email: 'bigbela@gmail.com',
@@ -28,5 +31,6 @@ async function createInitialUser() {
 }
 
 createInitialUser()
+//eddig
 
 module.exports = router

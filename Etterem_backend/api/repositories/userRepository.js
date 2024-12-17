@@ -36,7 +36,6 @@ class userRepository
     async createUser(user)
     {
         await this.User.create(user)
-        console.log('createUser ')
     }
 
     async deleteUser(user)
