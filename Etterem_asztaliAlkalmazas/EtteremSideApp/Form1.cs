@@ -1,15 +1,57 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace EtteremSideApp
 {
     public partial class Form1 : Form
     {
+
+        //------Global values------\\
+
+        private System.Windows.Forms.Timer clockTimer;
+        Random rand = new Random();
+        private int refetchIntervall = 2000;
+
+        //------Global values------\\
+
+
         public Form1()
         {
             InitializeComponent();
+        }
+
+        public static HttpClient sharedClient = new HttpClient()
+        {
+            BaseAddress = new Uri("https://google.com")
+        };
+
+        static async Task GetResponse()
+        {
+            MessageBox.Show("awdawd");
+            try
+            {
+                // Make a GET request to the base address
+                HttpResponseMessage response = await sharedClient.GetAsync("/");
+
+                // Check the status code
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show($"Success! Status Code: {response.StatusCode}");
+                }
+                else
+                {
+                    MessageBox.Show($"Failed! Status Code: {response.StatusCode}");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                MessageBox.Show($"Request error: {ex.Message}");
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -56,8 +98,57 @@ namespace EtteremSideApp
                 }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown")
             };
 
+
             DisplayOrders(orders);
+            InitializeClock();
+            UpdateClock();
+            UpdateElement();
+            InitializeElementUpdater();
+            GetResponse();
         }
+
+        private void InitializeClock()
+        {
+            clockTimer = new System.Windows.Forms.Timer
+            {
+                Interval = 1000 
+            };
+            clockTimer.Tick += UpdateClock;
+            clockTimer.Start();
+        }
+
+        private void UpdateClock(object sender = null, EventArgs e = null)
+        {
+            toolStripLabel1.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
+        private void InitializeElementUpdater()
+        {
+            System.Windows.Forms.Timer updateTimer;
+            updateTimer = new System.Windows.Forms.Timer
+            {
+                Interval = refetchIntervall
+            };
+
+            updateTimer.Tick += UpdateElement;
+
+            updateTimer.Start();
+        }
+
+        private void UpdateElement(object sender = null, EventArgs e = null)
+        {
+            int szam = rand.Next(100);
+            if (szam % 2 == 0)
+            {
+                toolStripLabel2.Text = "lEFUTOTT";
+            }
+            else if (szam % 2 == 1)
+            {
+                toolStripLabel2.Text = "Lefutott";
+            }
+
+        }
+
 
         private void DisplayOrders(List<Order> orders)
         {
@@ -76,7 +167,7 @@ namespace EtteremSideApp
             {
                 Panel orderPanel = new Panel
                 {
-                    AutoSize = true,  // Enables automatic size based on content
+                    AutoSize = true,
                     Margin = new Padding(10),
                     BackColor = GetRandomColor()
                 };
@@ -92,15 +183,14 @@ namespace EtteremSideApp
 
                 orderPanel.Controls.Add(orderLabel);
 
-                // Calculate the button location dynamically
-                int buttonTop = orderLabel.Bottom + 10;  // Space between the label and button
-                int panelHeight = buttonTop + 40;  // Additional space to account for button height
+                int buttonTop = orderLabel.Bottom + 10;  
+                int panelHeight = buttonTop + 40;  
                 Button doneButton = new Button
                 {
                     Text = "Kész",
                     Width = 280,
                     Height = 30,
-                    Location = new Point(5, panelHeight - 30),  // Align button at the bottom
+                    Location = new Point(5, panelHeight - 30),  
                     BackColor = Color.LightGreen,
                     FlatStyle = FlatStyle.Flat
                 };
@@ -112,12 +202,15 @@ namespace EtteremSideApp
         }
 
 
-
-
         private Color GetRandomColor()
         {
-            Random rand = new Random();
+            
             return Color.FromArgb(rand.Next(256), rand.Next(256), rand.Next(256));
+        }
+
+        private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
         }
     }
 
