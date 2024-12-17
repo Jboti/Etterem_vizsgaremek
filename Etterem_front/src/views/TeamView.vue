@@ -16,7 +16,7 @@ import { useRouter } from 'vue-router';
   <v-app>
   <v-main class="fill-height">
     <RouterView />
-    Ez a Home
+    Ez a Team
   </v-main>
   <v-navigation-drawer location="bottom">
     <v-footer class="bg-grey-lighten-1">

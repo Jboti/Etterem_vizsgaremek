@@ -40,6 +40,6 @@ db.allergenables = Allergenable
 db.allergy = Allergy
 
 
-db.sequelize.sync({force: true})
+db.sequelize.sync({alter: true})
 
 module.exports = db

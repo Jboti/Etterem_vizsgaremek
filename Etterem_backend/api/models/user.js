@@ -35,14 +35,17 @@ module.exports = (sequelize, DataTypes) => {
         points: {
           type: DataTypes.INTEGER,
           allowNull: false,
+          default: 0
         },
         isAdmin: {
           type: DataTypes.BOOLEAN,
           allowNull: false,
+          default: false
         },
         isActive: {
           type: DataTypes.BOOLEAN,
           allowNull: false,
+          default:true
         },
       },
       {
