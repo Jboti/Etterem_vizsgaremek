@@ -2,59 +2,64 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+//csak C:-n lehet futtatni!!
 
 namespace EtteremSideApp
 {
     public partial class Form1 : Form
     {
-
         //------Global values------\\
-
         private System.Windows.Forms.Timer clockTimer;
         Random rand = new Random();
         private int refetchIntervall = 2000;
+        static bool conn_alive = false;
 
         //------Global values------\\
-
 
         public Form1()
         {
             InitializeComponent();
         }
 
-        public static HttpClient sharedClient = new HttpClient()
+        private static readonly HttpClient sharedClient = new HttpClient(new HttpClientHandler
         {
-            BaseAddress = new Uri("https://google.com")
-        };
+            Proxy = null,
+            UseProxy = false
+        });
 
-        static async Task GetResponse()
+        private static async Task<bool> START()
         {
-            MessageBox.Show("awdawd");
+            var res = await GetResponse().ConfigureAwait(false); // Avoid capturing context
+            conn_alive = res;
+            return res;
+        }
+
+        public static async Task<bool> GetResponse()
+        {
             try
             {
-                // Make a GET request to the base address
-                HttpResponseMessage response = await sharedClient.GetAsync("/");
-
-                // Check the status code
+                HttpResponseMessage response = await sharedClient.GetAsync("https://www.google.com/");
                 if (response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show($"Success! Status Code: {response.StatusCode}");
+                    return true;
                 }
                 else
                 {
-                    MessageBox.Show($"Failed! Status Code: {response.StatusCode}");
+                    Console.WriteLine("Request failed with status code: " + response.StatusCode);
+                    return false;
                 }
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
-                MessageBox.Show($"Request error: {ex.Message}");
+                Console.WriteLine("An error occurred: " + ex.Message);
+                return false;
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private async void Form1_Load(object sender, EventArgs e)
         {
             var orders = new List<Order>
             {
@@ -98,20 +103,19 @@ namespace EtteremSideApp
                 }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown")
             };
 
-
+            await START(); // Use await instead of .Wait() to avoid deadlock
             DisplayOrders(orders);
             InitializeClock();
             UpdateClock();
             UpdateElement();
             InitializeElementUpdater();
-            GetResponse();
         }
 
         private void InitializeClock()
         {
             clockTimer = new System.Windows.Forms.Timer
             {
-                Interval = 1000 
+                Interval = 1000
             };
             clockTimer.Tick += UpdateClock;
             clockTimer.Start();
@@ -124,31 +128,33 @@ namespace EtteremSideApp
 
         private void InitializeElementUpdater()
         {
-            System.Windows.Forms.Timer updateTimer;
-            updateTimer = new System.Windows.Forms.Timer
+            System.Windows.Forms.Timer updateTimer = new System.Windows.Forms.Timer
             {
                 Interval = refetchIntervall
             };
 
             updateTimer.Tick += UpdateElement;
-
             updateTimer.Start();
         }
 
-        private void UpdateElement(object sender = null, EventArgs e = null)
+        private async void UpdateElement(object sender = null, EventArgs e = null)
         {
-            int szam = rand.Next(100);
-            if (szam % 2 == 0)
-            {
-                toolStripLabel2.Text = "lEFUTOTT";
-            }
-            else if (szam % 2 == 1)
-            {
-                toolStripLabel2.Text = "Lefutott";
-            }
+            bool result = await START(); // Ensure async behavior for connectivity
+            conn_alive = result;
 
+            if (InvokeRequired)
+            {
+                Invoke((MethodInvoker)(() =>
+                {
+                    toolStripLabel2.Text = conn_alive ? "Látja a szervert" : "HIBA nincs kapcsolat";
+                }));
+            }
+            else
+            {
+                toolStripLabel2.Text = conn_alive ? "Látja a szervert" : "HIBA nincs kapcsolat";
+            }
+            Console.WriteLine("Sikeresen frissült");
         }
-
 
         private void DisplayOrders(List<Order> orders)
         {
@@ -183,34 +189,30 @@ namespace EtteremSideApp
 
                 orderPanel.Controls.Add(orderLabel);
 
-                int buttonTop = orderLabel.Bottom + 10;  
-                int panelHeight = buttonTop + 40;  
+                int buttonTop = orderLabel.Bottom + 10;
+                int panelHeight = buttonTop + 40;
                 Button doneButton = new Button
                 {
                     Text = "Kész",
                     Width = 280,
                     Height = 30,
-                    Location = new Point(5, panelHeight - 30),  
+                    Location = new Point(5, panelHeight - 30),
                     BackColor = Color.LightGreen,
                     FlatStyle = FlatStyle.Flat
                 };
 
                 orderPanel.Controls.Add(doneButton);
-
                 flowLayoutPanel.Controls.Add(orderPanel);
             }
         }
 
-
         private Color GetRandomColor()
         {
-            
             return Color.FromArgb(rand.Next(256), rand.Next(256), rand.Next(256));
         }
 
         private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
-
         }
     }
 
