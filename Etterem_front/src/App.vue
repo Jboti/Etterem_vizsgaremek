@@ -3,10 +3,8 @@ import { useRouter } from 'vue-router';
   const links = [
     'Home',
     'Rendeles',
-    'Team',
-    'Services',
-    'Blog',
-    'Contact Us',
+    'Menu',
+    'Felhasznalo',
   ]
 
   const {push} = useRouter()
@@ -18,7 +16,7 @@ import { useRouter } from 'vue-router';
     <RouterView />
   </v-main>
   <v-navigation-drawer location="bottom">
-    <v-footer class="bg-grey-lighten-1">
+    <v-footer class="bg-red-darken-4">
     <v-row justify="center" no-gutters>
       <v-btn
         v-for="link in links"
@@ -32,7 +30,7 @@ import { useRouter } from 'vue-router';
         {{ link }}
       </v-btn>
       <v-col class="text-center mt-4" cols="12">
-        {{ new Date().getFullYear() }} — <strong>Vuetify</strong>
+        <strong>2024 - Döner Cegléd</strong>
       </v-col>
     </v-row>
   </v-footer>
