@@ -10,24 +10,45 @@ exports.getUser = async (req,res,next) =>
     }
 }
 
-exports.addUser = async (req,res,next) =>
+exports.getUsers = async (req,res,next) =>
 {
-    console.log('ads')
+    try {
+        const users = await userRepository.getUsers()
+        res.status(200).json(users)
+    } catch (error) {
+        console.error("Error getting users:", error)
+    }
+}
+
+exports.createUser = async (req,res,next) =>
+{
     try {
         const currentDate = new Date();
-    
-        await userRepository.createUser({
+        //  let user = {
+        //     id: null,
+        //     timestamp: currentDate.toISOString(),
+        //     created: currentDate.toISOString(),
+        //     userName: 'béla',
+        //     fullName: 'Big Béla',
+        //     email: 'bigbela@gmail.com',
+        //     password: 'asd',
+        //     points: 200,
+        //     isAdmin: true,
+        //     isActive: true
+        // }
+         let user = {
             id: null,
             timestamp: currentDate.toISOString(),
             created: currentDate.toISOString(),
-            userName: 'béla',
-            fullName: 'Big Béla',
-            email: 'bigbela@gmail.com',
-            password: 'asd',
-            points: 200,
-            isAdmin: true,
+            userName: 'sanyi',
+            fullName: 'Big Sanyi',
+            email: 'bigsanya@gmail.com',
+            password: 'abcdefg',
+            points: 20000,
+            isAdmin: false,
             isActive: true
-        })
+        }
+        await userRepository.createUser(user)
         console.log("User created successfully")
         res.status(201).send("User created successfully")
     } catch (error) {

@@ -7,6 +7,6 @@ const userRoutes = require('./api/routes/userRoutes')
 
 //ROUTES
 
-app.get("/", userRoutes)
+app.use("/user", userRoutes)
 
 module.exports = app
