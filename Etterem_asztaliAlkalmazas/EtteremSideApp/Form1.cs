@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -32,7 +33,7 @@ namespace EtteremSideApp
 
         private static async Task<bool> START()
         {
-            var res = await GetResponse().ConfigureAwait(false); // Avoid capturing context
+            var res = await GetResponse().ConfigureAwait(false); // ne ragadjon be
             conn_alive = res;
             return res;
         }
@@ -90,25 +91,29 @@ namespace EtteremSideApp
                 new Order(new List<OrderItem>
                 {
                     new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir1", new List<string>(), "Drink"),
-                    new OrderItem("Kefir2", new List<string>(), "Drink"),
-                    new OrderItem("Kefir3", new List<string>(), "Drink"),
-                    new OrderItem("Kefir4", new List<string>(), "Drink"),
-                    new OrderItem("Kefir5", new List<string>(), "Drink"),
-                    new OrderItem("Kefir6", new List<string>(), "Drink"),
-                    new OrderItem("Kefir7", new List<string>(), "Drink"),
-                    new OrderItem("Kefir8", new List<string>(), "Drink"),
-                    new OrderItem("Kefir9", new List<string>(), "Drink"),
-                    new OrderItem("Kefir10", new List<string>(), "Drink"),
+                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
+                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
+                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
+                    new OrderItem("Kefir", new List<string>(), "Drink"),
+                    new OrderItem("Kefir", new List<string>(), "Drink"),
+                    new OrderItem("Kefir", new List<string>(), "Drink"),
+                    new OrderItem("Kefir", new List<string>(), "Drink"),
+                    new OrderItem("Kefir", new List<string>(), "Drink"),
+                    new OrderItem("Kefir", new List<string>(), "Drink"),
+                    new OrderItem("Kefir", new List<string>(), "Drink"),
+                    new OrderItem("Kefir", new List<string>(), "Drink"),
+                    new OrderItem("Kefir", new List<string>(), "Drink"),
                 }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown")
             };
 
-            await START(); // Use await instead of .Wait() to avoid deadlock
+            await START(); //várni kell a responsera
             DisplayOrders(orders);
             InitializeClock();
             UpdateClock();
             UpdateElement();
             InitializeElementUpdater();
+            this.WindowState = FormWindowState.Maximized;
+
         }
 
         private void InitializeClock()
@@ -139,19 +144,37 @@ namespace EtteremSideApp
 
         private async void UpdateElement(object sender = null, EventArgs e = null)
         {
-            bool result = await START(); // Ensure async behavior for connectivity
+            bool result = await START();
             conn_alive = result;
 
             if (InvokeRequired)
             {
                 Invoke((MethodInvoker)(() =>
                 {
-                    toolStripLabel2.Text = conn_alive ? "Látja a szervert" : "HIBA nincs kapcsolat";
+                    if (conn_alive)
+                    {
+                        toolStripLabel2.Text = "A kapcsolat él";
+                        toolStripLabel2.ForeColor = Color.Green;
+                    }
+                    else 
+                    {
+                        toolStripLabel2.Text = "HIBA nincs kapcsolat";
+                        toolStripLabel2.ForeColor = Color.Red;
+                    }
                 }));
             }
             else
             {
-                toolStripLabel2.Text = conn_alive ? "Látja a szervert" : "HIBA nincs kapcsolat";
+                if (conn_alive)
+                {
+                    toolStripLabel2.Text = "A kapcsolat él";
+                    toolStripLabel2.ForeColor = Color.Green;
+                }
+                else
+                {
+                    toolStripLabel2.Text = "HIBA nincs kapcsolat";
+                    toolStripLabel2.ForeColor = Color.Red;
+                }
             }
             Console.WriteLine("Sikeresen frissült");
         }
@@ -178,9 +201,66 @@ namespace EtteremSideApp
                     BackColor = GetRandomColor()
                 };
 
+                //Kategóriánként csoportosítjuk
+                var groupedByCategory = order.Items
+                    .GroupBy(item => item.category)
+                    .ToList();
+
+                var displayContent = new List<string>();
+
+                foreach (var categoryGroup in groupedByCategory)
+                {
+                    
+                    displayContent.Add($"\n----{categoryGroup.Key}----\n");
+
+                    //ételek és módosítások szerinti csoportosítás
+                    var groupedItems = categoryGroup
+                    .GroupBy(item =>
+                    {
+                        string modificationsKey;
+                        if (item.modifications.Count == 0)
+                        {
+                            modificationsKey = null;
+                        }
+                        else
+                        {
+                            modificationsKey = string.Join(",", item.modifications.OrderBy(m => m));
+                        }
+
+                        return new
+                        {
+                            item.name,
+                            ModificationsKey = modificationsKey
+                        };
+                    })
+                    .Select(group =>
+                    {
+                        string mods;
+                        if (group.Key.ModificationsKey == null)
+                        {
+                            mods = "";
+                        }
+                        else
+                        {
+                            mods = $"Módosítások: ({group.Key.ModificationsKey})";
+                        }
+
+                        return $"{group.Count()} X {group.Key.name} {mods}";
+                    })
+                    .ToList();
+
+                    displayContent.AddRange(groupedItems);
+                }
+
                 Label orderLabel = new Label
                 {
-                    Text = $"ID: {order.Id}\nDátum: {order.timestamp.ToShortDateString()} {order.timestamp.ToShortTimeString()}\nNév: {order.customer_name}\nÁr: {order.pricev} Ft\nKifizetve: {(order.paid ? "Igen" : "Nem")}\nTartalom:\n{string.Join("\n", order.Items)}",
+                    Text = $@"ID: {order.Id}
+Dátum: {order.timestamp.ToShortDateString()} {order.timestamp.ToShortTimeString()}
+Név: {order.customer_name}
+Ár: {order.pricev} Ft
+Kifizetve: {(order.paid ? "Igen" : "Nem")}
+Tartalom:
+{string.Join("\n", displayContent)}",
                     AutoSize = true,
                     Location = new Point(10, 10),
                     ForeColor = Color.White,
@@ -205,6 +285,7 @@ namespace EtteremSideApp
                 flowLayoutPanel.Controls.Add(orderPanel);
             }
         }
+
 
         private Color GetRandomColor()
         {
