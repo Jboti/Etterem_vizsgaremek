@@ -19,6 +19,11 @@ class userRepository
             })
     }
 
+    async getUsers()
+    {
+        return await this.User.findAll({})
+    }
+
     async updateUserName(user)
     {
         await this.User.update(
