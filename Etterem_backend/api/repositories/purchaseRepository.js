@@ -5,10 +5,12 @@ class purchaseRepository
     constructor(db)
     {
         this.Purchase = db.purchase
+        this.OrderConnection = db.orderConnection
+        this.User = db.user
     }
 
 
-    async getPurchas(id)
+    async getPurchase(id)
     {
         return await this.Purchase.findOne(
             {
@@ -19,12 +21,27 @@ class purchaseRepository
             })
     }
 
+    async getPurchaseUser(purchase)
+    {
+        return await this.User.findOne(
+        {
+            where: {
+                id: this.OrderConnection.findOne(
+                    {
+                        where: {
+                            order_id: purchase.id,
+                        }
+                    }).user_id
+            }
+        })
+    }
+
     async getAllPurchases()
     {
         return await this.Purchase.findAll({})
     }
 
-    async updatePurchase(purchase)
+    async updatePurchaseMessage(purchase)
     {
         await this.Purchase.update(
             {
@@ -38,12 +55,26 @@ class purchaseRepository
             })
     }
 
+    async deActivatePurchase(purchase)
+    {
+        await this.Purchase.update(
+            {
+                isActive: false,
+            },
+            {
+                where: {
+                    id: purchase.id
+                }
+            }
+        )
+    }
+
     async createPurchase(purchase)
     {
         await this.Purchase.create(purchase)
     }
 
-    async deleteUser(purchase)
+    async deletePurchase(purchase)
     {
         await this.Purchase.destroy(
             {

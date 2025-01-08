@@ -32,9 +32,9 @@ db.sequelize = sequelize
 
 const { User, Allergenable, Allergy, Dish, OrderConnection, OrderDishConnection, Purchase} = require("../models")(db.sequelize, DataTypes)
 db.user = User;
-db.order_connection = OrderConnection
+db.orderConnection = OrderConnection
 db.purchase = Purchase
-db.order_dish_connection = OrderDishConnection
+db.orderDishConnection = OrderDishConnection
 db.dish = Dish
 db.allergenables = Allergenable
 db.allergy = Allergy

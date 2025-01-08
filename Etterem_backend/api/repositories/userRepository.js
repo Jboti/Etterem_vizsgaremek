@@ -43,13 +43,13 @@ class userRepository
         await this.User.create(user)
     }
 
-    async deleteUser(user)
+    async deleteUser(id)
     {
         await this.User.destroy(
             {
                 where:
                 {
-                    id: user.id
+                    id: id
                 }
             })
     }
