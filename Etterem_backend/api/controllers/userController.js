@@ -98,16 +98,17 @@ exports.createUser = async (req,res,next) =>
 exports.deleteUser = async (req,res,next) =>
 {
     try {
-        const {id} = req.params
-        id = Number(id)
-        if(!id || isNaN(id)){
-            const error = new Error("Id not found or id is not a number!")
-            error.status = 404
-            throw error
-        }
+        // const {id} = req.params
+        // id = Number(id)
+        // if(!id || isNaN(id)){
+        //     const error = new Error("Id not found or id is not a number!")
+        //     error.status = 404
+        //     throw error
+        // }
+        const id = 1
         await userRepository.deleteUser(id)
         console.log("User deleted successfully!")
-        res.status(202).send("User deleted successfully!")
+        res.status(200).send("User deleted successfully!")
     } catch (error) {
         next(error)
     }

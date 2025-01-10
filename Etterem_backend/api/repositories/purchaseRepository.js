@@ -55,7 +55,7 @@ class purchaseRepository
             })
     }
 
-    async deActivatePurchase(purchase)
+    async deActivatePurchase(id)
     {
         await this.Purchase.update(
             {
@@ -63,7 +63,7 @@ class purchaseRepository
             },
             {
                 where: {
-                    id: purchase.id
+                    id: id
                 }
             }
         )
