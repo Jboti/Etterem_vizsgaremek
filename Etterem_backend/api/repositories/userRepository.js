@@ -19,7 +19,7 @@ class userRepository
             })
     }
 
-    async getUsers()
+    async getAllUser()
     {
         return await this.User.findAll({})
     }

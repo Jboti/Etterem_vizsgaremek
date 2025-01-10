@@ -36,7 +36,7 @@ class purchaseRepository
         })
     }
 
-    async getAllPurchases()
+    async getAllPurchase()
     {
         return await this.Purchase.findAll({})
     }
