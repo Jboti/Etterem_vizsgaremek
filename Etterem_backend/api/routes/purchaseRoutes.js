@@ -3,8 +3,10 @@ const router = express.Router()
 
 const purchaseController = require('../controllers/purchaseController')
 
-router.get("/getPurchases", purchaseController.getAllPurchase)
-router.post("/createPurchase", purchaseController.createPurchase)
+//getAllActiveOrder
+router.get("/getAllActiveOrder", purchaseController.getAllActivePurchase)
+//Rendelés leadás, param: (userid) uid, body: totalPrice, message, dishInfo -> {dishIds: [...], dishAmounts: [...], dishCustomizations: [...]}
+router.post("/placeOrder/:uid", purchaseController.PlaceOrder)
 
 
 

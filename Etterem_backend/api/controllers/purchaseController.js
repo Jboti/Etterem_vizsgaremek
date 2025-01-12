@@ -1,11 +1,11 @@
 const purchaseRepository = require('../repositories/purchaseRepository')
 const order_connectionRepository = require('../repositories/order_connectionRepository')
 
-exports.getAllPurchase = async (req,res,next) =>
+exports.getAllActivePurchase = async (req,res,next) =>
 {
     try
     {
-        const purchases = await purchaseRepository.getAllPurchase()
+        const purchases = await purchaseRepository.getAllActivePurchase()
         res.status(200).json(purchases)
     }catch(error)
     {
@@ -20,7 +20,7 @@ exports.deActivatePurchase = async (req,res,next) =>
         const {id} = req.params
         id = Number(id)
         if(!id || isNaN(id)){
-            const error = new Error("Id is not found or id is not a number!")
+            const error = new Error("Purchase id is not found or id is not a number!")
             error.status = 404
             throw error
         }
@@ -33,56 +33,57 @@ exports.deActivatePurchase = async (req,res,next) =>
     }
 }
 
-exports.createPurchase = async (req,res,next) =>
+exports.PlaceOrder = async (req,res,next) =>
 {
     try
     {
         const currentDate = new Date()
-        // const {totalPrice, message} = req.body
-        // const {uid} = req.params
-        // uid = Number(uid)
-        // totalPrice = Number(totalPrice)
-        // if(!totalPrice || isNaN(totalPrice)){
-        //     const error = new Error("TotalPrice is not found or totalPrice is not a number!")
-        //     error.status = 404
-        //     throw error
-        // }
-        // if(!message){
-        //     const error = new Error("Message is not found!")
-        //     error.status = 404
-        //     throw error
-        // }
-        // if(!uid || isNaN(uid)){
-        //     const error = new Error("UserId is not found or userId is not a number!")
-        //     error.status = 404
-        //     throw error
-        // }
-        // const purchase = {
-        //     id: null,
-        //     date: currentDate.toISOString(),
-        //     totalPrice: totalPrice,
-        //     message: message,
-        // }
-        const uids = [1,2]
-        const purchases = [{
+        const {uid} = req.params
+        const {totalPrice, message, dishInfo} = req.body
+        uid = Number(uid)
+        totalPrice = Number(totalPrice)
+        dishInfo.dishIds = dishInfo.dishIds.map(id => Number(id))
+        dishInfo.dishAmounts = dishInfo.dishAmounts.map(amount => Number(amount))
+        if(!totalPrice || isNaN(totalPrice)){
+            const error = new Error("Purchase totalPrice is not found or totalPrice is not a number!")
+            error.status = 404
+            throw error
+        }
+        if(!message){
+            const error = new Error("Purchase message is not found!")
+            error.status = 404
+            throw error
+        }
+        if(!uid || isNaN(uid)){
+            const error = new Error("Purchase userId is not found or userId is not a number!")
+            error.status = 404
+            throw error
+        }
+        const purchase = {
             id: null,
             date: currentDate.toISOString(),
-            totalPrice: 10000,
-            message: "",
-        },
+            totalPrice: totalPrice,
+            message: message,
+            isActive: true
+        }
+        if(!dishInfo.dishIds || !dishInfo.dishAmounts || !dishInfo.dishCustomizations)
         {
-            id: null,
-            date: currentDate.toISOString(),
-            totalPrice: 8700,
-            message: "Kutya ugat",
-        },
-        {
-            id: null,
-            date: currentDate.toISOString(),
-            totalPrice: 2700,
-            message: "Nagyon szeretem!",
-        }]
-        await order_connectionRepository.createPurchaseConnection(uids[0],purchases[0])
+            const error = new Error("Purchase missing input in dishInfo!")
+            error.status = 404
+            throw error
+        }
+        if(dishInfo.dishIds.some(id => isNaN(id))) {
+            const error = new Error("Purchase dishId is not a number!")
+            error.status = 404
+            throw error
+        }
+        if(dishInfo.dishAmounts.some(amount => isNaN(amount))){
+            const error = new Error("Purchase dishAmount is not a number!")
+            error.status = 404
+            throw error
+        }
+
+        await order_connectionRepository.createPurchaseConnection(uid,purchase,dishInfo)
         console.log("Purchase created successfully!")
         res.status(201).send("Purchase created successfully!")
     }catch(error)

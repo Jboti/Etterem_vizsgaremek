@@ -1,3 +1,4 @@
+const { where } = require('sequelize')
 const db = require('../db/dbContext')
 
 class purchaseRepository
@@ -36,9 +37,14 @@ class purchaseRepository
         })
     }
 
-    async getAllPurchase()
+    async getAllActivePurchase()
     {
-        return await this.Purchase.findAll({})
+        return await this.Purchase.findAll({
+            where:
+            {
+                isActive: true
+            }
+        })
     }
 
     async updatePurchaseMessage(purchase)
