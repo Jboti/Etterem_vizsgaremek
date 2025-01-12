@@ -8,8 +8,8 @@ module.exports = (sequelize, DataTypes) => {
           autoIncrement: true,
         },
         date: {
-          type: DataTypes.INTEGER,
-          allowNull: false,
+          type: DataTypes.DATEONLY,
+          defaultValue: DataTypes.NOW,
         },
         totalPrice: {
           type: DataTypes.INTEGER,
@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         message: {
           type: DataTypes.STRING(255),
-          allowNull: false,
+          allowNull: true,
         },
         isActive: {
           type: DataTypes.BOOLEAN,

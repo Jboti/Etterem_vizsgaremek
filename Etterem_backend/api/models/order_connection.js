@@ -2,6 +2,12 @@ module.exports = (sequelize, DataTypes) => {
     const OrderConnection = sequelize.define(
       "orderConnection",
       {
+        id: 
+        {
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+        },
         user_id: 
         {
           type: DataTypes.INTEGER,

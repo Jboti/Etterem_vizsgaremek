@@ -1,4 +1,4 @@
-module.exports=(sequelize, DataTypes)=>{
+module.exports = (sequelize, DataTypes) => {
     const Allergenable = require("../models/allergenables")(sequelize, DataTypes)
     const Allergy = require("../models/allergy")(sequelize, DataTypes)
     const Dish = require("../models/dish")(sequelize, DataTypes)
@@ -10,6 +10,7 @@ module.exports=(sequelize, DataTypes)=>{
     User.hasMany(OrderConnection, {
         foreignKey: "user_id",
         as: "orders",
+        onDelete: 'CASCADE',  // Ha törlöm a felhasználót, törlődjenek az ő rendelései is
     })
 
     OrderConnection.belongsTo(User, {
@@ -20,6 +21,7 @@ module.exports=(sequelize, DataTypes)=>{
     OrderConnection.belongsTo(Purchase, {
         foreignKey: "order_id",
         as: "purchase",
+        onDelete: 'CASCADE',  // Ha törlöm a rendelést, törlődjenek a kapcsolódó order connections is
     })
 
     Purchase.hasMany(OrderConnection, {
@@ -30,6 +32,7 @@ module.exports=(sequelize, DataTypes)=>{
     Purchase.hasMany(OrderDishConnection, {
         foreignKey: "order_id",
         as: "order_dishes",
+        onDelete: 'CASCADE',  // Ha törlöm a rendelést, törlődjenek az order dish kapcsolatok is
     })
 
     OrderDishConnection.belongsTo(Purchase, {
@@ -40,18 +43,20 @@ module.exports=(sequelize, DataTypes)=>{
     OrderDishConnection.belongsTo(Dish, {
         foreignKey: "dish_id",
         as: "dish",
+        onDelete: 'CASCADE',  // Ha törlöm a dish-t, törlődjenek a kapcsolódó order dish connection rekordok
     })
 
     Dish.hasMany(OrderDishConnection, {
         foreignKey: "dish_id",
         as: "order_dish_connections",
+        onDelete: 'CASCADE',  // Ha törlöm a dish-t, törlődjenek az order dish connection rekordok
     })
 
     Dish.hasMany(Allergenable, {
         foreignKey: "allergenable_id",
         constraints: false,
         scope: {
-            allergenable_type: "dish",
+        allergenable_type: "dish",
         },
         as: "allergens",
     })
@@ -65,7 +70,7 @@ module.exports=(sequelize, DataTypes)=>{
         foreignKey: "allergenable_id",
         constraints: false,
         scope: {
-            allergenable_type: "user",
+        allergenable_type: "user",
         },
         as: "user_allergens",
     })
@@ -74,14 +79,15 @@ module.exports=(sequelize, DataTypes)=>{
         foreignKey: "allergenable_id",
         constraints: false,
         as: "dish",
+        onDelete: 'CASCADE',  // Ha törlöm a dish-t, törlődjenek a dish-hez kapcsolódó allergenek is
     })
 
     Allergenable.belongsTo(User, {
         foreignKey: "allergenable_id",
         constraints: false,
         as: "user",
+        onDelete: 'CASCADE',  // Ha törlöm a user-t, törlődjenek a user-hez kapcsolódó allergenek is
     })
 
-    return {User,Allergenable,Allergy,Dish,OrderConnection,OrderDishConnection,Purchase}
+    return { User, Allergenable, Allergy, Dish, OrderConnection, OrderDishConnection, Purchase }
 }
-
