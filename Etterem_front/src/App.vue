@@ -5,6 +5,8 @@ import { useRouter } from 'vue-router';
     'Rendeles',
     'Menu',
     'Felhasznalo',
+    'Regisztráció',
+    'Bejelentkezés'
   ]
 
   const {push} = useRouter()

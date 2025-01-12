@@ -26,7 +26,7 @@ const { mutate: registration, isPending} = useLogin()
             }" :loading="isPending">
                 Login
             </v-btn>
-            <v-btn @click="push({name:'password-reset-email'})">
+            <v-btn @click="push({name:'PasswordResetEmail'})">
                 Forgot password
             </v-btn>
         </v-card-actions>
