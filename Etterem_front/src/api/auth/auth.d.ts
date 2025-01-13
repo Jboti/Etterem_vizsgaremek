@@ -1,8 +1,8 @@
 export type RegistrationData = {
     userName: string,
-    fullName: string,
-    email: string
-
+    fullName: string
+    email: string,
+    password: string
 }
 
 export type RegistrationResponse = {

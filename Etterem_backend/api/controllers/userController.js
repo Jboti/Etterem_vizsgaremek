@@ -60,6 +60,9 @@ exports.createUser = async (req,res,next) =>
             fullName: fullName,
             email: email,
             password: password,
+            points: 0,
+            isAdmin: false,
+            isActive: true
         }
         await userRepository.createUser(user)
         console.log("User created successfully!")

@@ -4,21 +4,36 @@ import { useMutation, useQuery } from "@tanstack/vue-query"
 import { useRoute, useRouter } from "vue-router"
 import { QUERY_KEYS } from "@/utils/queryKeys"
 
-const registration = async (data: RegistrationData): Promise<RegistrationResponse> => {
-    const response = await axiosClient.post("http://localhost:3000", data)//majd itten kell átírni a saját linkünkre vagy vmi.
-    console.log({response})
-    return response.data.data
-}
+// const registration = async (data: RegistrationData): Promise<RegistrationResponse> => {
+//     const response = await axiosClient.post("localhost:3000/createUser", data)
+//     console.log({response})
+//     return response.data.data
+// }
 
+// export const useRegistration = () => {
+//     const {push} = useRouter()
+//     return useMutation({
+//         mutationFn: registration,
+//         onSuccess(data) {
+//             push({name: 'set-password', params: {token: data.token}})
+//         },
+//     })
+// }
+const registration = async (data: RegistrationData) => {
+    const response = await axiosClient.post("http://localhost:3000/user/createUser", data)
+    console.log(response)
+    return response.data
+}
 export const useRegistration = () => {
     const {push} = useRouter()
     return useMutation({
         mutationFn: registration,
-        onSuccess(data) {
-            push({name: 'SetPassword', params: {token: data.token}})
+        onSuccess() {
+            push({name: 'Főoldal'})
         },
     })
 }
+
 
 const getSetPassword = async (): Promise<SetPasswordResponse> => {
     const {params} = useRoute()

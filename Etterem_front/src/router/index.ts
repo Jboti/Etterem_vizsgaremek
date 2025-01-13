@@ -14,22 +14,22 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'Home',
+      name: 'Főoldal',
       component: HomeView,
     },
     {
       path: '/rendeles',
-      name: 'Rendeles',
+      name: 'Rendelés',
       component: RendelesView,
     },
     {
       path: '/menu',
-      name: 'Menu',
+      name: 'Menü',
       component: MenuView,
     },
     {
       path: '/felhasznalo',
-      name: 'Felhasznalo',
+      name: 'Felhasználó',
       component: FelhasznaloView,
     },
     {

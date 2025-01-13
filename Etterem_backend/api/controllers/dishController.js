@@ -1,3 +1,4 @@
+const dish = require('../models/dish')
 const dishRepository = require('../repositories/dishRepository')
 
 exports.createDish = async (req,res,next) =>
@@ -55,4 +56,15 @@ exports.createDish = async (req,res,next) =>
     {
         next(error)
     }
+}
+
+exports.getAllDishes = async (req,res,next) =>
+{
+    try {
+        const dishes = await dishRepository.getAllDishes()
+        res.status(200).json(dishes)
+    } catch (error) {
+        next(error)
+    }
+        
 }

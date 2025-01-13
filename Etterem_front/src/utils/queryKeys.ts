@@ -8,14 +8,14 @@ const AUTH_KEYS = {
     passwordReset:'passwordReset'
 }
 
-const PROJECT_KEYS = {
-    getProjects:'getProjects',
-    getProject:'getProject'
+const DISH_KEYS = {
+    getDishes: 'getDishes',
+
 }
 
 
 export const QUERY_KEYS = {
     ...USER_KEYS,
     ...AUTH_KEYS,
-    ...PROJECT_KEYS,
+    ...DISH_KEYS,
 } as const
