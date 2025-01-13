@@ -8,6 +8,8 @@ class purchaseRepository
         this.Purchase = db.purchase
         this.OrderConnection = db.orderConnection
         this.User = db.user
+        this.OrderDishConnection = db.orderDishConnection
+        this.Dish = db.dish
     }
 
 
@@ -37,15 +39,51 @@ class purchaseRepository
         })
     }
 
-    async getAllActivePurchase()
-    {
+    // async getAllActivePurchase()
+    // {
+    //     return await this.Purchase.findAll({
+    //         where:
+    //         {
+    //             isActive: true
+    //         }
+    //     })
+    // }
+
+    async getAllActivePurchase() {
         return await this.Purchase.findAll({
-            where:
-            {
+            where: {
                 isActive: true
-            }
+            },
+            include: [
+                {
+                    model: this.OrderConnection,
+                    as: "order_connections",
+                    include: [
+                        {
+                            model: this.User,
+                            as: "user",
+                            attributes: ["userName"]
+                        }
+                    ],
+                    attributes: ["id"] 
+                },
+                {
+                    model: this.OrderDishConnection, 
+                    as: "order_dishes",
+                    include: [
+                        {
+                            model: this.Dish, 
+                            as: "dish",
+                            attributes: ["name","type"] 
+                        }
+                    ],
+                    attributes: ["customizations", "amount"] 
+                }
+            ],
+            attributes: ["id", "date","totalPrice","message"] 
         })
     }
+    
 
     async updatePurchaseMessage(purchase)
     {
