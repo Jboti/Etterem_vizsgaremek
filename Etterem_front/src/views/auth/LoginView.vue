@@ -10,7 +10,7 @@ const LoginDataRef = ref<LoginData>({
 })
 
 const { push } = useRouter()
-const { mutate: registration, isPending} = useLogin()
+//const { mutate: registration, isPending} = useLogin()
 
 </script>
 <template>
@@ -22,8 +22,7 @@ const { mutate: registration, isPending} = useLogin()
         </v-card-text>
         <v-card-actions>
             <v-btn @click="() => {
-                registration(LoginDataRef)
-            }" :loading="isPending">
+            }">
                 Login
             </v-btn>
             <v-btn @click="push({name:'PasswordResetEmail'})">

@@ -1,7 +1,8 @@
 export type RegistrationData = {
-    name: string,
+    userName: string,
+    fullName: string
     email: string,
-    neptun_code: string
+    password: string
 }
 
 export type RegistrationResponse = {
