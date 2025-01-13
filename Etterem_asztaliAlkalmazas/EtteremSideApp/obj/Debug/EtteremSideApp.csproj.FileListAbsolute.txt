@@ -36,3 +36,13 @@ H:\f_PROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\obj\De
 H:\f_PROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\obj\Debug\EtteremSideApp.csproj.CoreCompileInputs.cache
 H:\f_PROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\obj\Debug\EtteremSideApp.exe
 H:\f_PROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\obj\Debug\EtteremSideApp.pdb
+H:\FINALPROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\bin\Debug\EtteremSideApp.exe.config
+H:\FINALPROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\bin\Debug\EtteremSideApp.exe
+H:\FINALPROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\bin\Debug\EtteremSideApp.pdb
+H:\FINALPROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\obj\Debug\EtteremSideApp.csproj.AssemblyReference.cache
+H:\FINALPROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\obj\Debug\EtteremSideApp.Form1.resources
+H:\FINALPROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\obj\Debug\EtteremSideApp.Properties.Resources.resources
+H:\FINALPROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\obj\Debug\EtteremSideApp.csproj.GenerateResource.cache
+H:\FINALPROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\obj\Debug\EtteremSideApp.csproj.CoreCompileInputs.cache
+H:\FINALPROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\obj\Debug\EtteremSideApp.exe
+H:\FINALPROJECT\Etterem_vizsgaremek\Etterem_asztaliAlkalmazas\EtteremSideApp\obj\Debug\EtteremSideApp.pdb
