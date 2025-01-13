@@ -266,7 +266,7 @@ namespace EtteremSideApp
             if (orders_count != previousOrdersCount)
             {
                 must_Update = true;
-                Application.Restart();
+                
                 previousOrdersCount = orders_count;
             }
             else
