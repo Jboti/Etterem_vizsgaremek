@@ -18,6 +18,7 @@ namespace EtteremSideApp
         private int refetchIntervall = 2000;
         static bool conn_alive = false;
         static string conn_link = "http://localhost:3000/user/getUsers";
+        public static List<Order> all_orders = new List<Order>();
 
         //------Global values------\\
 
@@ -61,9 +62,50 @@ namespace EtteremSideApp
             }
         }
 
+        public static async void RendelesekGet()
+        {
+            try
+            {
+                HttpResponseMessage response = await sharedClient.GetAsync("http://localhost:3000/purchase/getAllActiveOrder");
+                if (response.IsSuccessStatusCode)
+                {
+
+                }
+                else
+                {
+                    Console.WriteLine("Request failed with status code: " + response.StatusCode);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred: " + ex.Message);
+            }
+
+            int number_of_active_orders = 0;
+
+            for (int i = 0; i < number_of_active_orders; i++)
+            {
+                string OI_name = "";
+                List<string> OI_modifacations = new List<string>();
+                string OI_category = "";
+
+                int O_id = 0;
+                int O_price = 0;
+                bool O_paid = true;
+                DateTime dateTime;
+                string O_name = "";
+                //
+
+                //all_orders.Add()
+            }
+
+
+        }
+
         private async void Form1_Load(object sender, EventArgs e)
         {
-            var orders = new List<Order>
+            List<Order> orders = new List<Order>
             {
                 new Order(new List<OrderItem>
                 {
@@ -250,7 +292,8 @@ namespace EtteremSideApp
                     new OrderItem("Kefir", new List<string>(), "Drink"),
                     new OrderItem("Kefir", new List<string>(), "Drink"),
                     new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),                new Order(new List<OrderItem>
+                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
+                new Order(new List<OrderItem>
                 {
                     new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
                     new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
@@ -421,7 +464,7 @@ namespace EtteremSideApp
                 Dock = DockStyle.Fill,
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents = true, //must remain true
-                Padding = new Padding(20),
+                Padding = new Padding(20, 20, 20, 200), // Left, Top, Right, Bottom
                 AutoScroll = true,
             };
 
@@ -509,7 +552,7 @@ namespace EtteremSideApp
 
                 Label orderPriceLabel = new Label
                 {
-                    Text = "Ár: " + order.pricev + " Ft" + "\n",
+                    Text = "Ár: " + order.price + " Ft" + "\n",
                     AutoSize = true,
                     Location = new Point(10, currentTop),
                     ForeColor = Color.Black,
@@ -587,16 +630,16 @@ namespace EtteremSideApp
     {
         public List<OrderItem> Items { get; set; }
         public int Id { get; set; }
-        public int pricev { get; set; }
+        public int price { get; set; }
         public bool paid { get; set; }
         public DateTime timestamp { get; set; }
         public string customer_name { get; set; }
 
-        public Order(List<OrderItem> items, int id, int pricev, bool paid, DateTime timestamp, string customer_name)
+        public Order(List<OrderItem> items, int id, int price, bool paid, DateTime timestamp, string customer_name)
         {
             Items = items;
             Id = id;
-            this.pricev = pricev;
+            this.price = price;
             this.paid = true;
             this.timestamp = timestamp;
             this.customer_name = customer_name;
