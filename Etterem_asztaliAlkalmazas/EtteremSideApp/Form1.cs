@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -17,7 +20,7 @@ namespace EtteremSideApp
         Random rand = new Random();
         private int refetchIntervall = 2000;
         static bool conn_alive = false;
-        static string conn_link = "http://localhost:3000/user/getUsers";
+        static string conn_link = "http://localhost:3000/user/getAllUser";
         public static List<Order> all_orders = new List<Order>();
 
         //------Global values------\\
@@ -62,328 +65,87 @@ namespace EtteremSideApp
             }
         }
 
+        public static async Task<JsonElement> getRendelesJSON()
+        {
+            JsonElement jsonResponse; // Declare the JSON response variable
+            HttpResponseMessage response = await sharedClient.GetAsync("http://localhost:3000/purchase/getAllActiveOrder");
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            // Deserialize the JSON response into JsonElement
+            jsonResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
+
+            // Define JSON serialization options
+            var jsonOptions = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+
+            // Optionally log the formatted JSON
+            string formattedJson = JsonSerializer.Serialize(jsonResponse, jsonOptions);
+            // Console.WriteLine(formattedJson);
+
+            return jsonResponse;
+        }
+
         public static async void RendelesekGet()
         {
-            try
-            {
-                HttpResponseMessage response = await sharedClient.GetAsync("http://localhost:3000/purchase/getAllActiveOrder");
-                if (response.IsSuccessStatusCode)
-                {
+            all_orders.Clear();
+            // Await the getRendelesJSON method to get the actual JsonElement
+            JsonElement jsonResponse = await getRendelesJSON();
 
-                }
-                else
-                {
-                    Console.WriteLine("Request failed with status code: " + response.StatusCode);
-
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An error occurred: " + ex.Message);
-            }
-
-            int number_of_active_orders = 0;
+            int number_of_active_orders = jsonResponse.GetArrayLength(); // Get the actual number of orders
 
             for (int i = 0; i < number_of_active_orders; i++)
             {
-                string OI_name = "";
-                List<string> OI_modifacations = new List<string>();
-                string OI_category = "";
+                // Access each order in the loop
+                JsonElement order = jsonResponse[i];
 
-                int O_id = 0;
-                int O_price = 0;
-                bool O_paid = true;
-                DateTime dateTime;
-                string O_name = "";
-                //
+                // Example: Get some properties of the order
+                int id = order.GetProperty("id").GetInt32();
+                int totalprice = order.GetProperty("totalPrice").GetInt32();
+                DateTime date = order.GetProperty("date").GetDateTime();
+                string message = order.GetProperty("message").GetString();
+                string name = order.GetProperty("order_connections")[0].GetProperty("user").GetProperty("userName").GetString();
+                var dishes = order.GetProperty("order_dishes");
+                int number_of_dishes = dishes.GetArrayLength();
+                List<OrderItem> items = new List<OrderItem>();
 
-                //all_orders.Add()
+                // Fixing the loop where you use 'i' incorrectly
+                for (int j = 0; j < number_of_dishes; j++)
+                {
+                    string dish_name = dishes[j].GetProperty("dish").GetProperty("name").GetString();
+                    string customizationsStr = dishes[j].GetProperty("customizations").GetString();
+
+                    // Remove the surrounding quotes and split by commas if needed
+                    List<string> dish_customizations = customizationsStr
+                        .Trim('"')  // Remove the outer quotes
+                        .Split(new[] { "\",\"" }, StringSplitOptions.None)  // Split by comma separator if multiple options are present
+                        .ToList();
+                    string dish_type = dishes[j].GetProperty("dish").GetProperty("type").GetString();
+                    int dish_amount = dishes[j].GetProperty("amount").GetInt32();
+                    for (int k = 0; k < dish_amount; k++)
+                        items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
+                }
+
+                // Add the order to the all_orders list
+                all_orders.Add(new Order(items, id, totalprice, true, date, name));
+                Console.WriteLine("lefutott " + all_orders.Count());
             }
-
-
         }
+
 
         private async void Form1_Load(object sender, EventArgs e)
         {
-            List<Order> orders = new List<Order>
-            {
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Pizza", new List<string>{"Nem kérek hagymát"}, "Tészta"),
-                    new OrderItem("Tészta", new List<string>{"Nem kérek hagymát"}, "Tészta")
-                }, 1, 2000, false, DateTime.Parse("2024-11-01 14:30"), "John Doe"),
-
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Hamburger", new List<string>{"Extra sajt"}, "Fast Food"),
-                    new OrderItem("Sült krumpli", new List<string>(), "Side Dish")
-                }, 2, 2500, false, DateTime.Parse("2024-11-02 16:45"), "Jane Smith"),
-
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Saláta", new List<string>{"Nincs öntet"}, "Appetizer"),
-                    new OrderItem("Leves", new List<string>(), "Soup")
-                }, 3, 1500, false, DateTime.Parse("2024-11-03 18:00"), "Bob Lee"),
-
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Pörkölt", new List<string>{"Köret: Rizs"}, "Main Dish"),
-                    new OrderItem("Rizs", new List<string>(), "Side Dish")
-                }, 4, 1800, false, DateTime.Parse("2024-11-04 20:15"), "Alice Johnson"),
-
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-                                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-                new Order(new List<OrderItem>
-                {
-                    new OrderItem("Lángos", new List<string>{"Fokhagyma a lángosra"}, "Main Dish"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string> { "Csípős", "Pöcsös" }, "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                    new OrderItem("Kefir", new List<string>(), "Drink"),
-                }, 5, 1600, false, DateTime.Parse("2024-11-05 22:30"), "Charlie Brown"),
-            };
-
+            RendelesekGet();
             await START(); //várni kell a responsera
-            DisplayOrders(orders);
             InitializeClock();
             UpdateClock();
             UpdateElement();
             InitializeElementUpdater();
+            DisplayOrders(all_orders);
             this.WindowState = FormWindowState.Maximized;
-
         }
 
         private void InitializeClock()
@@ -417,6 +179,10 @@ namespace EtteremSideApp
             bool result = await START();
             conn_alive = result;
 
+            // Fetch new orders
+            await RefreshOrders();
+
+            // Update the connection status label
             if (InvokeRequired)
             {
                 Invoke((MethodInvoker)(() =>
@@ -446,31 +212,93 @@ namespace EtteremSideApp
                     toolStripLabel2.ForeColor = Color.Red;
                 }
             }
-            Console.WriteLine("Sikeresen frissült");
+            DisplayOrders(all_orders);
         }
 
-        //var displayContent = new List<string>();
-        //    var groupedByCategory = order.Items
-        //.GroupBy(item => item.category)
-        //.ToList();
 
-        //    var displayContent = new List<string>();
-
-
-        private void DisplayOrders(List<Order> orders)
+        private async Task RefreshOrders()
         {
+            // Clear existing orders
+            all_orders.Clear();
+
+            // Await the getRendelesJSON method to get the actual JsonElement and fill all_orders
+            JsonElement jsonResponse = await getRendelesJSON();
+
+            int number_of_active_orders = jsonResponse.GetArrayLength(); // Get the actual number of orders
+
+            for (int i = 0; i < number_of_active_orders; i++)
+            {
+                JsonElement order = jsonResponse[i];
+
+                int id = order.GetProperty("id").GetInt32();
+                int totalprice = order.GetProperty("totalPrice").GetInt32();
+                DateTime date = order.GetProperty("date").GetDateTime();
+                string message = order.GetProperty("message").GetString();
+                string name = order.GetProperty("order_connections")[0].GetProperty("user").GetProperty("userName").GetString();
+                var dishes = order.GetProperty("order_dishes");
+                int number_of_dishes = dishes.GetArrayLength();
+                List<OrderItem> items = new List<OrderItem>();
+
+                for (int j = 0; j < number_of_dishes; j++)
+                {
+                    string dish_name = dishes[j].GetProperty("dish").GetProperty("name").GetString();
+                    string customizationsStr = dishes[j].GetProperty("customizations").GetString();
+
+                    List<string> dish_customizations = customizationsStr
+                        .Trim('"')  // Remove the outer quotes
+                        .Split(new[] { "\",\"" }, StringSplitOptions.None)  // Split by comma separator if multiple options are present
+                        .ToList();
+                    string dish_type = dishes[j].GetProperty("dish").GetProperty("type").GetString();
+                    int dish_amount = dishes[j].GetProperty("amount").GetInt32();
+
+                    for (int k = 0; k < dish_amount; k++)
+                        items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
+                }
+
+                // Add the order to the all_orders list
+                all_orders.Add(new Order(items, id, totalprice, true, date, name));
+
+
+
+            }
+            int orders_count = all_orders.Count;
+
+            if (orders_count != previousOrdersCount)
+            {
+                must_Update = true;
+                Application.Restart();
+                previousOrdersCount = orders_count;
+            }
+            else
+            {
+                must_Update = false;
+            }
+            Console.WriteLine("eredeti: " + orders_count);
+            Console.WriteLine("előző: " + previousOrdersCount);
+            Console.WriteLine(must_Update);
+            DisplayOrders(all_orders);
+        }
+
+        public bool must_Update;
+
+
+        int previousOrdersCount = 0;
+        private void DisplayOrders(List<Order> all_orders)
+        {
+
+            //ide kell rakni minden panel törlésést
             FlowLayoutPanel flowLayoutPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 FlowDirection = FlowDirection.LeftToRight,
-                WrapContents = true, //must remain true
-                Padding = new Padding(20, 20, 20, 200), // Left, Top, Right, Bottom
+                WrapContents = true,
+                Padding = new Padding(20, 20, 20, 200),
                 AutoScroll = true,
             };
 
             this.Controls.Add(flowLayoutPanel);
 
-            foreach (var order in orders)
+            foreach (var order in all_orders)
             {
                 Panel orderPanel = new Panel
                 {
@@ -615,11 +443,29 @@ namespace EtteremSideApp
                     FlatStyle = FlatStyle.Flat
                 };
 
+                // Add click event handler for the button
+                doneButton.Click += (sender, args) =>
+                {
+                    // Show a MessageBox with "OK" and "Cancel" options
+                    DialogResult result = MessageBox.Show($"Rendelés ID: {order.Id}", "Biztosan kiadja a rendelést?", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+                    // Check the result of the MessageBox
+                    if (result == DialogResult.OK)
+                    {
+                        // If the "OK" button is clicked, call the OrderFinish function
+                        OrderFinish(order.Id);
+                    }
+                };
                 orderPanel.Controls.Add(doneButton);
                 flowLayoutPanel.Controls.Add(orderPanel);
             }
         }
 
+        private void OrderFinish(int id)
+        {
+            MessageBox.Show("Rendelés sikeresen kiadva");
+
+        }
 
         private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
