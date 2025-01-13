@@ -5,7 +5,7 @@ import { useRoute, useRouter } from "vue-router"
 import { QUERY_KEYS } from "@/utils/queryKeys"
 
 const registration = async (data: RegistrationData): Promise<RegistrationResponse> => {
-    const response = await axiosClient.post("http://172.22.1.219/api/v1/registration", data)//majd itten kell átírni a saját linkünkre vagy vmi.
+    const response = await axiosClient.post("http://localhost:3000", data)//majd itten kell átírni a saját linkünkre vagy vmi.
     console.log({response})
     return response.data.data
 }
@@ -15,14 +15,14 @@ export const useRegistration = () => {
     return useMutation({
         mutationFn: registration,
         onSuccess(data) {
-            push({name: 'set-password', params: {token: data.token}})
+            push({name: 'SetPassword', params: {token: data.token}})
         },
     })
 }
 
 const getSetPassword = async (): Promise<SetPasswordResponse> => {
     const {params} = useRoute()
-    const response = await axiosClient.get(`http://172.22.1.219/api/v1/set-password/${params.token}`)
+    const response = await axiosClient.get(`http://localhost:3000/api/v1/set-password/${params.token}`)
     return response.data
 }
 
@@ -36,7 +36,7 @@ export const useGetSetPassword = () => {
 }
 
 const putSetPassword = async (token: string, data: SetPasswordData) => {
-    const response = await axiosClient.put(`http://172.22.1.219/api/v1/set-password/${token}`, data)
+    const response = await axiosClient.put(`http://localhost:3000/api/v1/set-password/${token}`, data)
     return response.data
 }
 
@@ -46,7 +46,7 @@ export const usePutSetPassword = () => {
         {
             mutationFn: ({token, data} : { token: string, data: SetPasswordData }) => putSetPassword(token, data),
             onSuccess() {
-                push({name:'login'})
+                push({name:'Bejelentkezés'})
             },
         }
     )
@@ -64,7 +64,7 @@ export const useLogin = () => {
         mutationFn:Login,
         onSuccess(data){
             localStorage.token = data.token
-            push({name:'projects'})
+            push({name:'Home'})
         }
     })
 }
@@ -115,7 +115,7 @@ export const usePutPasswordReset = () => {
         {
             mutationFn: ({token, data} : { token: string, data: SetPasswordData }) => putPasswordReset(token, data),
             onSuccess() {
-                push({name:'login'})
+                push({name:'Bejelentkezés'})
             },
         }
     )

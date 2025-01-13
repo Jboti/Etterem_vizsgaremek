@@ -4,9 +4,9 @@ import { useRegistration } from '@/api/auth/authQuery';
 import { ref } from 'vue';
 
 const registrationDataRef = ref<RegistrationData>({
-    name: '',
-    email: '',
-    neptun_code: ''
+    fullName: '',
+    userName:'',
+    email: ''
 })
 
 const { mutate: registration, isPending} = useRegistration()
@@ -16,9 +16,9 @@ const { mutate: registration, isPending} = useRegistration()
     <v-card>
         <v-card-title>Regisztráció</v-card-title>
         <v-card-text>
-            <v-text-field v-model="registrationDataRef.name" label="Name" variant="outlined"></v-text-field>
+            <v-text-field v-model="registrationDataRef.fullName" label="Teljes név" variant="outlined"></v-text-field>
+            <v-text-field v-model="registrationDataRef.userName" label="felhasználó név" variant="outlined"></v-text-field>
             <v-text-field v-model="registrationDataRef.email" label="Email" variant="outlined"></v-text-field>
-            <v-text-field v-model="registrationDataRef.neptun_code" label="Neptun kód" variant="outlined"></v-text-field>
         </v-card-text>
         <v-card-actions>
             <v-btn @click="() => {
