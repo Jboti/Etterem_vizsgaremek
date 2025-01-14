@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http;
@@ -8,6 +9,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 //csak C:-n lehet futtatni!!
 
@@ -67,72 +69,105 @@ namespace EtteremSideApp
 
         public static async Task<JsonElement> getRendelesJSON()
         {
-            JsonElement jsonResponse; // Declare the JSON response variable
-            HttpResponseMessage response = await sharedClient.GetAsync("http://localhost:3000/purchase/getAllActiveOrder");
+            JsonElement jsonResponse = default; // Ensure jsonResponse is initialized
 
-            string responseBody = await response.Content.ReadAsStringAsync();
-
-            // Deserialize the JSON response into JsonElement
-            jsonResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
-
-            // Define JSON serialization options
-            var jsonOptions = new JsonSerializerOptions
+            try
             {
-                WriteIndented = true,
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
+                HttpResponseMessage response = await sharedClient.GetAsync("http://localhost:3000/purchase/getAllActiveOrder");
 
-            // Optionally log the formatted JSON
-            string formattedJson = JsonSerializer.Serialize(jsonResponse, jsonOptions);
-            // Console.WriteLine(formattedJson);
+                // Ensure the response is successful
+                response.EnsureSuccessStatusCode();
+
+                string responseBody = await response.Content.ReadAsStringAsync();
+
+                // Deserialize the JSON response into JsonElement
+                jsonResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
+
+                // Optionally log the formatted JSON (can be removed if not needed)
+                var jsonOptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+                string formattedJson = JsonSerializer.Serialize(jsonResponse, jsonOptions);
+                Console.WriteLine(formattedJson);
+            }
+            catch (HttpRequestException ex)
+            {
+                // Log HTTP request exceptions
+                Console.WriteLine($"Request error: {ex.Message}");
+                conn_alive = false;
+            }
+            catch (JsonException ex)
+            {
+                // Log JSON deserialization errors
+                Console.WriteLine($"JSON error: {ex.Message}");
+                conn_alive = false;
+
+            }
+            catch (Exception ex)
+            {
+                // Log any other exceptions
+                Console.WriteLine($"Unexpected error: {ex.Message}");
+                conn_alive = false;
+
+            }
 
             return jsonResponse;
         }
 
         public static async void RendelesekGet()
         {
-            all_orders.Clear();
-            // Await the getRendelesJSON method to get the actual JsonElement
-            JsonElement jsonResponse = await getRendelesJSON();
-
-            int number_of_active_orders = jsonResponse.GetArrayLength(); // Get the actual number of orders
-
-            for (int i = 0; i < number_of_active_orders; i++)
+            try
             {
-                // Access each order in the loop
-                JsonElement order = jsonResponse[i];
+                all_orders.Clear();
+                // Await the getRendelesJSON method to get the actual JsonElement
+                JsonElement jsonResponse = await getRendelesJSON();
 
-                // Example: Get some properties of the order
-                int id = order.GetProperty("id").GetInt32();
-                int totalprice = order.GetProperty("totalPrice").GetInt32();
-                DateTime date = order.GetProperty("date").GetDateTime();
-                string message = order.GetProperty("message").GetString();
-                string name = order.GetProperty("order_connections")[0].GetProperty("user").GetProperty("userName").GetString();
-                var dishes = order.GetProperty("order_dishes");
-                int number_of_dishes = dishes.GetArrayLength();
-                List<OrderItem> items = new List<OrderItem>();
+                int number_of_active_orders = jsonResponse.GetArrayLength(); // Get the actual number of orders
 
-                // Fixing the loop where you use 'i' incorrectly
-                for (int j = 0; j < number_of_dishes; j++)
+                for (int i = 0; i < number_of_active_orders; i++)
                 {
-                    string dish_name = dishes[j].GetProperty("dish").GetProperty("name").GetString();
-                    string customizationsStr = dishes[j].GetProperty("customizations").GetString();
+                    // Access each order in the loop
+                    JsonElement order = jsonResponse[i];
 
-                    // Remove the surrounding quotes and split by commas if needed
-                    List<string> dish_customizations = customizationsStr
-                        .Trim('"')  // Remove the outer quotes
-                        .Split(new[] { "\",\"" }, StringSplitOptions.None)  // Split by comma separator if multiple options are present
-                        .ToList();
-                    string dish_type = dishes[j].GetProperty("dish").GetProperty("type").GetString();
-                    int dish_amount = dishes[j].GetProperty("amount").GetInt32();
-                    for (int k = 0; k < dish_amount; k++)
-                        items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
+                    // Example: Get some properties of the order
+                    int id = order.GetProperty("id").GetInt32();
+                    int totalprice = order.GetProperty("totalPrice").GetInt32();
+                    DateTime date = order.GetProperty("date").GetDateTime();
+                    string message = order.GetProperty("message").GetString();
+                    string name = order.GetProperty("order_connections")[0].GetProperty("user").GetProperty("userName").GetString();
+                    var dishes = order.GetProperty("order_dishes");
+                    int number_of_dishes = dishes.GetArrayLength();
+                    List<OrderItem> items = new List<OrderItem>();
+
+                    // Fixing the loop where you use 'i' incorrectly
+                    for (int j = 0; j < number_of_dishes; j++)
+                    {
+                        string dish_name = dishes[j].GetProperty("dish").GetProperty("name").GetString();
+                        string customizationsStr = dishes[j].GetProperty("customizations").GetString();
+
+                        // Remove the surrounding quotes and split by commas if needed
+                        List<string> dish_customizations = customizationsStr
+                            .Trim('"')  // Remove the outer quotes
+                            .Split(new[] { "\",\"" }, StringSplitOptions.None)  // Split by comma separator if multiple options are present
+                            .ToList();
+                        string dish_type = dishes[j].GetProperty("dish").GetProperty("type").GetString();
+                        int dish_amount = dishes[j].GetProperty("amount").GetInt32();
+                        for (int k = 0; k < dish_amount; k++)
+                            items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
+                    }
+
+                    // Add the order to the all_orders list
+                    all_orders.Add(new Order(items, id, totalprice, true, date, name));
+                    Console.WriteLine("lefutott " + all_orders.Count());
                 }
-
-                // Add the order to the all_orders list
-                all_orders.Add(new Order(items, id, totalprice, true, date, name));
-                Console.WriteLine("lefutott " + all_orders.Count());
             }
+            catch
+            {
+                conn_alive = false;
+            }
+
         }
 
 
@@ -218,75 +253,96 @@ namespace EtteremSideApp
 
         private async Task RefreshOrders()
         {
-            // Clear existing orders
-            all_orders.Clear();
-
-            // Await the getRendelesJSON method to get the actual JsonElement and fill all_orders
-            JsonElement jsonResponse = await getRendelesJSON();
-
-            int number_of_active_orders = jsonResponse.GetArrayLength(); // Get the actual number of orders
-
-            for (int i = 0; i < number_of_active_orders; i++)
+            try
             {
-                JsonElement order = jsonResponse[i];
+                // Clear existing orders
+                all_orders.Clear();
 
-                int id = order.GetProperty("id").GetInt32();
-                int totalprice = order.GetProperty("totalPrice").GetInt32();
-                DateTime date = order.GetProperty("date").GetDateTime();
-                string message = order.GetProperty("message").GetString();
-                string name = order.GetProperty("order_connections")[0].GetProperty("user").GetProperty("userName").GetString();
-                var dishes = order.GetProperty("order_dishes");
-                int number_of_dishes = dishes.GetArrayLength();
-                List<OrderItem> items = new List<OrderItem>();
+                // Await the getRendelesJSON method to get the actual JsonElement and fill all_orders
+                JsonElement jsonResponse = await getRendelesJSON();
 
-                for (int j = 0; j < number_of_dishes; j++)
+
+                int number_of_active_orders = jsonResponse.GetArrayLength(); // Get the actual number of orders
+
+                for (int i = 0; i < number_of_active_orders; i++)
                 {
-                    string dish_name = dishes[j].GetProperty("dish").GetProperty("name").GetString();
-                    string customizationsStr = dishes[j].GetProperty("customizations").GetString();
+                    JsonElement order = jsonResponse[i];
 
-                    List<string> dish_customizations = customizationsStr
-                        .Trim('"')  // Remove the outer quotes
-                        .Split(new[] { "\",\"" }, StringSplitOptions.None)  // Split by comma separator if multiple options are present
-                        .ToList();
-                    string dish_type = dishes[j].GetProperty("dish").GetProperty("type").GetString();
-                    int dish_amount = dishes[j].GetProperty("amount").GetInt32();
+                    int id = order.GetProperty("id").GetInt32();
+                    int totalprice = order.GetProperty("totalPrice").GetInt32();
+                    DateTime date = order.GetProperty("date").GetDateTime();
+                    string message = order.GetProperty("message").GetString();
+                    string name = order.GetProperty("order_connections")[0].GetProperty("user").GetProperty("userName").GetString();
+                    var dishes = order.GetProperty("order_dishes");
+                    int number_of_dishes = dishes.GetArrayLength();
+                    List<OrderItem> items = new List<OrderItem>();
 
-                    for (int k = 0; k < dish_amount; k++)
-                        items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
+                    for (int j = 0; j < number_of_dishes; j++)
+                    {
+                        string dish_name = dishes[j].GetProperty("dish").GetProperty("name").GetString();
+                        string customizationsStr = dishes[j].GetProperty("customizations").GetString();
+
+                        List<string> dish_customizations = customizationsStr
+                            .Trim('"')  // Remove the outer quotes
+                            .Split(new[] { "\",\"" }, StringSplitOptions.None)  // Split by comma separator if multiple options are present
+                            .ToList();
+                        string dish_type = dishes[j].GetProperty("dish").GetProperty("type").GetString();
+                        int dish_amount = dishes[j].GetProperty("amount").GetInt32();
+
+                        for (int k = 0; k < dish_amount; k++)
+                            items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
+                    }
+
+                    // Add the order to the all_orders list
+                    all_orders.Add(new Order(items, id, totalprice, true, date, name));
+
+
+
                 }
+                int orders_count = all_orders.Count;
 
-                // Add the order to the all_orders list
-                all_orders.Add(new Order(items, id, totalprice, true, date, name));
+                if (orders_count != previousOrdersCount)
+                {
+                    must_Update = true;
 
-
-
+                    previousOrdersCount = orders_count;
+                }
+                else
+                {
+                    must_Update = false;
+                }
+                Console.WriteLine("eredeti: " + orders_count);
+                Console.WriteLine("előző: " + previousOrdersCount);
+                Console.WriteLine(must_Update);
+                DisplayOrders(all_orders);
             }
-            int orders_count = all_orders.Count;
-
-            if (orders_count != previousOrdersCount)
+            catch
             {
-                must_Update = true;
-                
-                previousOrdersCount = orders_count;
+                conn_alive = false;
             }
-            else
-            {
-                must_Update = false;
-            }
-            Console.WriteLine("eredeti: " + orders_count);
-            Console.WriteLine("előző: " + previousOrdersCount);
-            Console.WriteLine(must_Update);
-            DisplayOrders(all_orders);
         }
 
         public bool must_Update;
 
 
+        public void DeleteAllPanels()
+        {
+            foreach (var panel in this.Controls.OfType<FlowLayoutPanel>().ToList())
+            {
+                this.Controls.Remove(panel);
+                panel.Dispose();
+            }
+        }
+
         int previousOrdersCount = 0;
         private void DisplayOrders(List<Order> all_orders)
         {
 
-            //ide kell rakni minden panel törlésést
+            if (must_Update)
+            {
+                Console.WriteLine("wdawdwa");
+                DeleteAllPanels();
+            }
             FlowLayoutPanel flowLayoutPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
