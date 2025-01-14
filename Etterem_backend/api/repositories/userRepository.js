@@ -40,12 +40,14 @@ class userRepository
 
     async createUser(user)
     {
-        await this.User.create(user)
+        const newUser = await this.User.create(user)
+        await newUser.save()
+        return newUser
     }
 
     async deleteUser(id)
     {
-        await this.User.destroy(
+        return await this.User.destroy(
             {
                 where:
                 {
