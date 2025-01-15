@@ -61,7 +61,6 @@
     "is-number": "^7.0.0",
     "is-property": "^1.0.2",
     "jsonwebtoken": "^9.0.2",
-    "jswt": "^2.0.3",
     "lodash": "^4.17.21",
     "long": "^5.2.3",
     "lru-cache": "^7.18.3",
