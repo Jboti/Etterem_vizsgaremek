@@ -19,17 +19,18 @@ import { QUERY_KEYS } from "@/utils/queryKeys"
 //         },
 //     })
 // }
-const registration = async (data: RegistrationData) => {
+const registration = async (data: RegistrationData): Promise<RegistrationResponse> => {
     const response = await axiosClient.post("http://localhost:3000/user/createUser", data)
     console.log(response)
-    return response.data
+    return response.data.data
 }
 export const useRegistration = () => {
     const {push} = useRouter()
     return useMutation({
         mutationFn: registration,
-        onSuccess() {
+        onSuccess(data) {
             push({name: 'Főoldal'})
+            console.log(data.token)
         },
     })
 }

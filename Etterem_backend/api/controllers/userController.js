@@ -76,7 +76,9 @@ exports.createUser = async (req,res,next) =>
         if(result)
         {
             console.log("User created successfully!")
-            res.status(201).json(result)
+            const token = jwt.sign({ user }, process.env.JWT_KEY, { expiresIn: "30m" })
+            const data = {data:{token:token}}
+            res.status(201).json(data)
         }
         else
             res.status(400).send("Failed creating new user.")

@@ -5,7 +5,8 @@ const links = [
   { name: 'Bejelentkezés', icon: 'mdi-login' },
   { name: 'Regisztráció', icon: 'mdi-account-plus' },
 ];
-const { push } = useRouter();
+const { push } = useRouter()
+
 </script>
 <template>
   <h1>Home</h1>
