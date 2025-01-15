@@ -17,14 +17,14 @@ exports.deActivatePurchase = async (req,res,next) =>
 {
     try
     {
-        const {id} = req.params
+        var {id} = req.params
         id = Number(id)
         if(!id || isNaN(id)){
             const error = new Error("Purchase id is not found or id is not a number!")
             error.status = 404
             throw error
         }
-
+        console.log(id);
         const result = await purchaseService.deActivatePurchase(id)
         res.status(200).json(result)
         console.log("Purchase deactivated!")

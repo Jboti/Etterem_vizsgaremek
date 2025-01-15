@@ -24,6 +24,9 @@ namespace EtteremSideApp
         static bool conn_alive = false;
         static string conn_link = "http://localhost:3000/user/getAllUser";
         public static List<Order> all_orders = new List<Order>();
+        public static bool must_Update;
+        public static int previousOrdersCount = 0;
+
 
         //------Global values------\\
 
@@ -69,21 +72,18 @@ namespace EtteremSideApp
 
         public static async Task<JsonElement> getRendelesJSON()
         {
-            JsonElement jsonResponse = default; // Ensure jsonResponse is initialized
+            JsonElement jsonResponse = default;
 
             try
             {
                 HttpResponseMessage response = await sharedClient.GetAsync("http://localhost:3000/purchase/getAllActiveOrder");
 
-                // Ensure the response is successful
                 response.EnsureSuccessStatusCode();
 
                 string responseBody = await response.Content.ReadAsStringAsync();
 
-                // Deserialize the JSON response into JsonElement
                 jsonResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
 
-                // Optionally log the formatted JSON (can be removed if not needed)
                 var jsonOptions = new JsonSerializerOptions
                 {
                     WriteIndented = true,
@@ -94,20 +94,17 @@ namespace EtteremSideApp
             }
             catch (HttpRequestException ex)
             {
-                // Log HTTP request exceptions
                 Console.WriteLine($"Request error: {ex.Message}");
                 conn_alive = false;
             }
             catch (JsonException ex)
             {
-                // Log JSON deserialization errors
                 Console.WriteLine($"JSON error: {ex.Message}");
                 conn_alive = false;
 
             }
             catch (Exception ex)
             {
-                // Log any other exceptions
                 Console.WriteLine($"Unexpected error: {ex.Message}");
                 conn_alive = false;
 
@@ -121,17 +118,15 @@ namespace EtteremSideApp
             try
             {
                 all_orders.Clear();
-                // Await the getRendelesJSON method to get the actual JsonElement
+
                 JsonElement jsonResponse = await getRendelesJSON();
 
-                int number_of_active_orders = jsonResponse.GetArrayLength(); // Get the actual number of orders
+                int number_of_active_orders = jsonResponse.GetArrayLength();
 
                 for (int i = 0; i < number_of_active_orders; i++)
                 {
-                    // Access each order in the loop
                     JsonElement order = jsonResponse[i];
 
-                    // Example: Get some properties of the order
                     int id = order.GetProperty("id").GetInt32();
                     int totalprice = order.GetProperty("totalPrice").GetInt32();
                     DateTime date = order.GetProperty("date").GetDateTime();
@@ -141,16 +136,14 @@ namespace EtteremSideApp
                     int number_of_dishes = dishes.GetArrayLength();
                     List<OrderItem> items = new List<OrderItem>();
 
-                    // Fixing the loop where you use 'i' incorrectly
                     for (int j = 0; j < number_of_dishes; j++)
                     {
                         string dish_name = dishes[j].GetProperty("dish").GetProperty("name").GetString();
                         string customizationsStr = dishes[j].GetProperty("customizations").GetString();
 
-                        // Remove the surrounding quotes and split by commas if needed
                         List<string> dish_customizations = customizationsStr
-                            .Trim('"')  // Remove the outer quotes
-                            .Split(new[] { "\",\"" }, StringSplitOptions.None)  // Split by comma separator if multiple options are present
+                            .Trim('"')
+                            .Split(new[] { "\",\"" }, StringSplitOptions.None)
                             .ToList();
                         string dish_type = dishes[j].GetProperty("dish").GetProperty("type").GetString();
                         int dish_amount = dishes[j].GetProperty("amount").GetInt32();
@@ -158,7 +151,6 @@ namespace EtteremSideApp
                             items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
                     }
 
-                    // Add the order to the all_orders list
                     all_orders.Add(new Order(items, id, totalprice, true, date, name));
                     Console.WriteLine("lefutott " + all_orders.Count());
                 }
@@ -167,7 +159,6 @@ namespace EtteremSideApp
             {
                 conn_alive = false;
             }
-
         }
 
 
@@ -214,10 +205,8 @@ namespace EtteremSideApp
             bool result = await START();
             conn_alive = result;
 
-            // Fetch new orders
             await RefreshOrders();
 
-            // Update the connection status label
             if (InvokeRequired)
             {
                 Invoke((MethodInvoker)(() =>
@@ -255,14 +244,11 @@ namespace EtteremSideApp
         {
             try
             {
-                // Clear existing orders
                 all_orders.Clear();
 
-                // Await the getRendelesJSON method to get the actual JsonElement and fill all_orders
                 JsonElement jsonResponse = await getRendelesJSON();
 
-
-                int number_of_active_orders = jsonResponse.GetArrayLength(); // Get the actual number of orders
+                int number_of_active_orders = jsonResponse.GetArrayLength();
 
                 for (int i = 0; i < number_of_active_orders; i++)
                 {
@@ -283,8 +269,8 @@ namespace EtteremSideApp
                         string customizationsStr = dishes[j].GetProperty("customizations").GetString();
 
                         List<string> dish_customizations = customizationsStr
-                            .Trim('"')  // Remove the outer quotes
-                            .Split(new[] { "\",\"" }, StringSplitOptions.None)  // Split by comma separator if multiple options are present
+                            .Trim('"')
+                            .Split(new[] { "\",\"" }, StringSplitOptions.None)
                             .ToList();
                         string dish_type = dishes[j].GetProperty("dish").GetProperty("type").GetString();
                         int dish_amount = dishes[j].GetProperty("amount").GetInt32();
@@ -293,12 +279,11 @@ namespace EtteremSideApp
                             items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
                     }
 
-                    // Add the order to the all_orders list
                     all_orders.Add(new Order(items, id, totalprice, true, date, name));
-
-
-
                 }
+
+                //kell e frissítsen?
+
                 int orders_count = all_orders.Count;
 
                 if (orders_count != previousOrdersCount)
@@ -322,8 +307,8 @@ namespace EtteremSideApp
             }
         }
 
-        public bool must_Update;
 
+        //--megjelenítés--
 
         public void DeleteAllPanels()
         {
@@ -334,16 +319,28 @@ namespace EtteremSideApp
             }
         }
 
-        int previousOrdersCount = 0;
         private void DisplayOrders(List<Order> all_orders)
         {
-
             if (must_Update)
             {
-                Console.WriteLine("wdawdwa");
+                Console.WriteLine("Updating orders...");
                 DeleteAllPanels();
             }
-            FlowLayoutPanel flowLayoutPanel = new FlowLayoutPanel
+
+            FlowLayoutPanel flowLayoutPanel = CreateFlowLayoutPanel();
+            this.Controls.Add(flowLayoutPanel);
+
+            foreach (var order in all_orders)
+            {
+                Panel orderPanel = CreateOrderPanel();
+                PopulateOrderPanel(orderPanel, order);
+                flowLayoutPanel.Controls.Add(orderPanel);
+            }
+        }
+
+        private FlowLayoutPanel CreateFlowLayoutPanel()
+        {
+            return new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 FlowDirection = FlowDirection.LeftToRight,
@@ -351,176 +348,170 @@ namespace EtteremSideApp
                 Padding = new Padding(20, 20, 20, 200),
                 AutoScroll = true,
             };
-
-            this.Controls.Add(flowLayoutPanel);
-
-            foreach (var order in all_orders)
-            {
-                Panel orderPanel = new Panel
-                {
-                    AutoSize = true,
-                    Margin = new Padding(20),
-                    BackColor = Color.White
-                };
-
-                var groupedByCategory = order.Items
-                    .GroupBy(item => item.category)
-                    .ToList();
-
-                var displayContent = new List<string>();
-
-                foreach (var categoryGroup in groupedByCategory)
-                {
-                    displayContent.Add($"\n----{categoryGroup.Key}----\n");
-
-                    var groupedItems = categoryGroup
-                        .GroupBy(item =>
-                        {
-                            string modificationsKey = item.modifications.Count == 0
-                                ? null
-                                : string.Join(",", item.modifications.OrderBy(m => m));
-
-                            return new
-                            {
-                                item.name,
-                                ModificationsKey = modificationsKey
-                            };
-                        })
-                        .Select(group =>
-                        {
-                            string mods = group.Key.ModificationsKey == null
-                                ? ""
-                                : $"Módosítások: ({group.Key.ModificationsKey})";
-
-                            return $"{group.Count()} X {group.Key.name} {mods}";
-                        })
-                        .ToList();
-
-                    displayContent.AddRange(groupedItems);
-                }
-
-                int currentTop = 10;
-
-                Label orderIdLabel = new Label
-                {
-                    Text = "Rendelés ID: " + order.Id + "\n",
-                    AutoSize = true,
-                    Location = new Point(10, currentTop),
-                    ForeColor = Color.Black,
-                    TextAlign = ContentAlignment.TopLeft
-                };
-                orderPanel.Controls.Add(orderIdLabel);
-                currentTop += orderIdLabel.Height + 5;
-
-                Label orderDateLabel = new Label
-                {
-                    Text = "Dátum: " + order.timestamp.ToShortDateString() + " " + order.timestamp.ToShortTimeString() + "\n",
-                    AutoSize = true,
-                    Location = new Point(10, currentTop),
-                    ForeColor = Color.Black,
-                    TextAlign = ContentAlignment.TopLeft
-                };
-                orderPanel.Controls.Add(orderDateLabel);
-                currentTop += orderDateLabel.Height + 5;
-
-                Label orderNameLabel = new Label
-                {
-                    Text = "Megrendelő: " + order.customer_name + "\n",
-                    AutoSize = true,
-                    Location = new Point(10, currentTop),
-                    ForeColor = Color.Black,
-                    TextAlign = ContentAlignment.TopLeft
-                };
-                orderPanel.Controls.Add(orderNameLabel);
-                currentTop += orderNameLabel.Height + 5;
-
-                Label orderPriceLabel = new Label
-                {
-                    Text = "Ár: " + order.price + " Ft" + "\n",
-                    AutoSize = true,
-                    Location = new Point(10, currentTop),
-                    ForeColor = Color.Black,
-                    TextAlign = ContentAlignment.TopLeft
-                };
-                orderPanel.Controls.Add(orderPriceLabel);
-                currentTop += orderPriceLabel.Height + 5;
-
-                Label orderPaidLabel = new Label
-                {
-                    Text = "Kifizetve: " + " " + Convert.ToString(order.paid ? "Igen" : "Nem") + "\n",
-                    AutoSize = true,
-                    Location = new Point(10, currentTop),
-                    ForeColor = Color.Black,
-                    TextAlign = ContentAlignment.TopLeft
-                };
-                orderPanel.Controls.Add(orderPaidLabel);
-                currentTop += orderPaidLabel.Height + 10; // Add some extra space before the separator
-
-                Label separatorLabel = new Label
-                {
-                    AutoSize = false,
-                    Height = 2, // Thickness of the dotted line
-                    Width = orderPanel.Width - 20, // Adjust width if necessary
-                    Location = new Point(10, currentTop), // Position it below the orderPaidLabel
-                    BackColor = Color.Transparent
-                };
-
-                separatorLabel.Paint += (sender, e) =>
-                {
-                    using (Pen dottedPen = new Pen(Color.Black))
-                    {
-                        dottedPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;
-                        int y = separatorLabel.Height / 2;
-                        e.Graphics.DrawLine(dottedPen, 0, y, separatorLabel.Width, y);
-                    }
-                };
-                orderPanel.Controls.Add(separatorLabel);
-                currentTop += separatorLabel.Height + 10; // Update position after the separator
-
-                Label orderContentLabel = new Label
-                {
-                    Text = "Tartalom:" + "\n" + string.Join("\n", displayContent),
-                    AutoSize = true,
-                    Location = new Point(10, currentTop),
-                    ForeColor = Color.Black,
-                    TextAlign = ContentAlignment.TopLeft
-                };
-                orderPanel.Controls.Add(orderContentLabel);
-                currentTop += orderContentLabel.Height + 15;
-
-                int buttonTop = currentTop;
-                Button doneButton = new Button
-                {
-                    Text = "Kész",
-                    Width = 280,
-                    Height = 30,
-                    Location = new Point(10, buttonTop),
-                    BackColor = Color.LightGreen,
-                    FlatStyle = FlatStyle.Flat
-                };
-
-                // Add click event handler for the button
-                doneButton.Click += (sender, args) =>
-                {
-                    // Show a MessageBox with "OK" and "Cancel" options
-                    DialogResult result = MessageBox.Show($"Rendelés ID: {order.Id}", "Biztosan kiadja a rendelést?", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-
-                    // Check the result of the MessageBox
-                    if (result == DialogResult.OK)
-                    {
-                        // If the "OK" button is clicked, call the OrderFinish function
-                        OrderFinish(order.Id);
-                    }
-                };
-                orderPanel.Controls.Add(doneButton);
-                flowLayoutPanel.Controls.Add(orderPanel);
-            }
         }
 
-        private void OrderFinish(int id)
+        private Panel CreateOrderPanel()
         {
-            MessageBox.Show("Rendelés sikeresen kiadva");
+            return new Panel
+            {
+                AutoSize = true,
+                Margin = new Padding(20),
+                BackColor = Color.White
+            };
+        }
 
+        private void PopulateOrderPanel(Panel orderPanel, Order order)
+        {
+            int currentTop = 10;
+
+            AddLabel(orderPanel, $"Rendelés ID: {order.Id}\n", ref currentTop);
+            AddLabel(orderPanel, $"Dátum: {order.timestamp.ToShortDateString()} {order.timestamp.ToShortTimeString()}\n", ref currentTop);
+            AddLabel(orderPanel, $"Megrendelő: {order.customer_name}\n", ref currentTop);
+            AddLabel(orderPanel, $"Ár: {order.price} Ft\n", ref currentTop);
+            AddLabel(orderPanel, $"Kifizetve: {(order.paid ? "Igen" : "Nem")}\n", ref currentTop);
+
+            AddSeparator(orderPanel, ref currentTop);
+
+            string orderContent = GenerateOrderContent(order);
+            AddLabel(orderPanel, $"Tartalom:\n{orderContent}", ref currentTop);
+
+            AddDoneButton(orderPanel, order, currentTop);
+        }
+
+        private void AddLabel(Panel panel, string text, ref int currentTop)
+        {
+            Label label = new Label
+            {
+                Text = text,
+                AutoSize = true,
+                Location = new Point(10, currentTop),
+                ForeColor = Color.Black,
+                TextAlign = ContentAlignment.TopLeft
+            };
+            panel.Controls.Add(label);
+            currentTop += label.Height + 5;
+        }
+
+        private void AddSeparator(Panel panel, ref int currentTop)
+        {
+            Label separatorLabel = new Label
+            {
+                AutoSize = false,
+                Height = 2,
+                Width = panel.Width - 20,
+                Location = new Point(10, currentTop),
+                BackColor = Color.Transparent
+            };
+
+            separatorLabel.Paint += (sender, e) =>
+            {
+                using (Pen dottedPen = new Pen(Color.Black))
+                {
+                    dottedPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;
+                    int y = separatorLabel.Height / 2;
+                    e.Graphics.DrawLine(dottedPen, 0, y, separatorLabel.Width, y);
+                }
+            };
+            panel.Controls.Add(separatorLabel);
+            currentTop += separatorLabel.Height + 10;
+        }
+
+        private string GenerateOrderContent(Order order)
+        {
+            var groupedByCategory = order.Items
+                .GroupBy(item => item.category)
+                .ToList();
+
+            var displayContent = new List<string>();
+
+            foreach (var categoryGroup in groupedByCategory)
+            {
+                displayContent.Add($"\n----{categoryGroup.Key}----\n");
+
+                var groupedItems = categoryGroup
+                    .GroupBy(item =>
+                    {
+                        string modificationsKey = item.modifications.Count == 0
+                            ? null
+                            : string.Join(",", item.modifications.OrderBy(m => m));
+
+                        return new
+                        {
+                            item.name,
+                            ModificationsKey = modificationsKey
+                        };
+                    })
+                    .Select(group =>
+                    {
+                        string mods = group.Key.ModificationsKey == null
+                            ? ""
+                            : $"Módosítások: ({group.Key.ModificationsKey})";
+
+                        return $"{group.Count()} X {group.Key.name} {mods}";
+                    })
+                    .ToList();
+
+                displayContent.AddRange(groupedItems);
+            }
+
+            return string.Join("\n", displayContent);
+        }
+
+        private void AddDoneButton(Panel panel, Order order, int currentTop)
+        {
+            Button doneButton = new Button
+            {
+                Text = "Kész",
+                Width = 280,
+                Height = 30,
+                Location = new Point(10, currentTop),
+                BackColor = Color.LightGreen,
+                FlatStyle = FlatStyle.Flat
+            };
+
+            doneButton.Click += (sender, args) =>
+            {
+                DialogResult result = MessageBox.Show($"Rendelés ID: {order.Id}", "Biztosan kiadja a rendelést?", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+                if (result == DialogResult.OK)
+                {
+                    OrderFinish(order.Id);
+                }
+            };
+            panel.Controls.Add(doneButton);
+        }
+
+        private async void OrderFinish(int id)
+        {
+            string url = String.Format("http://localhost:3000/purchase/deActivatePurchase/" + Convert.ToString(id));
+            Console.WriteLine(url);
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    HttpContent content = new StringContent("");
+
+                    HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), url)
+                    {
+                        Content = content
+                    };
+
+                    HttpResponseMessage response = await client.SendAsync(request);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("Rendelés sikeresen kiadva");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Hiba történt: {response.StatusCode}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Hiba történt: {ex.Message}");
+                }
+            }
         }
 
         private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
