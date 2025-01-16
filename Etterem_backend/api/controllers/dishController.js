@@ -5,7 +5,7 @@ exports.createDish = async (req,res,next) =>
     try
     {
         const currentDate = new Date()
-        const {name, price, customizationOptions, description, type} = req.body
+        let {name, price, customizationOptions, description, type} = req.body
         price = Number(price)
         if(!name)
         {

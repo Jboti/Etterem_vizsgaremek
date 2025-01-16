@@ -2,13 +2,14 @@ const userService = require('../services/userService')
 const bcrypt = require("bcrypt")
 const salt = 10
 const jwt = require("jsonwebtoken")
+const nodemailer = require('nodemailer')
 
 
 exports.getUser = async (req,res,next) =>
 {
     try
     {
-        const {id} = req.params
+        let {id} = req.params
         id = Number(id)
         if(!id || isNaN(id)){
             const error = new Error("User id not found or id is not a number!")
@@ -44,13 +45,23 @@ exports.createUser = async (req,res,next) =>
             error.status = 404
             throw error
         }
-        if(!fullName){
-            const error = new Error("User fullName is not found!")
+        if(!email){
+            const error = new Error("User email is not found!")
             error.status = 404
             throw error
         }
-        if(!email){
-            const error = new Error("User email is not found!")
+        const existingUser = await userService.checkForExistingUser(userName, email)
+
+        if (existingUser != null) {
+            if(existingUser.email == email){ 
+                res.status(409).json({error:"Email is already in use"})
+            }else{
+                res.status(409).json({error:"Username is already in use"})
+            }
+        }
+
+        if(!fullName){
+            const error = new Error("User fullName is not found!")
             error.status = 404
             throw error
         }
@@ -59,6 +70,10 @@ exports.createUser = async (req,res,next) =>
             error.status = 404
             throw error
         }
+       
+       
+
+
         const user = {
             id: null,
             timestamp: currentDate.toISOString(),
@@ -69,16 +84,43 @@ exports.createUser = async (req,res,next) =>
             password: await bcrypt.hash(password,salt),
             points: 0,
             isAdmin: false,
-            isActive: true
+            isActive: false //email verification után true
         }
 
         const result = await userService.createUser(user)
+
+        const token = jwt.sign({ email }, process.env.JWT_KEY, { expiresIn: "30m" })
+        const verificationLink = `http://localhost:5173/email-vertify?token=${token}&uid=${result.id}`
+
+        async function sendMail() {
+            const transporter = nodemailer.createTransport({
+                service:'gmail',
+                auth:{
+                    user:'donercegled@gmail.com',
+                    pass:'pjctmapwxkspxybj'
+                }
+            })
+            const mailOptions = {
+                from:'donercegled@gmail.com',
+                to:user.email,
+                subject:'Teszt',
+                html:`KLIKK <a href=${verificationLink}> ide </a> megerősíteni`
+            }
+
+            const emailRes = await transporter.sendMail(mailOptions)
+            if(!emailRes)
+                {
+                    const error = new Error("Failed to send out vertification email!")
+                    error.status = 404
+                    throw error
+                }
+        } 
+        sendMail()
+
         if(result)
         {
             console.log("User created successfully!")
-            const token = jwt.sign({ user }, process.env.JWT_KEY, { expiresIn: "30m" })
-            const data = {data:{token:token}}
-            res.status(201).json(data)
+            res.status(201).json(result)
         }
         else
             res.status(400).send("Failed creating new user.")
@@ -87,11 +129,58 @@ exports.createUser = async (req,res,next) =>
     }
 }
 
+exports.vertifyEmail = async (req,res,next) =>
+{
+    try
+    {
+        let {token, uid} = req.body
+        uid = Number(uid)
+        if (!token) 
+        {
+            const error = new Error("Unauthorized!")
+            error.status = 404
+            throw error
+        }
+        if(!uid || isNaN(uid))
+        {
+            const error = new Error("Email vertifying user id not found or is not a number!")
+            error.status = 404
+            throw error
+        }
+        jwt.verify(token, process.env.JWT_KEY, async (err) => {
+            if (err){
+                if(err.name == "TokenExpiredError"){
+                    const error = new Error("Token expired!")
+                    error.status = 403
+                    throw error
+                }
+                const error = new Error("Invalid Token!")
+                error.status = 403
+                throw error
+            }else{
+                const result = await userService.vertifyEmail(uid)
+                if(!result)
+                {
+                    const error = new Error("User vertification went wrong!")
+                    error.status = 404
+                    throw error
+                }else{
+                    console.log("User activated!")
+                    res.status(200).send("User activated!")
+                }
+            }
+        })
+        
+    } catch (error) {
+        next(error)
+    }
+}
+
 exports.loginUser = async (req,res,next) =>
 {
     try
     {
-        const { id, password } = req.body;
+        let { id, password } = req.body;
         id = Number(id)
         if(!id || isNaN(id))
         {
@@ -123,7 +212,7 @@ exports.deleteUser = async (req,res,next) =>
 {
     try
     {
-        const {id} = req.params
+        let {id} = req.params
         id = Number(id)
         if(!id || isNaN(id)){
             const error = new Error("User id not found or id is not a number!")

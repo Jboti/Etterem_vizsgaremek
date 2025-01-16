@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
           autoIncrement: true,
         },
         timestamp: {
-          type: DataTypes.DATEONLY,
+          type: DataTypes.DATE,
           defaultValue: DataTypes.NOW,
         },
         created: {

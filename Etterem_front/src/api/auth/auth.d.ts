@@ -5,8 +5,9 @@ export type RegistrationData = {
     password: string
 }
 
-export type RegistrationResponse = {
-    token: string
+export type emailVertifyData = {
+    token:string,
+    uid: number
 }
 
 export type SetPasswordResponse = {

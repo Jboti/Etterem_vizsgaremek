@@ -15,6 +15,8 @@ router.get("/getAllUser", userController.getAllUser)
 router.post("/createUser", userController.createUser)
 // user törlés id alapján, param: id
 router.delete("/deleteUser/:id",userController.deleteUser)
+// aktiválja a usert az email megerősítés után
+router.patch("/vertify-user",userController.vertifyEmail)
 
 
 

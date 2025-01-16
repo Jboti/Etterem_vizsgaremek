@@ -23,7 +23,7 @@ const { mutate, isPending} = useRegistration()
             <v-text-field v-model="registrationDataRef.password" label="Jelszó" variant="outlined"></v-text-field>
         </v-card-text>
         <v-card-actions>
-            <v-btn @click="mutate(registrationDataRef)" :loading="isPending">
+            <v-btn @click="mutate(registrationDataRef)" :loading="isPending ">
                 Regisztráció
             </v-btn>
         </v-card-actions>

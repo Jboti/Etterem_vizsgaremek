@@ -17,7 +17,7 @@ exports.deActivatePurchase = async (req,res,next) =>
 {
     try
     {
-        var {id} = req.params
+        let {id} = req.params
         id = Number(id)
         if(!id || isNaN(id)){
             const error = new Error("Purchase id is not found or id is not a number!")
@@ -38,8 +38,8 @@ exports.PlaceOrder = async (req,res,next) =>
     try
     {
         const currentDate = new Date()
-        const {uid} = req.params
-        const {totalPrice, message, dishInfo} = req.body
+        let {uid} = req.params
+        let {totalPrice, message, dishInfo} = req.body
         uid = Number(uid)
         totalPrice = Number(totalPrice)
         dishInfo.dishIds = dishInfo.dishIds.map(id => Number(id))
