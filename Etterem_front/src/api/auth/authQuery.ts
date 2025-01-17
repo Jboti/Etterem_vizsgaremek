@@ -20,7 +20,7 @@ import { QUERY_KEYS } from "@/utils/queryKeys"
 //     })
 // }
 const registration = async (data: RegistrationData): Promise<RegistrationResponse> => {
-    const response = await axiosClient.post("http://localhost:3000/user/createUser", data)
+    const response = await axiosClient.post("http://localhost:3000/api/v1/create-user", data)
     console.log(response)
     return response.data.data
 }
@@ -29,8 +29,7 @@ export const useRegistration = () => {
     return useMutation({
         mutationFn: registration,
         onSuccess(data) {
-            push({name: 'Főoldal'})
-            console.log(data.token)
+            push({name: 'emailVerify',params:{token:data.token}})
         },
     })
 }

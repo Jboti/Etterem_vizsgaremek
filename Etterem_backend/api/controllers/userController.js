@@ -69,7 +69,7 @@ exports.createUser = async (req,res,next) =>
             password: await bcrypt.hash(password,salt),
             points: 0,
             isAdmin: false,
-            isActive: true
+            isActive: false //email visszaigazolása után állítjuk true-ra
         }
 
         const result = await userService.createUser(user)

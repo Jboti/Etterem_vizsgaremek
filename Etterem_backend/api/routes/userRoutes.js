@@ -8,13 +8,13 @@ router.get("/", [ userAuth.verifyToken ], userController.getAllUser)
 
 
 // 1 user lekérés id alapján, param: id
-router.get("/getUser/:id", userController.getUser)
+router.get("/get-user/:id", userController.getUser)
 // összes user adatlekérdezése
-router.get("/getAllUser", userController.getAllUser)
+router.get("/get-users", userController.getAllUser)
 // user kreálása, (regisztráció), body: userName,fullName,email,password
-router.post("/createUser", userController.createUser)
+router.post("/create-user", userController.createUser)
 // user törlés id alapján, param: id
-router.delete("/deleteUser/:id",userController.deleteUser)
+router.delete("/delete-user/:id",userController.deleteUser)
 
 
 

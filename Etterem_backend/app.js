@@ -24,9 +24,9 @@ const testRouter = require('./api/routes/testRouter')
 
 //ROUTES
 
-app.use("/user", userRoutes)
-app.use("/purchase", purchaseRoutes)
-app.use("/dish",dishRoutes)
+app.use("/api/v1/", userRoutes)
+app.use("/api/v1/", purchaseRoutes)
+app.use("/api/v1/",dishRoutes)
 
 //táblákat feltölti pár alap adattal teszthez
 app.use("/testDataCreate",testRouter)
