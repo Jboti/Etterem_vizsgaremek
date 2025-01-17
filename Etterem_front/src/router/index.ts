@@ -19,7 +19,7 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/rendeles',
+      path: '/order',
       name: 'Rendelés',
       component: RendelesView,
     },
@@ -29,7 +29,7 @@ const router = createRouter({
       component: MenuView,
     },
     {
-      path: '/felhasznalo',
+      path: '/user',
       name: 'Felhasználó',
       component: FelhasznaloView,
     },
@@ -44,12 +44,12 @@ const router = createRouter({
       component: RegistrationView,
     },
     {
-      path: '/passwordreset',
+      path: '/password-reset',
       name: 'PasswordReset',
       component: PasswordResetView,
     },
     {
-      path: '/passwordresetemail',
+      path: '/password-reset-email',
       name: 'PasswordResetEmail',
       component: PasswordResetEmailView,
     },

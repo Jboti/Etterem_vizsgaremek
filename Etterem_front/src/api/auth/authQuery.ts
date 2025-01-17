@@ -6,11 +6,7 @@ import { QUERY_KEYS } from "@/utils/queryKeys"
 
 
 const registration = async (data: RegistrationData) => {
-    const response = await axiosClient.post("http://localhost:3000/user/createUser", data)
-    // if (response.status === 409) {
-    //     console.log(response.data)
-    //     throw new Error(response.data.error)
-    // }
+    const response = await axiosClient.post("http://localhost:3000/api/v1/create-user", data)
     console.log(response)
     console.log(response.status)
     console.log(response.data)
@@ -36,7 +32,7 @@ export const useRegistration = () => {
 }
 
 const emailVertification = async (data: emailVertifyData) => {
-    const response = await axiosClient.patch("http://localhost:3000/user/vertify-user", data)
+    const response = await axiosClient.patch("http://localhost:3000/api/v1/vertify-user", data)
     return response.data.data
 }
 
@@ -51,21 +47,6 @@ export const useEmailVertification = () => {
     })
 }
 
-
-const getSetPassword = async (): Promise<SetPasswordResponse> => {
-    const {params} = useRoute()
-    const response = await axiosClient.get(`http://localhost:3000/api/v1/set-password/${params.token}`)
-    return response.data
-}
-
-export const useGetSetPassword = () => {
-    return useQuery(
-        {
-            queryKey: [QUERY_KEYS.setPassword],  //setPassword
-            queryFn: getSetPassword,
-        }
-    )
-}
 
 const putSetPassword = async (token: string, data: SetPasswordData) => {
     const response = await axiosClient.put(`http://localhost:3000/api/v1/set-password/${token}`, data)

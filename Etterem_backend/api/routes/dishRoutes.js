@@ -3,6 +3,6 @@ const router = express.Router()
 
 const dishController = require('../controllers/dishController')
 
-router.get('/getAllDishes',dishController.getAllDishes)
+router.get('/get-dishes',dishController.getAllDishes)
 
 module.exports = router
