@@ -352,44 +352,86 @@ namespace EtteremSideApp
 
         private Panel CreateOrderPanel()
         {
-            return new Panel
+            Panel panel = new Panel
             {
                 AutoSize = true,
-                Margin = new Padding(20),
-                BackColor = Color.White
+                Margin = new Padding(10, 20, 20, 20),
+                BackColor = Color.White,
             };
+
+            // Attach a Paint event handler to draw custom borders.
+            panel.Paint += (s, e) =>
+            {
+                // Define border colors and thicknesses.
+                Color topLeftBorderColor = Color.Gray; // Example color for top and left borders.
+                Color rightBottomBorderColor = Color.Gray; // Example color for right and zigzag bottom border.
+                int topLeftBorderThickness = 3; // Thicker border for top and left.
+                int rightBottomBorderThickness = 3; // Standard border for right and zigzag.
+
+                Graphics g = e.Graphics;
+                using (Pen topLeftPen = new Pen(topLeftBorderColor, topLeftBorderThickness))
+                using (Pen rightBottomPen = new Pen(rightBottomBorderColor, rightBottomBorderThickness))
+                {
+                    g.DrawLine(topLeftPen, 0, 0, panel.Width, 0);
+
+                    g.DrawLine(topLeftPen, 0, 0, 0, panel.Height);
+
+                    g.DrawLine(rightBottomPen, panel.Width - 1, 0, panel.Width - 1, panel.Height);
+
+                    int zigzagHeight = 10; 
+                    int zigzagWidth = 15; 
+                    int numZigzags = panel.Width / zigzagWidth; 
+
+                    Point[] zigzagPoints = new Point[numZigzags * 2 + 2]; 
+                    for (int i = 0; i <= numZigzags; i++)
+                    {
+                        int x = i * zigzagWidth;
+                        int yBase = panel.Height; 
+                        zigzagPoints[i * 2] = new Point(x, yBase); 
+                        zigzagPoints[i * 2 + 1] = new Point(x + zigzagWidth / 2, yBase - zigzagHeight); 
+                    }
+                    zigzagPoints[zigzagPoints.Length - 1] = new Point(panel.Width, panel.Height); 
+
+                    g.DrawLines(rightBottomPen, zigzagPoints);
+                }
+            };
+
+            return panel;
         }
+
+
 
         private void PopulateOrderPanel(Panel orderPanel, Order order)
         {
             int currentTop = 10;
+            int maxLabelWidth = 0; // To track the widest label.
 
-            AddLabel(orderPanel, $"Rendelés ID: {order.Id}\n", ref currentTop);
-            AddLabel(orderPanel, $"Dátum: {order.timestamp.ToShortDateString()} {order.timestamp.ToShortTimeString()}\n", ref currentTop);
-            AddLabel(orderPanel, $"Megrendelő: {order.customer_name}\n", ref currentTop);
-            AddLabel(orderPanel, $"Ár: {order.price} Ft\n", ref currentTop);
-            AddLabel(orderPanel, $"Kifizetve: {(order.paid ? "Igen" : "Nem")}\n", ref currentTop);
+            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Rendelés ID: {order.Id}\n", ref currentTop));
+            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Dátum: {order.timestamp.ToShortDateString()} {order.timestamp.ToShortTimeString()}\n", ref currentTop));
+            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Megrendelő: {order.customer_name}\n", ref currentTop));
+            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Ár: {order.price} Ft\n", ref currentTop));
+            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Kifizetve: {(order.paid ? "Igen" : "Nem")}\n", ref currentTop));
 
             AddSeparator(orderPanel, ref currentTop);
 
             string orderContent = GenerateOrderContent(order);
-            AddLabel(orderPanel, $"Tartalom:\n{orderContent}", ref currentTop);
+            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Tartalom:\n{orderContent}", ref currentTop));
 
-            AddDoneButton(orderPanel, order, currentTop);
+            AddDoneButton(orderPanel, order, currentTop, maxLabelWidth);
         }
 
-        private void AddLabel(Panel panel, string text, ref int currentTop)
+        private int AddLabel(Panel panel, string text, ref int top)
         {
             Label label = new Label
             {
                 Text = text,
                 AutoSize = true,
-                Location = new Point(10, currentTop),
-                ForeColor = Color.Black,
-                TextAlign = ContentAlignment.TopLeft
+                Location = new Point(10, top)
             };
             panel.Controls.Add(label);
-            currentTop += label.Height + 5;
+
+            top += label.Height + 5;
+            return label.Width; 
         }
 
         private void AddSeparator(Panel panel, ref int currentTop)
@@ -457,16 +499,18 @@ namespace EtteremSideApp
             return string.Join("\n", displayContent);
         }
 
-        private void AddDoneButton(Panel panel, Order order, int currentTop)
+        private void AddDoneButton(Panel panel, Order order, int currentTop, int width)
         {
             Button doneButton = new Button
             {
                 Text = "Kész",
-                Width = 280,
+                Width = width,
                 Height = 30,
                 Location = new Point(10, currentTop),
                 BackColor = Color.LightGreen,
-                FlatStyle = FlatStyle.Flat
+                FlatStyle = FlatStyle.Flat,
+                Margin = new Padding(0, 0, 10, 20),
+
             };
 
             doneButton.Click += (sender, args) =>
