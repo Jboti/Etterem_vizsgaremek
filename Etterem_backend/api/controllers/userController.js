@@ -50,16 +50,6 @@ exports.createUser = async (req,res,next) =>
             error.status = 404
             throw error
         }
-        const existingUser = await userService.checkForExistingUser(userName, email)
-
-        if (existingUser != null) {
-            if(existingUser.email == email){ 
-                res.status(409).json({error:"Email is already in use"})
-            }else{
-                res.status(409).json({error:"Username is already in use"})
-            }
-        }
-
         if(!fullName){
             const error = new Error("User fullName is not found!")
             error.status = 404
@@ -71,9 +61,6 @@ exports.createUser = async (req,res,next) =>
             throw error
         }
        
-       
-
-
         const user = {
             id: null,
             timestamp: currentDate.toISOString(),
@@ -86,7 +73,7 @@ exports.createUser = async (req,res,next) =>
             isAdmin: false,
             isActive: false //email verification után true
         }
-
+        
         const result = await userService.createUser(user)
 
         const token = jwt.sign({ email }, process.env.JWT_KEY, { expiresIn: "30m" })
@@ -102,7 +89,7 @@ exports.createUser = async (req,res,next) =>
             })
             const mailOptions = {
                 from:'donercegled@gmail.com',
-                to:user.email,
+                to:email,
                 subject:'Teszt',
                 html:`KLIKK <a href=${verificationLink}> ide </a> megerősíteni`
             }

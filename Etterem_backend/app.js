@@ -24,12 +24,12 @@ const testRouter = require('./api/routes/testRouter')
 
 //ROUTES
 
-app.use("/api/v1/", userRoutes)
-app.use("/api/v1/", purchaseRoutes)
-app.use("/api/v1/",dishRoutes)
+app.use("/api/v1", userRoutes)
+app.use("/api/v1", purchaseRoutes)
+app.use("/api/v1",dishRoutes)
 
 //táblákat feltölti pár alap adattal teszthez
-app.use("/testDataCreate",testRouter)
+app.use("/test-data-create",testRouter)
 
 app.use(errorHandler.notFoundError)
 app.use(errorHandler.showError)
