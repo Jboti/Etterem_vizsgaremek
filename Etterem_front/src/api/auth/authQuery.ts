@@ -1,35 +1,52 @@
 import axiosClient from "@/lib/axios"
-import type { LoginData, LoginResponse, RegistrationData, RegistrationResponse, ResetPasswordData, SetPasswordData, SetPasswordResponse } from "./auth"
+import type { emailVertifyData, LoginData, LoginResponse, RegistrationData, ResetPasswordData, SetPasswordData, SetPasswordResponse } from "./auth"
 import { useMutation, useQuery } from "@tanstack/vue-query"
 import { useRoute, useRouter } from "vue-router"
 import { QUERY_KEYS } from "@/utils/queryKeys"
 
-// const registration = async (data: RegistrationData): Promise<RegistrationResponse> => {
-//     const response = await axiosClient.post("localhost:3000/createUser", data)
-//     console.log({response})
-//     return response.data.data
-// }
 
-// export const useRegistration = () => {
-//     const {push} = useRouter()
-//     return useMutation({
-//         mutationFn: registration,
-//         onSuccess(data) {
-//             push({name: 'set-password', params: {token: data.token}})
-//         },
-//     })
-// }
-const registration = async (data: RegistrationData): Promise<RegistrationResponse> => {
-    const response = await axiosClient.post("http://localhost:3000/api/v1/create-user", data)
+const registration = async (data: RegistrationData) => {
+    const response = await axiosClient.post("http://localhost:3000/user/createUser", data)
+    // if (response.status === 409) {
+    //     console.log(response.data)
+    //     throw new Error(response.data.error)
+    // }
     console.log(response)
-    return response.data.data
+    console.log(response.status)
+    console.log(response.data)
+    return response.data
 }
+
 export const useRegistration = () => {
-    const {push} = useRouter()
+    const { push } = useRouter()
+    
     return useMutation({
         mutationFn: registration,
-        onSuccess(data) {
-            push({name: 'emailVerify',params:{token:data.token}})
+        onSuccess() {
+            push({ name: 'email-sent' })
+        },
+        // onError(error: any) {
+        //     if (error.error === 'Username is already in use') {
+        //         alert('The username is already taken. Please choose another one.')
+        //     } else if (error.message === 'Email is already in use') {
+        //         alert('The email is already registered. Please use another one.')
+        //     }
+        // },
+    })
+}
+
+const emailVertification = async (data: emailVertifyData) => {
+    const response = await axiosClient.patch("http://localhost:3000/user/vertify-user", data)
+    return response.data.data
+}
+
+export const useEmailVertification = () => {
+    const {push} = useRouter()
+    return useMutation({
+        mutationFn: emailVertification,
+        onSuccess() {
+            push({name:'Főoldal'})
+            
         },
     })
 }
@@ -37,7 +54,7 @@ export const useRegistration = () => {
 
 const getSetPassword = async (): Promise<SetPasswordResponse> => {
     const {params} = useRoute()
-    const response = await axiosClient.get(`http://172.22.1.219/api/v1/set-password/${params.token}`)
+    const response = await axiosClient.get(`http://localhost:3000/api/v1/set-password/${params.token}`)
     return response.data
 }
 
@@ -51,7 +68,7 @@ export const useGetSetPassword = () => {
 }
 
 const putSetPassword = async (token: string, data: SetPasswordData) => {
-    const response = await axiosClient.put(`http://172.22.1.219/api/v1/set-password/${token}`, data)
+    const response = await axiosClient.put(`http://localhost:3000/api/v1/set-password/${token}`, data)
     return response.data
 }
 
@@ -61,7 +78,7 @@ export const usePutSetPassword = () => {
         {
             mutationFn: ({token, data} : { token: string, data: SetPasswordData }) => putSetPassword(token, data),
             onSuccess() {
-                push({name:'login'})
+                push({name:'Bejelentkezés'})
             },
         }
     )
@@ -79,7 +96,7 @@ export const useLogin = () => {
         mutationFn:Login,
         onSuccess(data){
             localStorage.token = data.token
-            push({name:'projects'})
+            push({name:'Home'})
         }
     })
 }
@@ -130,7 +147,7 @@ export const usePutPasswordReset = () => {
         {
             mutationFn: ({token, data} : { token: string, data: SetPasswordData }) => putPasswordReset(token, data),
             onSuccess() {
-                push({name:'login'})
+                push({name:'Bejelentkezés'})
             },
         }
     )

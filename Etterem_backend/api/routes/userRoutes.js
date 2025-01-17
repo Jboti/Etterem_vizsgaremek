@@ -14,7 +14,9 @@ router.get("/get-users", userController.getAllUser)
 // user kreálása, (regisztráció), body: userName,fullName,email,password
 router.post("/create-user", userController.createUser)
 // user törlés id alapján, param: id
-router.delete("/delete-user/:id",userController.deleteUser)
+router.delete("/deleteUser/:id",userController.deleteUser)
+// aktiválja a usert az email megerősítés után
+router.patch("/vertify-user",userController.vertifyEmail)
 
 
 

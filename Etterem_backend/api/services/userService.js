@@ -21,6 +21,16 @@ class UserService
     {
         await userRepository.deleteUser(id)
     }
+
+    async vertifyEmail(id)
+    {
+        return await userRepository.vertifyEmail(id)
+    }
+
+    async checkForExistingUser(userName,email)
+    {
+        return await userRepository.checkForExistingUser(userName,email)
+    }
 }
 
 module.exports = new UserService()
