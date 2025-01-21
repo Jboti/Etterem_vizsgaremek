@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
@@ -22,10 +23,13 @@ namespace EtteremSideApp
         Random rand = new Random();
         private int refetchIntervall = 2000;
         static bool conn_alive = false;
-        static string conn_link = "http://localhost:3000/user/getAllUser";
+        static string conn_link = "http://localhost:3000/api/v1/get-users";
         public static List<Order> all_orders = new List<Order>();
         public static bool must_Update;
         public static int previousOrdersCount = 0;
+        public static int fontSize = 12;
+        public static Color backGroundColor = Color.Black;
+        
 
 
         //------Global values------\\
@@ -76,7 +80,7 @@ namespace EtteremSideApp
 
             try
             {
-                HttpResponseMessage response = await sharedClient.GetAsync("http://localhost:3000/purchase/getAllActiveOrder");
+                HttpResponseMessage response = await sharedClient.GetAsync("http://localhost:3000/api/v1/get-all-active-order");
 
                 response.EnsureSuccessStatusCode();
 
@@ -133,6 +137,8 @@ namespace EtteremSideApp
                     string message = order.GetProperty("message").GetString();
                     string name = order.GetProperty("order_connections")[0].GetProperty("user").GetProperty("userName").GetString();
                     var dishes = order.GetProperty("order_dishes");
+                    bool takeAway = order.GetProperty("takeAway").GetBoolean();
+                    Console.WriteLine(order.GetProperty("takeAway").GetBoolean());
                     int number_of_dishes = dishes.GetArrayLength();
                     List<OrderItem> items = new List<OrderItem>();
 
@@ -151,7 +157,7 @@ namespace EtteremSideApp
                             items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
                     }
 
-                    all_orders.Add(new Order(items, id, totalprice, true, date, name));
+                    all_orders.Add(new Order(items, id, totalprice, true, date, name, message,takeAway));
                     Console.WriteLine("lefutott " + all_orders.Count());
                 }
             }
@@ -172,6 +178,8 @@ namespace EtteremSideApp
             InitializeElementUpdater();
             DisplayOrders(all_orders);
             this.WindowState = FormWindowState.Maximized;
+            this.Font = new Font("Arial", fontSize);
+            this.BackColor = backGroundColor;
         }
 
         private void InitializeClock()
@@ -236,7 +244,7 @@ namespace EtteremSideApp
                     toolStripLabel2.ForeColor = Color.Red;
                 }
             }
-            DisplayOrders(all_orders);
+            //DisplayOrders(all_orders);
         }
 
 
@@ -260,6 +268,8 @@ namespace EtteremSideApp
                     string message = order.GetProperty("message").GetString();
                     string name = order.GetProperty("order_connections")[0].GetProperty("user").GetProperty("userName").GetString();
                     var dishes = order.GetProperty("order_dishes");
+                    bool takeAway = order.GetProperty("takeAway").GetBoolean();
+                    Console.WriteLine(order.GetProperty("takeAway").GetBoolean());
                     int number_of_dishes = dishes.GetArrayLength();
                     List<OrderItem> items = new List<OrderItem>();
 
@@ -279,7 +289,7 @@ namespace EtteremSideApp
                             items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
                     }
 
-                    all_orders.Add(new Order(items, id, totalprice, true, date, name));
+                    all_orders.Add(new Order(items, id, totalprice, true, date, name,message,takeAway));
                 }
 
                 //kell e frissítsen?
@@ -323,7 +333,6 @@ namespace EtteremSideApp
         {
             if (must_Update)
             {
-                Console.WriteLine("Updating orders...");
                 DeleteAllPanels();
             }
 
@@ -359,65 +368,104 @@ namespace EtteremSideApp
                 BackColor = Color.White,
             };
 
-            // Attach a Paint event handler to draw custom borders.
-            panel.Paint += (s, e) =>
+            panel.SizeChanged += (s, e) =>
             {
-                // Define border colors and thicknesses.
-                Color topLeftBorderColor = Color.Gray; // Example color for top and left borders.
-                Color rightBottomBorderColor = Color.Gray; // Example color for right and zigzag bottom border.
-                int topLeftBorderThickness = 3; // Thicker border for top and left.
-                int rightBottomBorderThickness = 3; // Standard border for right and zigzag.
-
-                Graphics g = e.Graphics;
-                using (Pen topLeftPen = new Pen(topLeftBorderColor, topLeftBorderThickness))
-                using (Pen rightBottomPen = new Pen(rightBottomBorderColor, rightBottomBorderThickness))
+                if (panel.Width % 15 != 0)
                 {
-                    g.DrawLine(topLeftPen, 0, 0, panel.Width, 0);
-
-                    g.DrawLine(topLeftPen, 0, 0, 0, panel.Height);
-
-                    g.DrawLine(rightBottomPen, panel.Width - 1, 0, panel.Width - 1, panel.Height);
-
-                    int zigzagHeight = 10; 
-                    int zigzagWidth = 15; 
-                    int numZigzags = panel.Width / zigzagWidth; 
-
-                    Point[] zigzagPoints = new Point[numZigzags * 2 + 2]; 
-                    for (int i = 0; i <= numZigzags; i++)
-                    {
-                        int x = i * zigzagWidth;
-                        int yBase = panel.Height; 
-                        zigzagPoints[i * 2] = new Point(x, yBase); 
-                        zigzagPoints[i * 2 + 1] = new Point(x + zigzagWidth / 2, yBase - zigzagHeight); 
-                    }
-                    zigzagPoints[zigzagPoints.Length - 1] = new Point(panel.Width, panel.Height); 
-
-                    g.DrawLines(rightBottomPen, zigzagPoints);
+                    int newWidth = panel.Width + (15 - panel.Width % 15);
+                    panel.Width = newWidth;
                 }
             };
 
+            panel.Paint += (s, e) => PaintPanel(e.Graphics, panel);
+
             return panel;
         }
+
+        private void PaintPanel(Graphics g, Panel panel)
+        {
+            Color topLeftBorderColor = Color.Gray;
+            Color rightBottomBorderColor = Color.Gray;
+            int topLeftBorderThickness = 3;
+            int rightBottomBorderThickness = 3;
+
+            using (Pen topLeftPen = new Pen(topLeftBorderColor, topLeftBorderThickness))
+            using (Pen rightBottomPen = new Pen(rightBottomBorderColor, rightBottomBorderThickness))
+            {
+                g.DrawLine(topLeftPen, 0, 0, panel.Width, 0);
+                g.DrawLine(topLeftPen, 0, 0, 0, panel.Height);
+
+                g.DrawLine(rightBottomPen, panel.Width - 1, 0, panel.Width - 1, panel.Height);
+
+                int zigzagHeight = 10;
+                int zigzagWidth = 15;
+                int numZigzags = panel.Width / zigzagWidth;
+
+                Point[] zigzagPoints = new Point[numZigzags * 2 + 2];
+                for (int i = 0; i <= numZigzags; i++)
+                {
+                    int x = i * zigzagWidth;
+                    int yBase = panel.Height;
+                    zigzagPoints[i * 2] = new Point(x, yBase); // háromszög alja
+                    zigzagPoints[i * 2 + 1] = new Point(x + zigzagWidth / 2, yBase - zigzagHeight); // háromszög teteje
+                }
+                zigzagPoints[zigzagPoints.Length - 1] = new Point(panel.Width, panel.Height);
+
+                using (Brush blackBrush = new SolidBrush(backGroundColor))
+                {
+                    for (int i = 0; i < zigzagPoints.Length - 2; i += 2)
+                    {
+                        Point[] triangle = {
+                    zigzagPoints[i],
+                    zigzagPoints[i + 1],
+                    zigzagPoints[i + 2]
+                };
+                        g.FillPolygon(blackBrush, triangle);
+                    }
+                }
+
+                g.DrawLines(rightBottomPen, zigzagPoints);
+            }
+        }
+
+
+
 
 
 
         private void PopulateOrderPanel(Panel orderPanel, Order order)
         {
             int currentTop = 10;
-            int maxLabelWidth = 0; // To track the widest label.
+            int maxLabelWidth = 0;
 
             maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Rendelés ID: {order.Id}\n", ref currentTop));
             maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Dátum: {order.timestamp.ToShortDateString()} {order.timestamp.ToShortTimeString()}\n", ref currentTop));
             maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Megrendelő: {order.customer_name}\n", ref currentTop));
             maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Ár: {order.price} Ft\n", ref currentTop));
             maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Kifizetve: {(order.paid ? "Igen" : "Nem")}\n", ref currentTop));
+            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Elvitelre: {(order.takeAway ? "Igen" : "Nem")}\n", ref currentTop));
+            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Megjegyzés: {order.message}\n", ref currentTop));
 
             AddSeparator(orderPanel, ref currentTop);
 
             string orderContent = GenerateOrderContent(order);
             maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Tartalom:\n{orderContent}", ref currentTop));
 
-            AddDoneButton(orderPanel, order, currentTop, maxLabelWidth);
+            AddDoneButton(orderPanel, order, currentTop+50,maxLabelWidth);
+
+            ColorOrderPanel(ref orderPanel,ref order);
+        }
+
+        private void ColorOrderPanel( ref Panel orderPanel, ref Order order)
+        {
+            if (order.takeAway)
+            {
+                orderPanel.BackColor = Color.LightSalmon;
+            }
+            else
+            { 
+                orderPanel.BackColor= Color.LightSteelBlue;
+            }
         }
 
         private int AddLabel(Panel panel, string text, ref int top)
@@ -426,7 +474,8 @@ namespace EtteremSideApp
             {
                 Text = text,
                 AutoSize = true,
-                Location = new Point(10, top)
+                Location = new Point(10, top),
+
             };
             panel.Controls.Add(label);
 
@@ -487,7 +536,7 @@ namespace EtteremSideApp
                     {
                         string mods = group.Key.ModificationsKey == null
                             ? ""
-                            : $"Módosítások: ({group.Key.ModificationsKey})";
+                            : $"Módosítások: {group.Key.ModificationsKey}";
 
                         return $"{group.Count()} X {group.Key.name} {mods}";
                     })
@@ -504,7 +553,7 @@ namespace EtteremSideApp
             Button doneButton = new Button
             {
                 Text = "Kész",
-                Width = width,
+                Width = width+200,
                 Height = 30,
                 Location = new Point(10, currentTop),
                 BackColor = Color.LightGreen,
@@ -527,7 +576,7 @@ namespace EtteremSideApp
 
         private async void OrderFinish(int id)
         {
-            string url = String.Format("http://localhost:3000/purchase/deActivatePurchase/" + Convert.ToString(id));
+            string url = String.Format("http://localhost:3000/api/v1/in-activate-order/" + Convert.ToString(id));
             Console.WriteLine(url);
             using (HttpClient client = new HttpClient())
             {
@@ -571,15 +620,18 @@ namespace EtteremSideApp
         public bool paid { get; set; }
         public DateTime timestamp { get; set; }
         public string customer_name { get; set; }
-
-        public Order(List<OrderItem> items, int id, int price, bool paid, DateTime timestamp, string customer_name)
+        public string message { get; set; }
+        public bool takeAway { get; set; }
+        public Order(List<OrderItem> items, int id, int price, bool paid, DateTime timestamp, string customer_name, string message, bool takeAway)
         {
             Items = items;
             Id = id;
             this.price = price;
-            this.paid = true;
+            this.paid = paid;
             this.timestamp = timestamp;
             this.customer_name = customer_name;
+            this.message = message;
+            this.takeAway = takeAway;
         }
     }
 

@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.BOOLEAN,
           allowNull: false,
         },
+        takeAway: {
+          type: DataTypes.BOOLEAN,
+          allowNull: false,
+        },
       },
       {
         timestamps: false,
