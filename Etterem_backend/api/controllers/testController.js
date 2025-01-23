@@ -166,21 +166,26 @@ exports.DataCreate = async (req,res,next) =>
             date: currentDate.toISOString(),
             totalPrice: 10000,
             message: "",
-            isActive: false
+            isActive: false,
+            takeAway: false,
         },
         {
             id: null,
             date: currentDate.toISOString(),
             totalPrice: 8700,
             message: "Kutya ugat",
-            isActive: true
+            isActive: true,
+            takeAway: false,
+
         },
         {
             id: null,
             date: currentDate.toISOString(),
             totalPrice: 2700,
             message: "Nagyon szeretem!",
-            isActive: true
+            isActive: true,
+            takeAway: false,
+
         }]
         const dishInfos = [
         {
