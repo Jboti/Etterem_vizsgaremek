@@ -1,5 +1,5 @@
 const db = require('../db/dbContext')
-const { Op } = require('sequelize')
+const { Op, where } = require('sequelize')
 class userRepository
 {
     constructor(db)
@@ -56,7 +56,7 @@ class userRepository
             })
     }
 
-    async vertifyEmail(id)
+    async verifyEmail(id)
     {
         return await this.User.update(
             {
@@ -72,9 +72,20 @@ class userRepository
     
     async checkForExistingUser(userName,email)
     {
-        return await User.findOne({
+        return await this.User.findOne({
             [Op.or]: [{ userName: userName }, { email: email }]
         })
+    }
+
+    async getUserByEmail(email)
+    {
+        return await this.User.findOne(
+            {
+                where:
+                {
+                    email:email
+                }
+            })
     }
 
 }

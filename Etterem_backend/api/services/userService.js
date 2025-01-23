@@ -22,14 +22,19 @@ class UserService
         await userRepository.deleteUser(id)
     }
 
-    async vertifyEmail(id)
+    async verifyEmail(id)
     {
-        return await userRepository.vertifyEmail(id)
+        return await userRepository.verifyEmail(id)
     }
 
     async checkForExistingUser(userName,email)
     {
         return await userRepository.checkForExistingUser(userName,email)
+    }
+
+    async getUserByEmail(email)
+    {
+        return await userRepository.getUserByEmail(email)
     }
 }
 

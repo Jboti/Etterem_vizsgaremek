@@ -1,25 +1,24 @@
 <script lang="ts" setup>
-import type { emailVertifyData } from '@/api/auth/auth';
+import type { emailVerifyData } from '@/api/auth/auth';
 import { useEmailVertification } from '@/api/auth/authQuery';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 
-const {token} = useRoute()
+const {query} = useRoute()
+const token = query.token as string
 
-
-const emailVertifyDataRef = ref<emailVertifyData>({
+const emailverifyDataRef = ref<emailVerifyData>({
     token:'',
 })
-emailVertifyDataRef.value.token = token
-emailVertifyDataRef.value.uid = Number(uid)
+emailverifyDataRef.value.token = token
 
 const {mutate, isPending} = useEmailVertification()
 
 </script>
 <template>
     <h1>Erősítsd meg</h1>
-    <v-btn @click="mutate(emailVertifyDataRef)" :loading="isPending">
+    <v-btn @click="mutate(emailverifyDataRef)" :loading="isPending">
         Megerősítés
     </v-btn>
 </template>

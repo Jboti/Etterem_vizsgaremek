@@ -7,7 +7,7 @@ import LoginView from '@/views/auth/LoginView.vue'
 import PasswordResetEmailView from '@/views/auth/PasswordResetEmailView.vue'
 import PasswordResetView from '@/views/auth/PasswordResetView.vue'
 import RegistrationView from '@/views/auth/RegistrationView.vue'
-import EmailVertifyView from '@/views/auth/EmailVertifyView.vue'
+import EmailverifyView from '@/views/auth/EmailverifyView.vue'
 import EmailSentView from '@/views/auth/EmailSentView.vue'
 
 const router = createRouter({
@@ -54,9 +54,9 @@ const router = createRouter({
       component: PasswordResetEmailView,
     },
     {
-      path: '/email-vertify',
+      path: '/email-verify',
       name: 'email-verify',
-      component: EmailVertifyView,
+      component: EmailverifyView,
     },
     {
       path: '/email-sent',

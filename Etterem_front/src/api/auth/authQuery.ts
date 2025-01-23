@@ -1,12 +1,12 @@
 import axiosClient from "@/lib/axios"
-import type { emailVertifyData, LoginData, LoginResponse, RegistrationData, ResetPasswordData, SetPasswordData, SetPasswordResponse } from "./auth"
+import type { emailVerifyData, LoginData, LoginResponse, RegistrationData, ResetPasswordData, SetPasswordData, SetPasswordResponse } from "./auth"
 import { useMutation, useQuery } from "@tanstack/vue-query"
 import { useRoute, useRouter } from "vue-router"
 import { QUERY_KEYS } from "@/utils/queryKeys"
 
 
 const registration = async (data: RegistrationData) => {
-    const response = await axiosClient.post("http://localhost:3000/api/v1/create-user", data)
+    const response = await axiosClient.post("http://localhost:3000/api/v1/register", data)
     return response.data
 }
 
@@ -22,8 +22,8 @@ export const useRegistration = () => {
     })
 }
 
-const emailVertification = async (data: emailVertifyData) => {
-    const response = await axiosClient.patch("http://localhost:3000/api/v1/vertify-user", data)
+const emailVertification = async (data: emailVerifyData) => {
+    const response = await axiosClient.patch("http://localhost:3000/api/v1/verify-user", data)
     return response.data.data
 }
 
@@ -37,6 +37,23 @@ export const useEmailVertification = () => {
         },
     })
 }
+
+const Login = async (data: LoginData) : Promise<LoginResponse> => {
+    const response = await axiosClient.post('http://localhost:3000/api/v1/login', data)
+    return response.data.data
+}
+
+export const useLogin = () => {
+    const {push} = useRouter()
+    return useMutation({
+        mutationFn:Login,
+        onSuccess(data){
+            document.cookie = `token=${data.token}; path=/; HttpOnly; SameSite=Strict;`;
+            push({name:'Főoldal'})
+        }
+    })
+}
+
 
 
 const putSetPassword = async (token: string, data: SetPasswordData) => {
@@ -56,22 +73,6 @@ export const usePutSetPassword = () => {
     )
 }
 
-
-const Login = async (data: LoginData) : Promise<LoginResponse> => {
-    const response = await axiosClient.post('http://172.22.1.219/api/v1/login', data)
-    return response.data.data
-}
-
-export const useLogin = () => {
-    const {push} = useRouter()
-    return useMutation({
-        mutationFn:Login,
-        onSuccess(data){
-            localStorage.token = data.token
-            push({name:'Home'})
-        }
-    })
-}
 
 
 const postPasswordReset = async ( data: ResetPasswordData) => {
