@@ -15,7 +15,8 @@ class userRepository
                 where:
                 {
                     id: id,
-                }
+                },
+                attributes: ['id','created','userName','fullName','email','points']
             })
     }
 

@@ -9,8 +9,8 @@ exports.getUser = async (req,res,next) =>
 {
     try
     {
-        let {id} = req.params
-        id = Number(id)
+        const id = Number(req.uid)
+        
         if(!id || isNaN(id)){
             const error = new Error("User id not found or id is not a number!")
             error.status = 404
