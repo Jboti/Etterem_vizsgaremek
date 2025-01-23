@@ -14,7 +14,6 @@ app.use(
     })
 )
 
-
 const errorHandler = require('./api/middlewares/errorHandler')
 const userRoutes = require('./api/routes/userRoutes')
 const purchaseRoutes = require('./api/routes/purchaseRoutes')

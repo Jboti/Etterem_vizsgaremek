@@ -7,9 +7,6 @@ import { QUERY_KEYS } from "@/utils/queryKeys"
 
 const registration = async (data: RegistrationData) => {
     const response = await axiosClient.post("http://localhost:3000/api/v1/create-user", data)
-    console.log(response)
-    console.log(response.status)
-    console.log(response.data)
     return response.data
 }
 
@@ -21,13 +18,7 @@ export const useRegistration = () => {
         onSuccess() {
             push({ name: 'email-sent' })
         },
-        // onError(error: any) {
-        //     if (error.error === 'Username is already in use') {
-        //         alert('The username is already taken. Please choose another one.')
-        //     } else if (error.message === 'Email is already in use') {
-        //         alert('The email is already registered. Please use another one.')
-        //     }
-        // },
+       
     })
 }
 

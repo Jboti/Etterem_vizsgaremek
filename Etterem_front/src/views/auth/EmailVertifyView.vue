@@ -5,13 +5,11 @@ import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 
-const {query} = useRoute()
-const token = query.token as string
-const uid = query.uid as string 
+const {token} = useRoute()
+
 
 const emailVertifyDataRef = ref<emailVertifyData>({
     token:'',
-    uid:0
 })
 emailVertifyDataRef.value.token = token
 emailVertifyDataRef.value.uid = Number(uid)
