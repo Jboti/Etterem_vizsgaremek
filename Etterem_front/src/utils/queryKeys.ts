@@ -4,7 +4,6 @@ const USER_KEYS = {
 }
 
 const AUTH_KEYS = {
-    setPassword: 'setPassword',
     passwordReset:'passwordReset'
 }
 

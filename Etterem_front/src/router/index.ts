@@ -1,14 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import RendelesView from '@/views/RendelesView.vue'
-import FelhasznaloView from '@/views/FelhasznaloView.vue'
+import OrderView from '@/views/OrderView.vue'
+import UserView from '@/views/UserView.vue'
 import MenuView from '@/views/MenuView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
-import PasswordResetEmailView from '@/views/auth/PasswordResetEmailView.vue'
-import PasswordResetView from '@/views/auth/PasswordResetView.vue'
 import RegistrationView from '@/views/auth/RegistrationView.vue'
-import EmailverifyView from '@/views/auth/EmailverifyView.vue'
 import EmailSentView from '@/views/auth/EmailSentView.vue'
+import EmailVerifyView from '@/views/auth/EmailVerifyView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,7 +19,7 @@ const router = createRouter({
     {
       path: '/order',
       name: 'Rendelés',
-      component: RendelesView,
+      component: OrderView,
     },
     {
       path: '/menu',
@@ -31,7 +29,7 @@ const router = createRouter({
     {
       path: '/user',
       name: 'Felhasználó',
-      component: FelhasznaloView,
+      component: UserView,
     },
     {
       path: '/login',
@@ -44,19 +42,9 @@ const router = createRouter({
       component: RegistrationView,
     },
     {
-      path: '/password-reset',
-      name: 'PasswordReset',
-      component: PasswordResetView,
-    },
-    {
-      path: '/password-reset-email',
-      name: 'PasswordResetEmail',
-      component: PasswordResetEmailView,
-    },
-    {
       path: '/email-verify',
       name: 'email-verify',
-      component: EmailverifyView,
+      component: EmailVerifyView,
     },
     {
       path: '/email-sent',

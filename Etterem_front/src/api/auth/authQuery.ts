@@ -1,5 +1,5 @@
 import axiosClient from "@/lib/axios"
-import type { emailVerifyData, LoginData, LoginResponse, RegistrationData, ResetPasswordData, SetPasswordData, SetPasswordResponse } from "./auth"
+import type { emailVerifyData, LoginData, LoginResponse, RegistrationData, } from "./auth"
 import { useMutation, useQuery } from "@tanstack/vue-query"
 import { useRoute, useRouter } from "vue-router"
 import { QUERY_KEYS } from "@/utils/queryKeys"
@@ -40,7 +40,8 @@ export const useEmailVertification = () => {
 
 const Login = async (data: LoginData) : Promise<LoginResponse> => {
     const response = await axiosClient.post('http://localhost:3000/api/v1/login', data)
-    return response.data.data
+    console.log(response.data.token)
+    return response.data
 }
 
 export const useLogin = () => {
@@ -48,80 +49,10 @@ export const useLogin = () => {
     return useMutation({
         mutationFn:Login,
         onSuccess(data){
-            document.cookie = `token=${data.token}; path=/; HttpOnly; SameSite=Strict;`;
+            console.log("success")
+            document.cookie = `token=${data.token}; path=/; SameSite=Strict;`
+            console.log(document.cookie)
             push({name:'Főoldal'})
         }
     })
-}
-
-
-
-const putSetPassword = async (token: string, data: SetPasswordData) => {
-    const response = await axiosClient.put(`http://localhost:3000/api/v1/set-password/${token}`, data)
-    return response.data
-}
-
-export const usePutSetPassword = () => {
-    const {push} = useRouter()
-    return useMutation(
-        {
-            mutationFn: ({token, data} : { token: string, data: SetPasswordData }) => putSetPassword(token, data),
-            onSuccess() {
-                push({name:'Bejelentkezés'})
-            },
-        }
-    )
-}
-
-
-
-const postPasswordReset = async ( data: ResetPasswordData) => {
-    const response = await axiosClient.post(`http://172.22.1.219/api/v1/password-reset`, data)
-    return response.data.data
-}
-
-export const usePostPasswordReset = () => {
-    const {push} = useRouter()
-    return useMutation(
-        {
-            mutationFn: postPasswordReset,
-            onSuccess(data) {
-                push({name: 'password-reset', params: {token: data.token}})
-            },
-        }
-    )
-}
-
-
-const getPasswordReset = async () : Promise<SetPasswordResponse> => {
-    const {params} = useRoute()
-    const response = await axiosClient.get(`http://172.22.1.219/api/v1/password-reset/${params.token}`)
-    return response.data
-}
-
-export const useGetPasswordReset = () => {
-    return useQuery(
-        {
-            queryKey: [QUERY_KEYS.passwordReset],
-            queryFn: getPasswordReset,
-        }
-    )
-}
-
-
-const putPasswordReset = async (token: string, data: SetPasswordData) => {
-    const response = await axiosClient.put(`http://172.22.1.219/api/v1/password-reset/${token}`, data)
-    return response.data
-}
-
-export const usePutPasswordReset = () => {
-    const {push} = useRouter()
-    return useMutation(
-        {
-            mutationFn: ({token, data} : { token: string, data: SetPasswordData }) => putPasswordReset(token, data),
-            onSuccess() {
-                push({name:'Bejelentkezés'})
-            },
-        }
-    )
 }

@@ -2,7 +2,7 @@
 import type { LoginData } from '@/api/auth/auth';
 import { useLogin } from '@/api/auth/authQuery';
 import { ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 const LoginDataRef = ref<LoginData>({
     email: '',

@@ -1,17 +1,17 @@
 <script lang="ts" setup>
-import { useGetDishes } from '@/api/menuItems/itemsQuery';
+import { useGetDishes } from '@/api/menuItems/itemsQuery'
 
-const { data } = useGetDishes();
+const { data } = useGetDishes()
 </script>
 
 <template>
   <h1 class="bg-red-darken-4 text-center">Menu</h1>
 
   <div class="bg-red-darken-4 pt-3 pb-3 text-center">
-    <v-btn class="bg-red-darken-4 mr-3" rounded="xl">Menük</v-btn>
-    <v-btn class="bg-red-darken-4 mr-3" rounded="xl">Kebabok</v-btn>
-    <v-btn class="bg-red-darken-4 mr-3" rounded="xl">Köretek</v-btn>
-    <v-btn class="bg-red-darken-4 mr-3" rounded="xl">Üdítők</v-btn>
+    <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl">Menük</v-btn>
+    <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl">Kebabok</v-btn>
+    <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl">Köretek</v-btn>
+    <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl">Üdítők</v-btn>
   </div>
 
   <v-container style="margin-bottom: 150px;">
@@ -19,7 +19,7 @@ const { data } = useGetDishes();
       <v-col 
         v-for="(dish, index) in data" 
         :key="index" 
-        cols="12" sm="6" md="4"
+        cols="12" sm="6" md="4" xl="3"
       >
         <v-card class="mx-auto" max-width="344">
           <v-img 
