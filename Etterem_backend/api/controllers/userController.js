@@ -78,7 +78,7 @@ exports.createUser = async (req,res,next) =>
 
         const token = jwt.sign({ id:result.id }, process.env.JWT_KEY, { expiresIn: "30m" })
         
-        const verificationLink = `http://localhost:5173/email-vertify?token=${token}`
+        const verificationLink = `http://localhost:5173/email-verify?token=${token}`
 
         async function sendMail() {
             const transporter = nodemailer.createTransport({
@@ -117,7 +117,7 @@ exports.createUser = async (req,res,next) =>
     }
 }
 
-exports.vertifyEmail = async (req, res, next) => {
+exports.verifyEmail = async (req, res, next) => {
     try {
         const { token } = req.body
         if (!token) {
@@ -134,7 +134,7 @@ exports.vertifyEmail = async (req, res, next) => {
             throw error
         }
 
-        const result = await userService.vertifyEmail(id);
+        const result = await userService.verifyEmail(id);
         if (!result) {
             const error = new Error("User verification went wrong!")
             error.status = 404
@@ -156,11 +156,10 @@ exports.loginUser = async (req,res,next) =>
 {
     try
     {
-        let { id, password } = req.body 
-        id = Number(id)
-        if(!id || isNaN(id))
+        let { email, password } = req.body 
+        if(!email)
         {
-            const error = new Error("Login user id not found or id not a number!")
+            const error = new Error("Login email not found!")
             error.status = 404
             throw error
         }
@@ -171,11 +170,15 @@ exports.loginUser = async (req,res,next) =>
             throw error
         }
 
-        const user = await userService.getUser(id)
+        const user = await userService.getUserByEmail(email)
+        if(!user)
+        {
+            res.status(404).json({error:"Email is not registered"})
+        }
         if(await bcrypt.compare(password, user.password))
         {
-            const token = jwt.sign({ user }, process.env.JWT_KEY, { expiresIn: "30m" })
-            res.status(200).json(token)
+            const token = jwt.sign({ id:user.id }, process.env.JWT_KEY, { expiresIn: "1h" })
+            res.status(200).json({token:token})
         }
         else
             res.status(400).send("Wrong password")
