@@ -1,5 +1,5 @@
 const db = require('../db/dbContext')
-
+const { Op, where } = require('sequelize')
 class userRepository
 {
     constructor(db)
@@ -40,12 +40,14 @@ class userRepository
 
     async createUser(user)
     {
-        await this.User.create(user)
+        const newUser = await this.User.create(user)
+        await newUser.save()
+        return newUser
     }
 
     async deleteUser(id)
     {
-        await this.User.destroy(
+        return await this.User.destroy(
             {
                 where:
                 {
@@ -53,6 +55,39 @@ class userRepository
                 }
             })
     }
+
+    async verifyEmail(id)
+    {
+        return await this.User.update(
+            {
+                isActive: true,
+            },
+            {
+                where:{
+                    id:id
+                }
+            }
+        )
+    }
+    
+    async checkForExistingUser(userName,email)
+    {
+        return await this.User.findOne({
+            [Op.or]: [{ userName: userName }, { email: email }]
+        })
+    }
+
+    async getUserByEmail(email)
+    {
+        return await this.User.findOne(
+            {
+                where:
+                {
+                    email:email
+                }
+            })
+    }
+
 }
 
 module.exports = new userRepository(db)

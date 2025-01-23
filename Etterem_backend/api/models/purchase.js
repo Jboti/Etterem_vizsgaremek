@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
           autoIncrement: true,
         },
         date: {
-          type: DataTypes.DATEONLY,
+          type: DataTypes.DATE,
           defaultValue: DataTypes.NOW,
         },
         totalPrice: {
@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
           allowNull: true,
         },
         isActive: {
+          type: DataTypes.BOOLEAN,
+          allowNull: false,
+        },
+        takeAway: {
           type: DataTypes.BOOLEAN,
           allowNull: false,
         },

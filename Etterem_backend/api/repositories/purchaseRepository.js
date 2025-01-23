@@ -80,7 +80,7 @@ class purchaseRepository
                     attributes: ["customizations", "amount"] 
                 }
             ],
-            attributes: ["id", "date","totalPrice","message"] 
+            attributes: ["id", "date","totalPrice","message","takeAway"] 
         })
     }
     

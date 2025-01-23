@@ -5,8 +5,17 @@ export type RegistrationData = {
     password: string
 }
 
-export type RegistrationResponse = {
-    token: string
+export type emailVerifyData = {
+    token:string,
+}
+
+export type LoginData = {
+    email:string,
+    password:string
+}
+
+export type LoginResponse = {
+    token:string
 }
 
 export type SetPasswordResponse = {
@@ -17,15 +26,6 @@ export type SetPasswordResponse = {
 export type SetPasswordData = {
     password: string,
     password_confirmation: string,
-}
-
-
-export type LoginData = {
-    email:string,
-    password:string
-}
-export type LoginResponse = {
-    token:string
 }
 
 export type ResetPasswordData = {

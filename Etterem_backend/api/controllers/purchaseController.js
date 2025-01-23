@@ -1,14 +1,14 @@
-const purchaseRepository = require('../repositories/purchaseRepository')
-const order_connectionRepository = require('../repositories/order_connectionRepository')
+const purchaseService = require('../services/purchaseService')
+const orderConnectionService = require('../services/orderConnectionService')
 
 exports.getAllActivePurchase = async (req,res,next) =>
 {
     try
     {
-        const purchases = await purchaseRepository.getAllActivePurchase()
+        const purchases = await purchaseService.getAllActivePurchase()
+
         res.status(200).json(purchases)
-    }catch(error)
-    {
+    }catch(error){
         next(error)
     }
 }
@@ -17,18 +17,18 @@ exports.deActivatePurchase = async (req,res,next) =>
 {
     try
     {
-        const {id} = req.params
+        let {id} = req.params
         id = Number(id)
         if(!id || isNaN(id)){
             const error = new Error("Purchase id is not found or id is not a number!")
             error.status = 404
             throw error
         }
-        await purchaseRepository.deActivatePurchase(id)
+        console.log(id);
+        const result = await purchaseService.deActivatePurchase(id)
+        res.status(200).json(result)
         console.log("Purchase deactivated!")
-        res.status(200).send("Purchase deactivated!")
-    }catch(error)
-    {
+    }catch(error){
         next(error)
     }
 }
@@ -38,8 +38,8 @@ exports.PlaceOrder = async (req,res,next) =>
     try
     {
         const currentDate = new Date()
-        const {uid} = req.params
-        const {totalPrice, message, dishInfo} = req.body
+        let {uid} = req.params
+        let {totalPrice, message, dishInfo} = req.body
         uid = Number(uid)
         totalPrice = Number(totalPrice)
         dishInfo.dishIds = dishInfo.dishIds.map(id => Number(id))
@@ -83,11 +83,15 @@ exports.PlaceOrder = async (req,res,next) =>
             throw error
         }
 
-        await order_connectionRepository.createPurchaseConnection(uid,purchase,dishInfo)
-        console.log("Purchase created successfully!")
-        res.status(201).send("Purchase created successfully!")
-    }catch(error)
-    {
+        const result = await orderConnectionService.createPurchaseConnection(uid,purchase,dishInfo)
+        if(result)
+        {
+            res.status(201).json(result)
+            console.log("Purchase created successfully!")
+        }
+        else
+            res.status(400).send("Failed creating order.")
+    }catch(error){
         next(error)
     }
 }

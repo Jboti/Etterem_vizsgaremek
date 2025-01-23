@@ -9,11 +9,10 @@ app.use(cors());
 app.use(
     cors({
         origin: 'http://localhost:5173', 
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
+        methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'], 
         allowedHeaders: ['Content-Type', 'Authorization'], 
     })
 )
-
 
 const errorHandler = require('./api/middlewares/errorHandler')
 const userRoutes = require('./api/routes/userRoutes')
@@ -24,12 +23,12 @@ const testRouter = require('./api/routes/testRouter')
 
 //ROUTES
 
-app.use("/user", userRoutes)
-app.use("/purchase", purchaseRoutes)
-app.use("/dish",dishRoutes)
+app.use("/api/v1", userRoutes)
+app.use("/api/v1", purchaseRoutes)
+app.use("/api/v1",dishRoutes)
 
 //táblákat feltölti pár alap adattal teszthez
-app.use("/testDataCreate",testRouter)
+app.use("/test-data-create",testRouter)
 
 app.use(errorHandler.notFoundError)
 app.use(errorHandler.showError)
