@@ -5,9 +5,9 @@ const { data } = useGetDishes()
 </script>
 
 <template>
-  <h1 class="bg-red-darken-4 text-center">Menu</h1>
-
-  <div class="bg-red-darken-4 pt-3 pb-3 text-center">
+  
+  <div class="pb-2 text-center" style="background: linear-gradient(90deg, black 0%, #B71C1C 50%, black 100%);">
+    <h1 class="pb-2">Étlap</h1>
     <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl">Menük</v-btn>
     <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl">Kebabok</v-btn>
     <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl">Köretek</v-btn>
@@ -29,7 +29,7 @@ const { data } = useGetDishes()
 
           <v-card-text>
             <div class="text-h6">{{ dish.name }}</div>
-            <div class="text-subtitle1">{{ dish.price }}</div>
+            <div class="text-subtitle1">{{ dish.price }} Ft</div>
           </v-card-text>
         </v-card>
       </v-col>

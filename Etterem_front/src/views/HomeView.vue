@@ -9,12 +9,13 @@ const { push } = useRouter()
 
 </script>
 <template>
-  <h1>Home</h1>
-  <v-card style="display: flex;
+  <v-card class=" mt-4" 
+    style="display: flex;
     align-content: stretch;
     flex-direction: row;
     justify-content: center;
-    box-shadow: none;">
+    box-shadow: none;
+    background: transparent">
     <v-btn
             v-for="link in links"
             :key="link.name"

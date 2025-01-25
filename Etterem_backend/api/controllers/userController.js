@@ -34,33 +34,32 @@ exports.getAllUser = async (req,res,next) =>
     }
 }
 
-exports.createUser = async (req,res,next) =>
-{
-    try
-    {
+exports.createUser = async (req, res, next) => {
+    try {
         const currentDate = new Date()
-        const {userName, fullName, email, password } = req.body
-        if(!userName){
+        const { userName, fullName, email, password } = req.body
+
+        if (!userName) {
             const error = new Error("User userName is not found!")
             error.status = 404
             throw error
         }
-        if(!email){
+        if (!email) {
             const error = new Error("User email is not found!")
             error.status = 404
             throw error
         }
-        if(!fullName){
+        if (!fullName) {
             const error = new Error("User fullName is not found!")
             error.status = 404
             throw error
         }
-        if(!password){
+        if (!password) {
             const error = new Error("User password is not found!")
             error.status = 404
             throw error
         }
-       
+
         const user = {
             id: null,
             timestamp: currentDate.toISOString(),
@@ -68,54 +67,75 @@ exports.createUser = async (req,res,next) =>
             userName: userName,
             fullName: fullName,
             email: email,
-            password: await bcrypt.hash(password,salt),
+            password: await bcrypt.hash(password, salt),
             points: 0,
             isAdmin: false,
             isActive: false //email verification után true
         }
-        
-        const result = await userService.createUser(user)
 
-        const token = jwt.sign({ id:result.id }, process.env.JWT_KEY, { expiresIn: "30m" })
-        
+        const result = await userService.createUser(user)
+        const token = jwt.sign({ id: result.id }, process.env.JWT_KEY, { expiresIn: "30m" })
         const verificationLink = `http://localhost:5173/email-verify?token=${token}`
 
         async function sendMail() {
             const transporter = nodemailer.createTransport({
-                service:'gmail',
-                auth:{
-                    user:'donercegled@gmail.com',
-                    pass:'pjctmapwxkspxybj'
-                }
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL,
+                    pass: process.env.EMAIL_PW,
+                },
             })
+
+            
             const mailOptions = {
-                from:'donercegled@gmail.com',
-                to:email,
-                subject:'Teszt',
-                html:`KLIKK <a href=${verificationLink}> ide </a> megerősíteni`
+                from: 'donercegled@gmail.com',
+                to: email,
+                subject: 'Megerősítő email',
+                html: `
+                    <div style="font-family: Arial, sans-serif; text-align: center; background-color: #B71C1C; padding: 20px; border: 3px solid black; border-radius: 8px; width: 90%; max-width: 500px; margin: auto;">
+                        <h1 style="color:#ffffff; text-shadow: 2px 2px 4px black">
+                            Kedves ${result.userName}!
+                        </h1>
+                        <h2 style="color: #ffffff; text-shadow: 1px 1px 2px black;">
+                           Köszönjük, hogy regisztráltál!
+                        </h2>
+                        <h4 style="color: #ffffff; text-shadow: 1px 1px 2px black;">
+                            Kérjük, erősítsd meg az email címed az alábbi gombra kattintva:
+                        </h4>
+                        <a href="${verificationLink}" style="display: inline-block; padding: 10px 20px; background-color:rgb(255, 255, 255); color: black; text-decoration: none; border-radius: 4px; font-size: 16px; margin-top: 10px; border: 2px solid black;">
+                            Email cím megerősítése
+                        </a>
+                        <p style="color: #ffffff; margin-top: 20px; font-size: 12px; text-shadow: 1px 1px 2px black">
+                            Ha nem te regisztráltál, kérjük, hagyd figyelmen kívül ezt az üzenetet.
+                        </p>
+                        <div style="border-top: 1px solid #ddd; margin-top: 20px; padding-top: 10px; text-align: center; color: #ddd; font-size: 12px;">
+                            <p style="color: #ddd; text-shadow: 1px 1px 2px black">Döner Cegléd</p>
+                        </div>
+                        <p style="color: #ddd; text-shadow: 1px 1px 2px black">${result.created}</p>
+                    </div>
+                `,
             }
 
-            const emailRes = await transporter.sendMail(mailOptions)
-            if(!emailRes)
-                {
-                    const error = new Error("Failed to send out vertification email!")
-                    error.status = 404
-                    throw error
-                }
-        } 
+            const emailRes = await transporter.sendMail(mailOptions);
+            if (!emailRes) {
+                const error = new Error("Failed to send out verification email!")
+                error.status = 404
+                throw error
+            }
+        }
         sendMail()
 
-        if(result)
-        {
+        if (result) {
             console.log("User created successfully!")
             res.status(201).json(result)
-        }
-        else
+        } else {
             res.status(400).send("Failed creating new user.")
+        }
     } catch (error) {
-       next(error)
+        next(error)
     }
 }
+
 
 exports.verifyEmail = async (req, res, next) => {
     try {

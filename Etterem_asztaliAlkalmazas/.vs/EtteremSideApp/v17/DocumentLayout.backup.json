@@ -1,13 +1,13 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Etterem_asztaliAlkalmazas\\",
+  "WorkspaceRootPath": "D:\\!SULI\\!VIZSGAREMEK\\Etterem_asztaliAlkalmazas\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{60687E08-D599-49BD-BAEA-BB101FD28AAE}|EtteremSideApp\\EtteremSideApp.csproj|c:\\etterem_asztalialkalmazas\\etteremsideapp\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{60687E08-D599-49BD-BAEA-BB101FD28AAE}|EtteremSideApp\\EtteremSideApp.csproj|d:\\!suli\\!vizsgaremek\\etterem_asztalialkalmazas\\etteremsideapp\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{60687E08-D599-49BD-BAEA-BB101FD28AAE}|EtteremSideApp\\EtteremSideApp.csproj|solutionrelative:etteremsideapp\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{60687E08-D599-49BD-BAEA-BB101FD28AAE}|EtteremSideApp\\EtteremSideApp.csproj|C:\\Etterem_asztaliAlkalmazas\\etteremsideapp\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{60687E08-D599-49BD-BAEA-BB101FD28AAE}|EtteremSideApp\\EtteremSideApp.csproj|D:\\!SULI\\!VIZSGAREMEK\\Etterem_asztaliAlkalmazas\\etteremsideapp\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{60687E08-D599-49BD-BAEA-BB101FD28AAE}|EtteremSideApp\\EtteremSideApp.csproj|solutionrelative:etteremsideapp\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
@@ -18,20 +18,16 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "Form1.cs [Design]",
-              "DocumentMoniker": "C:\\Etterem_asztaliAlkalmazas\\EtteremSideApp\\Form1.cs",
+              "DocumentMoniker": "D:\\!SULI\\!VIZSGAREMEK\\Etterem_asztaliAlkalmazas\\EtteremSideApp\\Form1.cs",
               "RelativeDocumentMoniker": "EtteremSideApp\\Form1.cs",
-              "ToolTip": "C:\\Etterem_asztaliAlkalmazas\\EtteremSideApp\\Form1.cs [Design]*",
-              "RelativeToolTip": "EtteremSideApp\\Form1.cs [Design]*",
+              "ToolTip": "D:\\!SULI\\!VIZSGAREMEK\\Etterem_asztaliAlkalmazas\\EtteremSideApp\\Form1.cs [Design]",
+              "RelativeToolTip": "EtteremSideApp\\Form1.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-12-02T08:16:28.176Z",
               "EditorCaption": " [Design]"
@@ -40,11 +36,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Form1.cs",
-              "DocumentMoniker": "C:\\Etterem_asztaliAlkalmazas\\EtteremSideApp\\Form1.cs",
+              "DocumentMoniker": "D:\\!SULI\\!VIZSGAREMEK\\Etterem_asztaliAlkalmazas\\EtteremSideApp\\Form1.cs",
               "RelativeDocumentMoniker": "EtteremSideApp\\Form1.cs",
-              "ToolTip": "C:\\Etterem_asztaliAlkalmazas\\EtteremSideApp\\Form1.cs*",
-              "RelativeToolTip": "EtteremSideApp\\Form1.cs*",
-              "ViewState": "AgIAAPYBAAAAAAAAAAAIwAMCAAAsAAAAAAAAAA==",
+              "ToolTip": "D:\\!SULI\\!VIZSGAREMEK\\Etterem_asztaliAlkalmazas\\EtteremSideApp\\Form1.cs",
+              "RelativeToolTip": "EtteremSideApp\\Form1.cs",
+              "ViewState": "AgIAAHIBAAAAAAAAAAAowIkBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-12-02T08:16:28.028Z",
               "EditorCaption": ""

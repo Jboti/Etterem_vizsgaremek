@@ -2,22 +2,22 @@
 import { useRouter } from 'vue-router';
 
 const links = [
-  { name: 'Főoldal', icon: 'mdi-home' },
-  { name: 'Rendelés', icon: 'mdi-order-bool-descending' },
-  { name: 'Menü', icon: 'mdi-menu' },
-  { name: 'Felhasználó', icon: 'mdi-account' },
-];
+  { name: 'Főoldal', icon: 'mdi-home'},
+  { name: 'Rendelés', icon: 'mdi-food-takeout-box'},
+  { name: 'Menü', icon: 'mdi-menu'},
+  { name: 'Felhasználó', icon: 'mdi-account'},
+]
 
 const { push } = useRouter();
 </script>
 
 <template>
   <v-app>
-    <v-main class="fill-height">
+    <v-main class="fill-height background-image" style="--v-layout-bottom: 0px;">
       <RouterView />
     </v-main>
     <v-navigation-drawer style="transform: translateY(0%)" location="bottom" app>
-      <v-footer class="bg-red-darken-4 pt-2">
+      <v-footer class="pt-1" style="background: linear-gradient(90deg, black, #B71C1C, black);">
         <v-row justify="center" no-gutters cols="12">
           <v-btn
             v-for="link in links"
@@ -37,7 +37,7 @@ const { push } = useRouter();
               {{ link.name }}
             </div>
           </v-btn>
-          <v-col class="text-center mt-8" cols="12">
+          <v-col class="text-center mt-2" cols="12">
             <strong>2025 - Döner Cegléd</strong>
           </v-col>
         </v-row>
@@ -45,3 +45,14 @@ const { push } = useRouter();
     </v-navigation-drawer>
   </v-app>
 </template>
+
+<style scoped>
+.background-image {
+  background-image: url(background.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+
+}
+</style>
