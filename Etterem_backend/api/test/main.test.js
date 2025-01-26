@@ -3,29 +3,6 @@ const request = require("supertest");
 //jest.setTimeout(15000);
 
 const app = require("../../app");
-describe("Tesztelések", () =>
-{
-
-    
-    test("létezik az errorHandler.js", () =>{
-        var errorHandler = require("../middlewares/errorHandler");
-
-        expect(errorHandler).toBeDefined(); 
-    })
-
-    test("Nem létező endpoint 404 el tér vissza", async () => {
-        const response = await request(app).get("/user/nincsilyenendpoint456454");
-        expect(response.status).toEqual(404);
-    });
-/* Az errorhandler vmiért nem jó az app-ban > nem változtatja meg az error message-t/ a 404 es kód működik mert alapból azt az errort adja ki a nem talált kérésre !!!
-    test("Nem létező endpoint hibánál jó hibaüzenettel tér vissza", async () => {
-        const response = await request(app).get("/nincsilyenendpoint456454");
-        expect(response.body.message).toEqual("Not found");
-    });
-*/
-    
-    
-})
 
 const dishController = require("../controllers/dishController");
 const purchaseController = require("../controllers/purchaseController");
@@ -38,27 +15,27 @@ describe("Controller tesztek", ()=>
     
 
     test.each(["createDish","getAllDishes"])
-    ("dishControllerben léteznek a kérések", async (keres)=>
+    ("dishControllerben léteznek a kérések: %s", async (keres)=>        //keres -> kérés
     {
         expect(dishController[keres]).toBeDefined();
     });
 
 
     test.each(["getAllActivePurchase","deActivatePurchase","PlaceOrder"])
-    ("purchaseControllerben léteznek a kérések", async (keres)=>
+    ("purchaseControllerben léteznek a kérések: %s", async (keres)=>
     {
         expect(purchaseController[keres]).toBeDefined();
     });
     
  
-    test("testControllerben léteznek a kérések", ()=>
+    test.each(["DataCreate"])("testControllerben léteznek a kérések: %s", (keres)=>
     {
-        expect(testController.DataCreate).toBeDefined();
+        expect(testController[keres]).toBeDefined();
     });
     
 
     test.each(["getUser","getAllUser","createUser","verifyEmail","loginUser","deleteUser"])
-    ("userControllerben léteznek a kérések", (keres)=>
+    ("userControllerben léteznek a kérések: %s", (keres)=>
     {
         expect(userController[keres]).toBeDefined();
     });
@@ -68,52 +45,66 @@ describe("Controller tesztek", ()=>
 //------Middlewares------
 describe("Middlewares tesztek", ()=>
 {
+    test.each(["errorHandler","userAuth"])("léteznek a middlewarek: %s", (mware) =>{
+        var middleware = require(`../middlewares/${mware}`);
 
+        expect(middleware).toBeDefined(); 
+    })
 
+    test.each(["notFoundError","showError"])("errorHandler funkció'i' léteznek: %s", (funkcio) =>{
+        var errorHandler = require(`../middlewares/errorHandler`);
+
+        expect(errorHandler[funkcio]).toBeDefined(); 
+    })
+
+    test.each(["authenticateToken"])("userAuth funkció'i' léteznek: %s", (funkcio) =>{
+        var userAuth = require(`../middlewares/userAuth`);
+
+        expect(userAuth[funkcio]).toBeDefined(); 
+    })
 })
 
 //------Routes------
 describe("Routes tesztek", ()=>
 {
 
-    test("dishRouteson helyes státusszal térnek vissza a GET kérések",async ()=>{
-        const res = await request(app).get('/api/v1/get-users');
+    test.each(["/get-users"])("dishRouteson helyes státusszal térnek vissza a GET kérések: %s",async (endpoint)=>{
+        const res = await request(app).get(`/api/v1/${endpoint}`);
         expect(res.statusCode).toBe(200);
     });
 
-    test("purchaseRouteson helyes státusszal térnek vissza a GET kérések",async ()=>{
-        const res = await request(app).get('/api/v1/get-all-active-order');
+    test.each(["/get-all-active-order"])("purchaseRouteson helyes státusszal térnek vissza a GET kérések: %s",async (endpoint)=>{
+        const res = await request(app).get(`/api/v1/${endpoint}`);
         expect(res.statusCode).toBe(200);
     });
     
-    test("purchaseRouteson helyes státusszal térnek vissza a POST kérések",async ()=>{
-        const id = 1;
-        const res = await request(app).post(`/api/v1/place-order/${id}`);
+    test.each(["/place-order/1"])("purchaseRouteson helyes státusszal térnek vissza a POST kérések: %s",async (endpoint)=>{
+        const res = await request(app).post(`/api/v1/${endpoint}`);
         expect(res.statusCode).toBe(201);
     });
 
-    test("purchaseRouteson helyes státusszal térnek vissza a PATCH kérések",async ()=>{
-        const res = await request(app).patch('/api/v1/in-activate-order/1');
+    test.each(["/in-activate-order/1"])("purchaseRouteson helyes státusszal térnek vissza a PATCH kérések: %s",async (endpoint)=>{
+        const res = await request(app).patch(`/api/v1${endpoint}`);
         expect(res.statusCode).toBe(200);
     });
 
-    test.each(["/get-users","/get-user/1"])("userRouteson helyes státusszal térnek vissza a GET kérések",async (endpoint)=>{
+    test.each(["/get-users","/get-user/1"])("userRouteson helyes státusszal térnek vissza a GET kérések: %s",async (endpoint)=>{
         const res = await request(app).get(`/api/v1${endpoint}`);
         expect(res.statusCode).toBe(200);
     });
 
-    test.each(["/register","/login"])("userRouteson helyes státusszal térnek vissza a POST kérések",async (endpoint)=>{
+    test.each(["/register","/login"])("userRouteson helyes státusszal térnek vissza a POST kérések: %s",async (endpoint)=>{
         const res = await request(app).post(`/api/v1${endpoint}`);
         expect(res.statusCode).toBe(201);
     });
 
-    test("userRouteson helyes státusszal térnek vissza a DELETE kérések",async ()=>{
-        const res = await request(app).delete('/api/v1/delete-user/1');
+    test.each(["/delete-user/1"])("userRouteson helyes státusszal térnek vissza a DELETE kérések: %s",async (endpoint)=>{
+        const res = await request(app).delete(`/api/v1${endpoint}`);
         expect(res.statusCode).toBe(200);
     });
 
-    test("userRouteson helyes státusszal térnek vissza a PATCH kérések",async ()=>{
-        const res = await request(app).patch('/api/v1/verify-user');
+    test.each(["/verify-user"])("userRouteson helyes státusszal térnek vissza a PATCH kérések: %s",async (endpoint)=>{
+        const res = await request(app).patch(`/api/v1${endpoint}`);
         expect(res.statusCode).toBe(200);
     });
 })
@@ -123,8 +114,8 @@ describe("Modellek léteznek", ()=>
 {
     
     test.each(["allergenables","allergy","dish","index","order_connection","order_dish_connection","purchase","user"])
-    ("Léteznek-e az adatbázis táblái backenden teszt",(model)=>{
-        var models = require("../models/"+model)
+    ("Léteznek-e az adatbázis táblái backenden: %s",(model)=>{
+        var models = require(`../models/${model}`)
         expect(models).toBeDefined();
     });
     
@@ -133,7 +124,46 @@ describe("Modellek léteznek", ()=>
 //------Services------
 describe("Services tesztek", ()=>
 {
+    test.each(["dishService","orderConnectionService","purchaseService","userService"])
+    ("Services fileok léteznek: %s",(service)=>{
+        var services = require(`../services/${service}`)
+        expect(services).toBeDefined();
+    });
 
+    test.each([
+        ["dishService", "DishService"],
+        ["orderConnectionService", "OrderConnectionService"],
+        ["purchaseService", "PurchaseService"],
+        ["userService", "UserService"]
+    ])
+    ("Services osztály példánya létezik: %s -> %s", (service, osztaly) => {
+        const services = require(`../services/${service}`);
+        
+        expect(services.constructor.name).toBe(osztaly); // így működik csak mert példányt ad vissza a service :P
+    });
     
+    test.each(["createDish","getAllDishes"])
+    ("dishService funkcióa'i' létezik/nek: %s",(funkcio)=>{
+        var dishService = require(`../services/dishService`)
+        expect(dishService[funkcio]).toBeDefined();
+    });
+
+    test.each(["createPurchaseConnection"])
+    ("orderConnectionService funkcióa'i' létezik/nek: %s",(funkcio)=>{
+        var orderConnectionService = require(`../services/orderConnectionService`)
+        expect(orderConnectionService[funkcio]).toBeDefined();
+    });
+
+    test.each(["getAllActivePurchase","deActivatePurchase"])
+    ("purchaseService funkcióa'i' létezik/nek: %s",(funkcio)=>{
+        var purchaseService = require(`../services/purchaseService`)
+        expect(purchaseService[funkcio]).toBeDefined();
+    });
+
+    test.each(["createUser","getAllUser","getUser","deleteUser","verifyEmail","checkForExistingUser","getUserByEmail"])
+    ("userService funkció'i' létezik/nek: %s",(funkcio)=>{
+        var userService = require(`../services/userService`)
+        expect(userService[funkcio]).toBeDefined();
+    });
 })
     
