@@ -23,7 +23,7 @@ const router = createRouter({
     },
     {
       path: '/menu',
-      name: 'Menü',
+      name: 'Étlap',
       component: MenuView,
     },
     {
