@@ -12,6 +12,7 @@ const { data, isError, error, isLoading } = useGetUserInfo()
     <div v-else-if="isError">
       <v-card>
         <h1>Hiba a validáció során, kérlek jelentkezz be újra!</h1>
+        <h2>{{ data }}</h2>
       </v-card>
       <!-- <p>{{ error?.response?.data?.errmessage || "An error occurred." }}</p> -->
     </div>

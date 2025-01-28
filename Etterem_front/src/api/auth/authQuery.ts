@@ -49,10 +49,9 @@ export const useLogin = () => {
     return useMutation({
         mutationFn:Login,
         onSuccess(data){
-            console.log("success")
             document.cookie = `token=${data.token}; path=/; SameSite=Strict;`
             console.log(document.cookie)
             push({name:'Főoldal'})
-        }
+        },
     })
 }

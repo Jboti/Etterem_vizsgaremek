@@ -9,8 +9,18 @@ const LoginDataRef = ref<LoginData>({
     password:''
 })
 
+const errorMessage = ref<string | null>(null)
 const { push } = useRouter()
 const { mutate, isPending} = useLogin()
+
+const handleLogin = (LoginDataRef: LoginData) => {
+    errorMessage.value = null
+    mutate(LoginDataRef,{
+        onError(error: any){
+            errorMessage.value = error.response?.data?.errmessage || "Hiba"
+        }
+    })
+}
 
 </script>
 <template>
@@ -21,7 +31,7 @@ const { mutate, isPending} = useLogin()
             <v-text-field v-model="LoginDataRef.password" label="Password" type="password" variant="outlined"></v-text-field>
         </v-card-text>
         <v-card-actions>
-            <v-btn @click="mutate(LoginDataRef)" :loading="isPending ">
+            <v-btn @click="handleLogin(LoginDataRef)" :loading="isPending ">
                 Login
             </v-btn>
             <v-btn @click="push({name:'PasswordResetEmail'})">
@@ -29,4 +39,5 @@ const { mutate, isPending} = useLogin()
             </v-btn>
         </v-card-actions>
     </v-card>
+    <p style="color: red;">{{ errorMessage }}</p>
 </template>

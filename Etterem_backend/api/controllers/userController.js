@@ -193,9 +193,9 @@ exports.loginUser = async (req,res,next) =>
         const user = await userService.getUserByEmail(email)
         if(!user)
         {
-            res.status(404).json({error:"Email is not registered"})
+            res.status(404).json({errmessage:"Az email címmel nincs regisztálva felhasználó!"})
         }
-        if(await bcrypt.compare(password, user.password))
+        else if(await bcrypt.compare(password, user.password))
         {
             const token = jwt.sign({ id:user.id }, process.env.JWT_KEY, { expiresIn: "1h" })
             res.status(200).json({token:token})
