@@ -17,7 +17,7 @@ const handleLogin = (LoginDataRef: LoginData) => {
     errorMessage.value = null
     mutate(LoginDataRef,{
         onError(error: any){
-            errorMessage.value = error.response?.data?.errmessage || "Hiba"
+            errorMessage.value = error.response?.data?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!"
         }
     })
 }

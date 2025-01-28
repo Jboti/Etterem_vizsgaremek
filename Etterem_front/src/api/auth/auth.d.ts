@@ -2,7 +2,8 @@ export type RegistrationData = {
     userName: string,
     fullName: string
     email: string,
-    password: string
+    password: string,
+    passwordRe: string
 }
 
 export type emailVerifyData = {
