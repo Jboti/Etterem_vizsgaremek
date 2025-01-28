@@ -11,14 +11,8 @@ const registration = async (data: RegistrationData) => {
 }
 
 export const useRegistration = () => {
-    const { push } = useRouter()
-    
     return useMutation({
         mutationFn: registration,
-        onSuccess() {
-            push({ name: 'email-sent' })
-        },
-       
     })
 }
 
@@ -32,7 +26,7 @@ export const useEmailVertification = () => {
     return useMutation({
         mutationFn: emailVertification,
         onSuccess() {
-            push({name:'Főoldal'})
+            push({name:'Bejelentkezés'})
             
         },
     })
