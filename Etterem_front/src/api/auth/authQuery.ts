@@ -1,5 +1,5 @@
 import axiosClient from "@/lib/axios"
-import type { emailVerifyData, LoginData, LoginResponse, RegistrationData, } from "./auth"
+import type { emailVerifyData, LoginData, LoginResponse, RegistrationData,SetPasswordData } from "./auth"
 import { useMutation, useQuery } from "@tanstack/vue-query"
 import { useRoute, useRouter } from "vue-router"
 import { QUERY_KEYS } from "@/utils/queryKeys"
@@ -11,14 +11,8 @@ const registration = async (data: RegistrationData) => {
 }
 
 export const useRegistration = () => {
-    const { push } = useRouter()
-    
     return useMutation({
         mutationFn: registration,
-        onSuccess() {
-            push({ name: 'email-sent' })
-        },
-       
     })
 }
 
@@ -32,7 +26,7 @@ export const useEmailVertification = () => {
     return useMutation({
         mutationFn: emailVertification,
         onSuccess() {
-            push({name:'Főoldal'})
+            push({name:'Bejelentkezés'})
             
         },
     })
@@ -55,3 +49,22 @@ export const useLogin = () => {
         },
     })
 }
+
+const PasswordReset = async (data: SetPasswordData) => {
+    const response = await axiosClient.patch('http://localhost:3000/api/v1/password-reset', data)
+    console.log(response.data.token)
+    return response.data
+}
+
+export const usePasswordReset = () => {
+    const {push} = useRouter()
+    return useMutation({
+        mutationFn:PasswordReset,
+        onSuccess(data){
+            document.cookie = `token=${data.token}; path=/; SameSite=Strict;`
+            console.log(document.cookie)
+            push({name:'Főoldal'})
+        },
+    })
+}
+
