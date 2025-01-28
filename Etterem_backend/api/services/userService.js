@@ -27,9 +27,14 @@ class UserService
         return await userRepository.verifyEmail(id)
     }
 
-    async checkForExistingUser(userName,email)
+    async checkForExistinguserName(userName)
     {
-        return await userRepository.checkForExistingUser(userName,email)
+        return await userRepository.checkForExistinguserName(userName)
+    }
+
+    async checkForExistingEmail(email)
+    {
+        return await userRepository.getUserByEmail(email)
     }
 
     async getUserByEmail(email)
