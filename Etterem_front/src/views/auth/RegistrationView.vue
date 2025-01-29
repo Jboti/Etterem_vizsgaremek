@@ -43,7 +43,7 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
     } else if (!validateEmail(registrationDataRef.email)){
         toast.error("Nem megfelelő formátumú email!")
     } else if (!validatePassword(registrationDataRef.password)){
-        toast.error("Nme megfelelő formátumú jelszó!")
+        toast.error("Nem megfelelő formátumú jelszó!")
     }else {
         mutate(registrationDataRef, {
             onSuccess(){

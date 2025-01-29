@@ -1,6 +1,6 @@
 import axiosClient from "@/lib/axios"
 import type { emailVerifyData, LoginData, LoginResponse, RegistrationData,SetPasswordData } from "./auth"
-import { useMutation, useQuery } from "@tanstack/vue-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query"
 import { useRoute, useRouter } from "vue-router"
 import { QUERY_KEYS } from "@/utils/queryKeys"
 
@@ -34,21 +34,41 @@ export const useEmailVertification = () => {
 
 const Login = async (data: LoginData) : Promise<LoginResponse> => {
     const response = await axiosClient.post('http://localhost:3000/api/v1/login', data)
-    console.log(response.data.token)
     return response.data
 }
 
 export const useLogin = () => {
     const {push} = useRouter()
+    const queryClient = useQueryClient()
     return useMutation({
         mutationFn:Login,
         onSuccess(data){
             document.cookie = `token=${data.token}; path=/; SameSite=Strict;`
-            console.log(document.cookie)
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.user] })
             push({name:'Főoldal'})
         },
     })
 }
+
+
+// const Logout = async (data: LoginData) => {
+//     const response = await axiosClient.post('http://localhost:3000/api/v1/login', data)
+//     return response.data
+// }
+
+// export const useLogout = () => {
+//     const {push} = useRouter()
+//     const queryClient = useQueryClient()
+//     return useMutation({
+//         mutationFn:Logout,
+//         onSuccess(){
+//             document.cookie = "token=; path=/;";
+//             queryClient.removeQueries({ queryKey: [QUERY_KEYS.user] });
+//             push({name:'Főoldal'})
+//         },
+//     })
+// }
+
 
 const PasswordReset = async (data: SetPasswordData) => {
     const response = await axiosClient.patch('http://localhost:3000/api/v1/password-reset', data)

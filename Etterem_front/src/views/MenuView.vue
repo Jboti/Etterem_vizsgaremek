@@ -1,12 +1,27 @@
 <script lang="ts" setup>
 import { useGetDishes } from '@/api/menuItems/itemsQuery'
+import { useGetUserInfo } from '@/api/user/userQuery';
+import { toast } from 'vue3-toastify';
 
 const { data } = useGetDishes()
+const { isError } = useGetUserInfo()
+
+const notify = () => {
+    toast.success("A termék a kosárba került!")
+}
+
+const handleAddToCart = () => {
+  if(isError.value)
+    toast.error("A rendeléshez kérlek jelentkezz be!")
+  else
+    toast.success("A termék a kosárba került!")
+}
+
+
 
 </script>
 
 <template>
-  
   <div class="pb-2 mb-4 text-center" style="background: linear-gradient(90deg, black 0%, #B71C1C 50%, black 100%);">
     <h1 class="pb-2" style="font-weight: 700;">Étlap</h1>
     <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl"><b>Menük</b></v-btn>
@@ -14,7 +29,10 @@ const { data } = useGetDishes()
     <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl"><b>Köretek</b></v-btn>
     <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl"><b>Üdítők</b></v-btn>
   </div>
-
+  <div>
+    <button @click="notify"></button>
+  </div>
+  
   <v-container style="margin-bottom: 150px;">
     <v-row>
       <v-col 
@@ -44,7 +62,9 @@ const { data } = useGetDishes()
                 <div><b>{{ dish.name }}</b></div>
                 <div>{{ dish.price }} Ft</div>
               </div>
-              <v-btn class="pl-4 pr-4 pt-2 pb-2" style="background-color: rgb(22, 139, 22); box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black; "><b>Kosárba</b></v-btn>
+              <v-btn class="pl-4 pr-4 pt-2 pb-2" style="background-color: rgb(22, 139, 22); box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black; " @click="handleAddToCart()">
+                <b>Kosárba</b>
+              </v-btn>
             </div>
           </v-card-text>
         </v-card>
