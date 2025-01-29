@@ -45,23 +45,41 @@ exports.DataCreate = async (req,res,next) =>
         const dishes = [
             {
                 id: null,
-                name: "Classic Kebab",
-                created: currentDate.toISOString(),
-                price: 1500,
+                name: "Borjú Kebab Wrap",
+                created: "2025-01-29T00:00:00.000Z",
+                price: 2290,
                 available: true,
-                customizationOptions: [{name:"extra csípős",price:200},{name:"extra sajt",price:300},{name:"extra szósz",price:200},{name:"extra hús",price:400},{name:"csípős nélkül",price:0},{name:"hagyma nélkül",price:0},{name:"uborka nélkül",price:0},{name:"paradicsom nélkül",price:0},{name:"saláta nélkül",price:0},{name:"szósz nélkül",price:0}],
-                description: "Classic török kebab, finom borjú hússal!",
-                type: "Kebab",
+                customizationOptions: [
+                    {name: "paradicsom ki", price: 0},
+                    {name: "paradicsom be", price: 0},
+                    {name: "csípős szósz", price: 0},
+                    {name: "kapros szósz", price: 0},
+                    {name: "fetás szósz", price: 0},
+                    {name: "fokhagymás szósz", price: 0},
+                    {name: "hagymamentes", price: 0}
+                ],
+                description: "Finom borjúhússal töltött, friss pita, ínycsiklandó szószokkal.",
+                type: "Kebab Wrap",
+                img: "H:\\FINALPROJECT\\Etterem_vizsgaremek\\Egyéb\\items\\borju_kebab_wrap.jpg"
             },
             {
                 id: null,
-                name: "Sajtos Kebab",
-                created: currentDate.toISOString(),
-                price: 1800,
+                name: "Csirke Kebab Wrap",
+                created: "2025-01-29T00:00:00.000Z",
+                price: 1990,
                 available: true,
-                customizationOptions: [{name:"extra csípős",price:200},{name:"extra sajt",price:300},{name:"extra szósz",price:200},{name:"extra hús",price:400},{name:"csípős nélkül",price:0},{name:"hagyma nélkül",price:0},{name:"uborka nélkül",price:0},{name:"paradicsom nélkül",price:0},{name:"saláta nélkül",price:0},{name:"szósz nélkül",price:0}],
-                description: "Classic török kebab, finom borjú hússal, plussz sajtal!",
-                type: "Kebab",
+                customizationOptions: [
+                    {name: "paradicsom ki", price: 0},
+                    {name: "paradicsom be", price: 0},
+                    {name: "csípős szósz", price: 0},
+                    {name: "kapros szósz", price: 0},
+                    {name: "fetás szósz", price: 0},
+                    {name: "fokhagymás szósz", price: 0},
+                    {name: "hagymamentes", price: 0}
+                ],
+                description: "Friss csirkehússal töltött pita, választható szószokkal és friss hozzávalókkal.",
+                type: "Kebab Wrap",
+                img: "H:\\FINALPROJECT\\Etterem_vizsgaremek\\Egyéb\\items\\csirke_kebab_wrap.jpg"
             },
             {
                 id: null,
