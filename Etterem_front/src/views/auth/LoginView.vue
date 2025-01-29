@@ -72,7 +72,7 @@ const handleLogin = (LoginDataRef: LoginData) => {
                     </v-btn>
                 </div>
                 <div style="text-align: center;">
-                    <v-btn @click="push({name:'PasswordResetEmail'})" variant="plain" style="font-size: xx-small; font-weight: bolder; width: 100%;">
+                    <v-btn @click="push({name:'password-reset-email'})" variant="plain" style="font-size: xx-small; font-weight: bolder; width: 100%;">
                         Elfelejtett jelszó
                     </v-btn>
                 </div>

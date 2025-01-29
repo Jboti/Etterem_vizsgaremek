@@ -200,12 +200,13 @@ exports.loginUser = async (req,res,next) =>
         }
 
         const user = await userService.getUserByEmail(email)
-        if(!user)
-        {
+        if(!user){
             res.status(404).json({errmessage:"Az email címmel nincs regisztálva felhasználó!"})
         }
-        else if(await bcrypt.compare(password, user.password))
-        {
+        else if(user.isActive == false){
+            res.status(404).json({errmessage:"A felhasználó nincs aktiválva, ha még nem aktiválta email címét tegye meg az azon kapott üzeneten keresztül! Más hiba esetén vegye fel velünk a kapcsolatot a: donercegled@gmail.com címen!"})
+        }
+        else if(await bcrypt.compare(password, user.password)){
             const token = jwt.sign({ id:user.id }, process.env.JWT_KEY, { expiresIn: "1h" })
             res.status(200).json({token:token})
         }

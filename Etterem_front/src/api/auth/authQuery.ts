@@ -38,7 +38,6 @@ const Login = async (data: LoginData) : Promise<LoginResponse> => {
 }
 
 export const useLogin = () => {
-    const {push} = useRouter()
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn:Login,
