@@ -12,7 +12,7 @@ const notify = () => {
 
 const handleAddToCart = () => {
   if(isError.value)
-    toast.error("A rendeléshez kérlek jelentkezz be!")
+    toast.error("Ahoz hogy a terméket a kosárba rakd be kell jelentkezned!")
   else
     toast.success("A termék a kosárba került!")
 }

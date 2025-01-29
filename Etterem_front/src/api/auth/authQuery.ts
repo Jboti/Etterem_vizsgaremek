@@ -45,7 +45,6 @@ export const useLogin = () => {
         onSuccess(data){
             document.cookie = `token=${data.token}; path=/; SameSite=Strict;`
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.user] })
-            push({name:'Főoldal'})
         },
     })
 }
