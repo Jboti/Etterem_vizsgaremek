@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'
+import { VueQueryDevtools } from '@tanstack/vue-query-devtools'
 
 const links = [
   { name: 'Főoldal', icon: 'mdi-home'},
@@ -14,10 +15,11 @@ const { push } = useRouter();
 <template>
   <v-app>
     <v-main class="fill-height background-image" style="--v-layout-bottom: 0px;">
+      <VueQueryDevtools />
       <RouterView />
     </v-main>
     <v-navigation-drawer style="transform: translateY(0%)" location="bottom" app>
-      <v-footer class="pt-1" style="background: linear-gradient(90deg, black, #B71C1C, black);">
+      <v-footer class="pt-1" style="background: linear-gradient(to right, black, #B71C1C, black);">
         <v-row justify="center" no-gutters cols="12">
           <v-col
             v-for="link in links"

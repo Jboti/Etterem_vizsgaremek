@@ -25,6 +25,11 @@ const notify = () => {
 }
 
 
+const validateUsername = (userName: string): boolean => {
+    const userNameRegex = /^[A-Za-z][A-Za-z0-9_]{5,18}$/ //min 6 hosszú, max 18 hosszú, ne kezdődjön számmal
+    return userNameRegex.test(userName)
+}
+
 const validateEmail = (email: string): boolean => {
     const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g
     return emailRegex.test(email)
@@ -34,12 +39,14 @@ const validatePassword = (password: string): boolean => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/ //min 8 hosszú, min 1 kis betű, min 1 nagy betű, min 1 szám
     return passwordRegex.test(password)
 }
-
+    
 const handleRegister = (registrationDataRef: RegistrationData) => {
     if (registrationDataRef.email == '' || registrationDataRef.fullName == '' || registrationDataRef.password == '' || registrationDataRef.userName == '' || registrationDataRef.passwordRe == '') {
         toast.error("Hiányzó adatok, kérlek töltsd ki az összes mezőt mielőtt tovább haladsz!")
     } else if (registrationDataRef.password != registrationDataRef.passwordRe) {
         toast.error("A két jelszó eltérő!")
+    }else if (!validateUsername(registrationDataRef.userName)){
+        toast.error("A felhasználónév hossza 6-18 között kell hogy legyen, illetve csak betűvel kezdődhet és nem tartalamzhat speciális karaktereket!")
     } else if (!validateEmail(registrationDataRef.email)){
         toast.error("Nem megfelelő formátumú email!")
     } else if (!validatePassword(registrationDataRef.password)){
