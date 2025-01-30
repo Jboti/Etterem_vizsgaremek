@@ -29,6 +29,7 @@ namespace EtteremSideApp
         public static int previousOrdersCount = 0;
         public static int fontSize = 12;
         public static Color backGroundColor = Color.Black;
+        public static bool adminLoggedIn = false;
         
 
 
@@ -180,6 +181,7 @@ namespace EtteremSideApp
             this.WindowState = FormWindowState.Maximized;
             this.Font = new Font("Arial", fontSize);
             this.BackColor = backGroundColor;
+            ShowAdminButtons();
         }
 
         private void InitializeClock()
@@ -384,8 +386,8 @@ namespace EtteremSideApp
 
         private void PaintPanel(Graphics g, Panel panel)
         {
-            Color topLeftBorderColor = Color.Gray;
-            Color rightBottomBorderColor = Color.Gray;
+            Color topLeftBorderColor = Color.Black;
+            Color rightBottomBorderColor = Color.Black;
             int topLeftBorderThickness = 3;
             int rightBottomBorderThickness = 3;
 
@@ -609,6 +611,115 @@ namespace EtteremSideApp
 
         private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
+        }
+
+        private void toolStripLabel3_Click(object sender, EventArgs e)
+        {
+            Form loginForm = new Form();
+            loginForm.Text = "Admin Login";
+            loginForm.Size = new Size(400, 200);
+            loginForm.StartPosition = FormStartPosition.CenterScreen;
+            loginForm.BackColor = Color.Black;
+
+            Label emailLabel = new Label() { Text = "Email:", Left = 20, Top = 20, Width = 80 };
+            TextBox emailTextBox = new TextBox() { Left = 100, Top = 20, Width = 150 };
+
+            Label passwordLabel = new Label() { Text = "Password:", Left = 20, Top = 60, Width = 80 };
+            TextBox passwordTextBox = new TextBox() { Left = 100, Top = 60, Width = 150, PasswordChar = '*' };
+
+            Button showPasswordButton = new Button() { Text = "Show", Left = 260, Top = 60, Width = 50 };
+            showPasswordButton.MouseDown += (s, ev) => { passwordTextBox.PasswordChar = '\0'; }; //üres
+            showPasswordButton.MouseUp += (s, ev) => { passwordTextBox.PasswordChar = '*'; };
+            showPasswordButton.BackColor = Color.White;
+
+            Button okButton = new Button() { Text = "OK", Left = 100, Top = 100, Width = 80 };
+            okButton.Click += (s, ev) =>
+            {
+                string email = emailTextBox.Text;
+                string password = passwordTextBox.Text;
+                if (email != "" && password != "")
+                {
+                    string check = getLogin(email, password);
+                    if (check == "")
+                    {
+                        MessageBox.Show("Hibás jelszó/e-mail cím vagy nincs jogosultsága itt bejelentkezni!");
+                    }
+                    else
+                    {
+                        //sikeres bejelentkezés |
+                        //                      V
+                        adminLoggedIn = true;
+                        ShowAdminButtons();
+
+
+                        loginForm.Close();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Ne hagyjon üres mezőket!");
+                }
+            };
+            okButton.BackColor = Color.White;
+
+            loginForm.Controls.Add(emailLabel);
+            loginForm.Controls.Add(emailTextBox);
+            loginForm.Controls.Add(passwordLabel);
+            loginForm.Controls.Add(passwordTextBox);
+            loginForm.Controls.Add(showPasswordButton);
+            loginForm.Controls.Add(okButton);
+
+            loginForm.ShowDialog();
+        }
+
+        private void ShowAdminButtons()
+        {
+            if (adminLoggedIn)
+            {
+                toolStripSeparator4.Visible = true;
+                toolStripSeparator5.Visible = true;
+                toolStripSeparator6.Visible = true;
+
+                toolStripLabel6.Visible = true;
+                toolStripLabel7.Visible = true;
+                toolStripLabel8.Visible = true;
+            }
+            else
+            {
+                toolStripSeparator4.Visible = false;
+                toolStripSeparator5.Visible = false;
+                toolStripSeparator6.Visible = false;
+
+                toolStripLabel6.Visible = false;
+                toolStripLabel7.Visible = false;
+                toolStripLabel8.Visible = false;
+            }
+        }
+
+        private string getLogin(string givenEmail, string givenPw)
+        {
+            string username = "";
+
+            //MessageBox.Show(givenEmail, givenPw);
+
+            return username;
+        }
+
+        private void toolStripLabel6_Click(object sender, EventArgs e)
+        {
+            //Kijelentkezés
+
+            adminLoggedIn = false;
+        }
+
+        private void toolStripLabel7_Click(object sender, EventArgs e)
+        {
+            //Felhasználók kezelése
+        }
+
+        private void toolStripLabel8_Click(object sender, EventArgs e)
+        {
+            //Új termék
         }
     }
 
