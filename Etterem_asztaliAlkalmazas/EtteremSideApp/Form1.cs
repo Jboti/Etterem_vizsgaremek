@@ -534,7 +534,7 @@ namespace EtteremSideApp
                     })
                     .Select(group =>
                     {
-                        string mods = group.Key.ModificationsKey == null
+                        string mods = string.IsNullOrEmpty(group.Key.ModificationsKey)
                             ? ""
                             : $"Módosítások: {group.Key.ModificationsKey}";
 
