@@ -16,7 +16,7 @@ const { mutate, isPending} = usePasswordResetEmail()
 
 
 const notify = () => {
-    toast.success("Sikeres bejelentkezés!")
+    toast.success("Email Sikeresen elküldve!")
 }
 
 
@@ -26,7 +26,7 @@ const handlePwResetEmailSent = (ResetPasswordDataRef: ResetPasswordData) => {
     }else{
         mutate(ResetPasswordDataRef,{
             onSuccess(){
-                push({name:'password-reset'})
+                push({name:'email-sent-pw-change'})
                 setTimeout(() => {
                         toast.success("Email sikeresen elküldve!")
                 }, 100)
@@ -50,7 +50,7 @@ const handlePwResetEmailSent = (ResetPasswordDataRef: ResetPasswordData) => {
                 width: 100%;
                 border-radius: 10px;
                 top: -10%;" outlined>
-            <v-card-title style="text-align: center;" class="pb-6 pt-4"><h2 style="text-shadow: 2px 2px 2px black; color: whitesmoke; font-size: clamp(20px, 6vw, 50px);"><b>Add meg az Emailed</b></h2></v-card-title>
+            <v-card-title style="text-align: center;" class="pb-6 pt-4"><h2 style="text-shadow: 2px 2px 2px black; color: whitesmoke; font-size: clamp(20px, 6vw, 50px);"><b>Add meg az email címed!</b></h2></v-card-title>
             <v-card-text>
                 <v-text-field v-model="ResetPasswordDataRef.email" label="Email" variant="outlined" class="mr-10 ml-10"></v-text-field>
             </v-card-text>

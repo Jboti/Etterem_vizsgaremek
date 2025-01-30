@@ -70,16 +70,16 @@ export const useLogout = () => {
 
 
 const PasswordReset = async (token: string, data: SetPasswordData) => {
-    const response = await axiosClient.post(`http://localhost:3000/api/v1/password-reset/${token}`, data)
+    const response = await axiosClient.post(`http://localhost:3000/api/v1/password-reset/${token}`, data) // erre endpointra (passwprd-reset) userroute, meg controllerbe megírni, hogy ha valid a token akkor módosítsa a jelszót
     console.log(response.data.token)
     return response.data
 }
-//----------------------------------------/\
+
 export const usePasswordReset = () => {
     const {push} = useRouter()
     return useMutation({
-        mutationFn:PasswordReset,
-        onSuccess(data){
+        mutationFn:({token,data} : {token:string, data: SetPasswordData }) => PasswordReset(token,data),
+        onSuccess(){
             push({name:'login'})
         },
     })
@@ -88,16 +88,11 @@ export const usePasswordReset = () => {
 
 const PasswordResetEmail = async (data: ResetPasswordData) => {
     const response = await axiosClient.patch('http://localhost:3000/api/v1/password-reset-email', data)
-    console.log(response.data.token)
     return response.data
 }
 
 export const usePasswordResetEmail = () => {
     return useMutation({
         mutationFn:PasswordResetEmail,
-        onSuccess(data){
-            document.cookie = `token=${data.token}; path=/; SameSite=Strict;`
-            console.log(document.cookie)
-        },
     })
 }
