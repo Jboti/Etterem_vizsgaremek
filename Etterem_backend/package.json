@@ -123,7 +123,7 @@
     "wkx": "^0.5.0"
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage",
     "start": "nodemon server.js"
   },
   "keywords": [],
