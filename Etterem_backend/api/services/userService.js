@@ -41,6 +41,11 @@ class UserService
     {
         return await userRepository.getUserByEmail(email)
     }
+
+    async changePassword(password,id)
+    {
+        return await userRepository.changePassword(password,id)
+    }
 }
 
 module.exports = new UserService()

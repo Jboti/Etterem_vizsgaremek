@@ -19,7 +19,10 @@ router.post("/login", userController.loginUser)
 router.delete("/delete-user/:id",userController.deleteUser)
 // aktiválja a usert az email megerősítés után
 router.patch("/verify-user",userController.verifyEmail)
-
+// emailt küld, hogy jelszót lehessen változtatni
+router.patch("/password-reset-email",userController.sendEmail)
+// user jelszó változtatása
+router.post("/password-reset",userAuth.authenticateToken ,userController.sendEmail)
 
 
 module.exports = router

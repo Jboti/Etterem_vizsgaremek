@@ -1,15 +1,25 @@
 <script lang="ts" setup>
-import type {  SetPasswordData } from '@/api/auth/auth';
+import type {  emailVerifyData, SetPasswordData } from '@/api/auth/auth';
 import { usePasswordReset } from '@/api/auth/authQuery';
 import { ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 const PasswordResetDataRef = ref<SetPasswordData>({
     password: '',
     password_confirmation: ''
 })
 
+const {query} = useRoute()
+const token = query.token as string
+
+const emailverifyDataRef = ref<emailVerifyData>({
+    token:'',
+})
+emailverifyDataRef.value.token = token
+
 const errorMessage = ref<string | null>(null)
 const { mutate, isPending} = usePasswordReset()
+
 const handlePasswordReset = (PasswordResetDataRef : SetPasswordData) => {
     errorMessage.value = null
     if( PasswordResetDataRef.password == '' || PasswordResetDataRef.password_confirmation == ''){

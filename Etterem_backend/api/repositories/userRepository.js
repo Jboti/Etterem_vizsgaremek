@@ -91,6 +91,22 @@ class userRepository
             })
     }
 
+    async changePassword(password,id)
+    {
+        return await this.User.update(
+            {
+                password:password
+            },
+            {
+                where:{
+                    id:id
+                }
+            }
+        )
+    }
+
 }
+
+
 
 module.exports = new userRepository(db)

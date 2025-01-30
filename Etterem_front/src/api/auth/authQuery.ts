@@ -68,19 +68,17 @@ export const useLogin = () => {
 // }
 
 
-const PasswordReset = async (data: SetPasswordData) => {
-    const response = await axiosClient.patch('http://localhost:3000/api/v1/password-reset', data)
+const PasswordReset = async (token: string, data: SetPasswordData) => {
+    const response = await axiosClient.post(`http://localhost:3000/api/v1/password-reset/${token}`, data)
     console.log(response.data.token)
     return response.data
 }
-
+//----------------------------------------/\
 export const usePasswordReset = () => {
     const {push} = useRouter()
     return useMutation({
         mutationFn:PasswordReset,
         onSuccess(data){
-            document.cookie = `token=${data.token}; path=/; SameSite=Strict;`
-            console.log(document.cookie)
             push({name:'login'})
         },
     })

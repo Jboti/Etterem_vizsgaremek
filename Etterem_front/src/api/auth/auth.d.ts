@@ -26,7 +26,7 @@ export type SetPasswordResponse = {
 
 export type SetPasswordData = {
     password: string,
-    password_confirmation: string,
+    password_confirmation: string
 }
 
 export type ResetPasswordData = {
