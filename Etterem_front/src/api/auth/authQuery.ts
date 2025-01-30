@@ -38,14 +38,12 @@ const Login = async (data: LoginData) : Promise<LoginResponse> => {
 }
 
 export const useLogin = () => {
-    const {push} = useRouter()
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn:Login,
         onSuccess(data){
             document.cookie = `token=${data.token}; path=/; SameSite=Strict;`
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.user] })
-            push({name:'Főoldal'})
         },
     })
 }
