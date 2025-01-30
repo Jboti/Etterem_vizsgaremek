@@ -18,7 +18,7 @@ const {mutate, isPending} = useEmailVertification()
 </script>
 
 <template>
-    <v-app>
+    <v-app style="background-color: transparent;">
     <v-container class="d-flex justify-center align-center" style="min-height: 90%;">
       <v-card max-width="500" class="pt-8 pb-8 pl-6 pr-6 bg-red-darken-4" style=" box-shadow: 0 0 5px 0.5px black inset, 0 0 5px 2px black;" outlined>
         <v-card-text class="text-center">

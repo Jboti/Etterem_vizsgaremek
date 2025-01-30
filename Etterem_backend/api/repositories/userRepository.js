@@ -71,10 +71,12 @@ class userRepository
         )
     }
     
-    async checkForExistingUser(userName,email)
+    async checkForExistinguserName(userName)
     {
         return await this.User.findOne({
-            [Op.or]: [{ userName: userName }, { email: email }]
+            where:{
+                userName: userName
+            }
         })
     }
 

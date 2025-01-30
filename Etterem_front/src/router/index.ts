@@ -7,6 +7,8 @@ import LoginView from '@/views/auth/LoginView.vue'
 import RegistrationView from '@/views/auth/RegistrationView.vue'
 import EmailSentView from '@/views/auth/EmailSentView.vue'
 import EmailVerifyView from '@/views/auth/EmailVerifyView.vue'
+import PasswordResetView from '@/views/auth/PasswordResetView.vue'
+import PasswordResetEmailView from '@/views/auth/PasswordResetEmailView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,7 +25,7 @@ const router = createRouter({
     },
     {
       path: '/menu',
-      name: 'Menü',
+      name: 'Étlap',
       component: MenuView,
     },
     {
@@ -50,6 +52,16 @@ const router = createRouter({
       path: '/email-sent',
       name: 'email-sent',
       component: EmailSentView,
+    },
+    {
+      path: '/password-reset-email',
+      name: 'password-reset-email',
+      component: PasswordResetEmailView,
+    },
+    {
+      path: '/password-reset',
+      name: 'password-reset',
+      component: PasswordResetView,
     },
   ],
 })
