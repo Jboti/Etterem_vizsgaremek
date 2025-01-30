@@ -13,10 +13,6 @@ const PasswordResetDataRef = ref<SetPasswordData>({
 const {query} = useRoute()
 const token = query.token as string
 
-const emailverifyDataRef = ref<emailVerifyData>({
-    token:'',
-})
-emailverifyDataRef.value.token = token
 
 
 const notify = () => {
@@ -31,7 +27,7 @@ const handlePasswordReset = (PasswordResetDataRef : SetPasswordData) => {
     }else if(PasswordResetDataRef.password != PasswordResetDataRef.password_confirmation){
         toast.error("A két jelszó eltérő!")
     }else{
-        mutate(PasswordResetDataRef,{
+        mutate({token:token, data: PasswordResetDataRef},{
         onError(error: any){
             toast.error(error.response?.data?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!")
             }
