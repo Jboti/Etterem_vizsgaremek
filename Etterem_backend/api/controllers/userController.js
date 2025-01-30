@@ -217,6 +217,16 @@ exports.loginUser = async (req,res,next) =>
     }
 }
 
+exports.logoutUser = async (req,res,next) =>
+{
+    try
+    {
+        res.status(200).send("User logged out successfully!")
+    } catch (error) {
+        next(error)
+    }
+}
+
 exports.deleteUser = async (req,res,next) =>
 {
     try

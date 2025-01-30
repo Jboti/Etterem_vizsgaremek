@@ -49,23 +49,24 @@ export const useLogin = () => {
 }
 
 
-// const Logout = async (data: LoginData) => {
-//     const response = await axiosClient.post('http://localhost:3000/api/v1/login', data)
-//     return response.data
-// }
+const Logout = async () => {
+    const response = await axiosClient.post('http://localhost:3000/api/v1/logout', {})
+    return response.data
+}
 
-// export const useLogout = () => {
-//     const {push} = useRouter()
-//     const queryClient = useQueryClient()
-//     return useMutation({
-//         mutationFn:Logout,
-//         onSuccess(){
-//             document.cookie = "token=; path=/;";
-//             queryClient.removeQueries({ queryKey: [QUERY_KEYS.user] });
-//             push({name:'Főoldal'})
-//         },
-//     })
-// }
+export const useLogout = () => {
+    const queryClient = useQueryClient()
+    const {push} = useRouter()
+    return useMutation({
+        mutationFn:Logout,
+        onSuccess(){
+            document.cookie = "token=; path=/;"
+            queryClient.removeQueries({ queryKey: [QUERY_KEYS.user] })
+            push({name:'Főoldal'})
+            window.location.reload()
+        },
+    })
+}
 
 
 const PasswordReset = async (token: string, data: SetPasswordData) => {

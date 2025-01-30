@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useLogout } from '@/api/auth/authQuery';
 import { useGetUserInfo } from '@/api/user/userQuery';
 import { useRouter } from 'vue-router';
 
@@ -7,8 +8,12 @@ const links = [
   { name: 'Regisztráció', icon: 'mdi-account-plus' },
 ]
 const { push } = useRouter()
-
 const { data, isError } = useGetUserInfo()
+const { mutate, isPending} = useLogout()
+
+const handleLogout = () => {
+  mutate()
+}
 
 </script>
 <template>
@@ -25,12 +30,12 @@ const { data, isError } = useGetUserInfo()
           </v-btn>
       </v-card>
       <v-card v-else class="mr-8 ml-3 logo-buttons-placement">
-        <v-card-title style="text-align: center;" class="pb-6 pt-4"><h2 style="font-size: clamp(16px, 4vw, 50px);"><b>{{ data?.userName }}</b></h2></v-card-title>
+        <v-card-title class="pb-6 pt-4"><h2 style="font-size: clamp(16px, 4vw, 50px);"><b>{{ data?.userName }}</b></h2></v-card-title>
         <v-btn
                 class="mx-1 mt-2 mb-2 pl-5 pr-5 auth-buttons"
                 color="white"
                 variant="text"
-                @click="push({name:'Főoldal'})">
+                @click="handleLogout()" :loading="isPending">
                 <v-icon class="mx-1" style="line-height: 0;">mdi-logout</v-icon>
                 <span class="ml-1" style="line-height: 1.5; font-weight: bold;">Kijelentkezés</span>
           </v-btn>
@@ -40,7 +45,7 @@ const { data, isError } = useGetUserInfo()
 <style scoped>
 
 .main-page-tp{
-  background-color: rgba(255, 255, 255, .85);
+  background-color: rgba(255, 255, 255, .75);
   box-shadow: 0 0 20px 5px #B71C1C;
   max-height: 250px;
   min-height: 150px; 
@@ -87,7 +92,13 @@ const { data, isError } = useGetUserInfo()
 }
 
 .auth-buttons:hover{
+  transform: scale(1.1);
   background-position: right;
 }
 
+.v-card-title {
+  background: linear-gradient(280deg, black 0%,#B71C1C 30%,#B71C1C 70%, black 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 </style>
