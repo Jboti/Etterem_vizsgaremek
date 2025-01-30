@@ -182,10 +182,10 @@ describe("Frontend tesztek:",()=>{
 })
 
 const bcrypt = require('bcrypt');
-const mockUsers = require('../__mocks__/userMock');
+const mockUsers = require('../../__mocks__/userMockock');
 
-describe('Mock User Data', () => {
-    test('Mock user should have correct structure', async () => {
+describe('Mock User információk', () => {
+    test('Mock User helyes struktúra', async () => {
         const users = await mockUsers();
         const user = users[0]; // Csak egy felhasználó van a mockban
 
