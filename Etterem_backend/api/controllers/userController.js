@@ -249,7 +249,20 @@ exports.deleteUser = async (req,res,next) =>
 
 exports.changePassword = async (req, res, next) => {
     try {
-        let { id, password } = req.body
+        let { password,token } = req.body
+        if (!token) {
+            const error = new Error("No token provided!")
+            error.status = 403
+            throw error 
+        }
+        let id = null
+        
+        jwt.verify(token, process.env.JWT_KEY,(err,decoded) =>{
+            if(err){
+                res.status(500).json({ errmessage:"Érvénytelen vagy lejárt munkamenet!"})
+            }
+            id = decoded.id
+        })
         id = Number(id)
         if (!id || isNaN(id)) {
             const error = new Error("User id not found or id is not a number!")
@@ -268,7 +281,7 @@ exports.changePassword = async (req, res, next) => {
             error.status = 404
             throw error
         }
-        res.status(200).send("Password changed successfully!")
+        res.status(200).send("Jelszó megváltoztatva!")
     } catch (error) {
         next(error)
         }
