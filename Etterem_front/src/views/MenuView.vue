@@ -40,12 +40,8 @@ const handleAddToCart = () => {
         :key="index" 
         cols="12" sm="6" md="4" xl="3"
       >
-        <v-card class="mx-auto mb-6" max-width="344" style="background-image: url(background.jpg); background-size: cover; background-position: center; background-repeat: no-repeat; border: solid 2px whitesmoke; border-radius: 3px; border-top-left-radius: 10px; border-top-right-radius: 10px; box-shadow: 0 0 2px 1px whitesmoke inset, 0 0 5px 2px whitesmoke;">
-          <v-img 
-            
-            height="275px"
-          ></v-img>
-
+        <v-card class="mx-auto mb-6 dish-card" max-width="344" style="background-image: url(background.jpg);">
+          <v-img height="275px"></v-img>
           <v-card-text class="pt-2" style="border-top: solid whitesmoke 3px; border-top-left-radius: 40px; border-top-right-radius: 40px; background-color: whitesmoke; box-shadow: 0 0 3px 1px whitesmoke; ">
             <div class="mt-4" style=" display: flex;
                         flex-direction: row;
@@ -72,3 +68,24 @@ const handleAddToCart = () => {
     </v-row>
   </v-container>
 </template>
+
+<style scoped>
+
+.dish-card{
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: solid 2px whitesmoke;
+  border-radius: 3px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  box-shadow: 0 0 2px 1px whitesmoke inset, 0 0 5px 2px whitesmoke;
+  animation: 1s ease-in-out sizeUp;
+}
+
+
+@keyframes sizeUp {
+  0%   { transform:scale(0); }
+  100% { transform:scale(1); }
+}
+</style>

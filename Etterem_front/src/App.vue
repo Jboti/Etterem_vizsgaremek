@@ -14,8 +14,8 @@ const { push } = useRouter();
 
 <template>
   <v-app>
-    <v-main class="fill-height background-image">
-      <VueQueryDevtools />
+    <v-main class="fill-height background-image" style=" --v-layout-bottom: 0px;">
+      <!-- <VueQueryDevtools /> -->
       <RouterView />
     </v-main>
     <v-navigation-drawer style="transform: translateY(0%)" location="bottom" app>
@@ -44,12 +44,12 @@ const { push } = useRouter();
 
 <style scoped>
 .background-image {
-  --v-layout-bottom: 0px;
+ 
   background-image: url(background.jpg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  height: 100vh;
+  height: 100% !important;
 }
 
 .buttons{

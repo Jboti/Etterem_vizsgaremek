@@ -47,8 +47,8 @@ const handleLogout = () => {
 .main-page-tp{
   background-color: rgba(255, 255, 255, .75);
   box-shadow: 0 0 20px 5px #B71C1C;
-  max-height: 250px;
-  min-height: 150px; 
+  max-height: 150px;
+  min-height: 100px; 
   max-width: 1750px;
   border-bottom-left-radius: 20px; 
   border-bottom-right-radius: 20px; 
@@ -57,6 +57,7 @@ const handleLogout = () => {
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
+  animation: 1s ease-out 0s 1 fade;
 }
 
 .logo-buttons-placement{
@@ -70,20 +71,24 @@ const handleLogout = () => {
   flex-direction: column;
   align-content: stretch;
   flex-wrap: nowrap;
+  animation: 1.5s ease-in slideInFromRight;
 }
 
 .logo{
-  min-height:150px;
-  max-height: 250px;
+  min-height:100px;
+  max-height: 150px;
   width: 25%;
   filter: drop-shadow(0 0 20px brown);
+  animation: 1s ease-out 0s 1 slideInFromLeft;
 }
+
 
 .auth-buttons{
   background-image: linear-gradient(to right, #B71C1C 10%,  black 100%);
   background-size: 200% auto;
   transition: all .3s ease-in-out;
   padding:2%;
+  transform: scale(90%);
   font-size: clamp(10px, 3vw, 20px);
   box-shadow: 0 0 5px 2px black inset, 0 0 5px .5px black;
   display: flex !important;
@@ -101,4 +106,28 @@ const handleLogout = () => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+@keyframes fade {
+  0%   { opacity:0; }
+  50%  { opacity:.5; }
+  100% { opacity:1; }
+}
+
 </style>
