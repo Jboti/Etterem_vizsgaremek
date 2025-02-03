@@ -17,7 +17,7 @@ const handleLogout = () => {
 
 </script>
 <template>
-  <v-container fluid class="main-page-tp">
+  <v-container fluid class="main-page-tp mb-4">
       <v-img src="../../donerlogoNobg.png" class="ml-6 mr-3 logo"></v-img>
       <v-card v-if="isError" class="mr-8 ml-3 logo-buttons-placement">
         <v-btn v-for="link in links" :key="link.name"
@@ -30,9 +30,9 @@ const handleLogout = () => {
           </v-btn>
       </v-card>
       <v-card v-else class="mr-8 ml-3 logo-buttons-placement">
-        <v-card-title class="pb-6 pt-4"><h2 style="font-size: clamp(16px, 4vw, 50px);"><b>{{ data?.userName }}</b></h2></v-card-title>
+        <v-card-title><h2 style="font-size: clamp(16px, 4vw, 50px);"><b>{{ data?.userName }}</b></h2></v-card-title>
         <v-btn
-                class="mx-1 mt-2 mb-2 pl-5 pr-5 auth-buttons"
+                class="mx-1 mt-2 mb-4 pl-5 pr-5 auth-buttons"
                 color="white"
                 variant="text"
                 @click="handleLogout()" :loading="isPending">
@@ -40,7 +40,32 @@ const handleLogout = () => {
                 <span class="ml-1" style="line-height: 1.5; font-weight: bold;">Kijelentkezés</span>
           </v-btn>
       </v-card>
-  </v-container>
+    </v-container>
+    <div class="infoBoxok">
+      <v-card class="nyitvaTartas">
+        <p class="pl-4 pt-2"><b>Nyitvatartás:</b></p>
+        <v-card-text class="pt-2" style="align-items: center; padding: 0;">
+          <p style="font-size: clamp(10px, 4dvw, 30px);"><b>H-P:</b> 8:00 - 23:00</p>
+          <p style="font-size: clamp(10px, 4dvw, 30px);"><b>Sz:</b> 10:00 - 21:00</p>
+          <p style="font-size: clamp(10px, 4dvw, 30px);"><b>V:</b> 11:00 - 20:00</p>
+        </v-card-text>
+      </v-card>
+      <v-card class="info">
+        <v-card  class="infoCard">
+          <v-card-text style="text-align: left;">
+            <p style="font-size: clamp(8px, 3.25dvw, 30px);"><b>Email:</b> donercegled@gmail.com</p>
+            <p style="font-size: clamp(8px, 3.25dvw, 30px);"><b>Tel szám.:</b> 06 xx xxx xxxx</p>
+            <p style="font-size: clamp(8px, 3.25dvw, 30px);"><b>Cím:</b> 2700 Cegléd, xy</p>
+          </v-card-text>
+        </v-card>
+        <div class="terkepInfo">
+          <p><b>Térkép:</b></p>
+          <v-card class="mb-2 terkep">
+            
+          </v-card>
+        </div>
+      </v-card>
+    </div>
 </template>
 <style scoped>
 
@@ -57,7 +82,7 @@ const handleLogout = () => {
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
-  animation: 1s ease-out 0s 1 fade;
+  animation: 1s ease-out fade;
 }
 
 .logo-buttons-placement{
@@ -103,8 +128,61 @@ const handleLogout = () => {
 
 .v-card-title {
   background: linear-gradient(280deg, black 0%,#B71C1C 30%,#B71C1C 70%, black 100%);
+  background-clip: 0;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.infoBoxok{
+  width: 100%;
+  max-width: 2000px;
+  display: flex; 
+  height: 20%;
+}
+
+.nyitvaTartas{
+  width: 30%;
+  margin: 2%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 10px .5px #B71C1C;
+}
+
+.info{
+  width: 70%;
+  margin: 2%;
+  height: 100%;
+  display: flex;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 10px .5px #B71C1C;
+}
+
+.infoCard {
+  width: 80dvw;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.v-card-text {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+.terkepInfo{
+  float: right;
+  width: 50dvw;
+  max-width: 500px;
+  min-width: 150px;
+  margin: 1%;
+}
+
+.terkep{
+  height: 80%;
+  box-shadow: 0 0 5px .5px black;
 }
 
 @keyframes slideInFromLeft {
@@ -126,8 +204,26 @@ const handleLogout = () => {
 }
 @keyframes fade {
   0%   { opacity:0; }
-  50%  { opacity:.5; }
   100% { opacity:1; }
 }
 
+@media screen and (max-width: 500px){
+  .infoBoxok{
+    flex-direction: column;
+    margin: auto;
+    width: 100%;
+    height: 40%;
+  }
+  .nyitvaTartas{
+    width: 95%;
+    height: 100%;
+  }
+  .info{
+    width: 95%;
+    height: 100%;
+  }
+  .terkepInfo{
+    width: 50%;
+  }
+}
 </style>

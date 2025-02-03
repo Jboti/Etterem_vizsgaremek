@@ -249,7 +249,7 @@ exports.deleteUser = async (req,res,next) =>
 
 exports.changePassword = async (req, res, next) => {
     try {
-        let { password,token } = req.body
+        const { password, token } = req.body
         if (!token) {
             const error = new Error("No token provided!")
             error.status = 403
@@ -284,7 +284,7 @@ exports.changePassword = async (req, res, next) => {
         res.status(200).send("Jelszó megváltoztatva!")
     } catch (error) {
         next(error)
-        }
+    }
 }
 
 exports.sendEmail = async(req,res,next) =>{

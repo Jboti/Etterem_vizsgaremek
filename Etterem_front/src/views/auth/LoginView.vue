@@ -57,7 +57,7 @@ const handleLogin = (LoginDataRef: LoginData) => {
             </v-card-text>
             <div class="buttons">
                 <div style="text-align: center;">
-                    <v-btn @click="handleLogin(LoginDataRef)" :loading="isPending" class="white pl-4 pr-4 mt-2 mb-6" style="font-weight: bolder; box-shadow: 0 0 5px 2px black; background-color: whitesmoke; color: black;">
+                    <v-btn @click="handleLogin(LoginDataRef)" :loading="isPending" class="white pl-4 pr-4 mt-2 mb-6 logButton" style="font-weight: bolder; box-shadow: 0 0 5px 2px black; background-color: whitesmoke; color: black;">
                         Bejelentkezés
                     </v-btn>
                 </div>
@@ -96,9 +96,18 @@ const handleLogin = (LoginDataRef: LoginData) => {
     animation: 1s ease-in slideInFromBottomAndFade;
 }
 
+.logButton{
+    box-shadow: 0 0 5px 2px black;
+    transition: transform 0.7s ease-in-out;
+}
+
+.logButton:hover{
+    box-shadow: 0 0 5px .5px black inset, 0 0 10px 5px black !important;
+    transform: scale(1.2);
+}
+
 @keyframes fade {
   0%   { opacity:0; }
-  50%  { opacity:.5; }
   100% { opacity:1; }
 }
 @keyframes slideInFromTop {
@@ -113,9 +122,6 @@ const handleLogin = (LoginDataRef: LoginData) => {
   0% {
     transform: translateY(100%);
     opacity: 0;
-  }
-  50%{
-    opacity: .5;
   }
   100% {
     transform: translateY(0);

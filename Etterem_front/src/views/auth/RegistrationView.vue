@@ -81,7 +81,7 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
                 </div>
                 <div style="width: 50%;">
                     <div class="field" style="text-align: center; margin-bottom: 1%;">
-                        <div class="Tooltip">
+                        <div tabindex="-1" class="Tooltip">
                             <v-icon class="TooltipIcon">mdi-help-circle-outline</v-icon>
                             <span class="TooltipText">Minimum 8 karakter hosszú,</br> Minimum 1 kis és nagy betű,</br> Minimum 1 szám</span>
                         </div>
@@ -111,9 +111,9 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
             </div>
         </v-card>
     </v-container>
-<div>
-    <button @click="notify"></button>
-</div>
+    <div>
+        <button @click="notify"></button>
+    </div>
 </template>
 
 <style scoped>
@@ -123,6 +123,7 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
     display: inline-block;
     width: 100%;
     color: white;
+    animation: 2s ease fade;
 }
 
 .TooltipIcon:hover{
@@ -157,11 +158,14 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
 }
 
 .card{
+
+    animation-fill-mode: forwards;
     box-shadow: 0 0 40px 8px black inset, 0 0 5px 2px black; 
     min-height: 62.5%;
     width: 100%;
     border-radius: 10px;
-    animation: 1.5s ease-out 0s 1 fade;   
+    animation: 1.5s ease-out 0s 1 fade;
+    will-change: opacity, transform;
 }
 
 .form{
@@ -176,7 +180,7 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
 .regButton{
     font-weight: bolder;
     box-shadow: 0 0 5px 2px black;
-    animation: all 1s ease-in;
+    transition: transform 0.7s ease-in-out;
 }
 
 .regButton:hover{
@@ -191,21 +195,20 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
 }
 @media screen and (max-width: 500px){
    .form{
-      flex-direction: column;
-   }
+        flex-direction: column;
+    }
    .field{
-    width: 100%;
-    margin: 0;
-   }
-   .card{
-    margin-bottom: 30% !important;
-    width: 80%;
-    margin: auto;
-   }
+        width: 100%;
+        margin: 0;
+    }
+    .card{
+        margin: auto;
+        margin-bottom: 30% !important;
+        width: 80%;
+    }
 }
 @keyframes fade {
-  0%   { opacity:0; }
-  50%  { opacity:.5; }
+  0%   { opacity:0.01; }
   100% { opacity:1; }
 }
 @keyframes slideInFromTop {
@@ -220,9 +223,6 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
   0% {
     transform: translateY(100%);
     opacity: 0;
-  }
-  50%{
-    opacity: .5;
   }
   100% {
     transform: translateY(0);
