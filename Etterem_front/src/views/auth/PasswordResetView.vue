@@ -27,7 +27,7 @@ const handlePasswordReset = (PasswordResetDataRef : SetPasswordData) => {
     }else if(PasswordResetDataRef.password != PasswordResetDataRef.password_confirmation){
         errorMessage.value = "A két jelsző eltérő!"
     }else{
-        mutate(PasswordResetDataRef,{
+        mutate({ token: token, data: PasswordResetDataRef },{
         onError(error: any){
             errorMessage.value = error.response?.data?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!"
             }
