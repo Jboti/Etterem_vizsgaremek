@@ -14,26 +14,21 @@ const { push } = useRouter();
 
 <template>
   <v-app>
-    <v-main class="fill-height background-image" style="--v-layout-bottom: 0px;">
-      <VueQueryDevtools />
+    <v-main class="fill-height background-image" style=" --v-layout-bottom: 0px; font-family: 'Times New Roman', Times, serif;">
+      <!-- <VueQueryDevtools /> -->
       <RouterView />
     </v-main>
     <v-navigation-drawer style="transform: translateY(0%)" location="bottom" app>
       <v-footer class="pt-1" style="background: linear-gradient(to right, black, #B71C1C, black);">
         <v-row justify="center" no-gutters cols="12">
-          <v-col
-            v-for="link in links"
-            :key="link.name"
+          <v-col v-for="link in links" :key="link.name"
             cols="6" sm="3" md="3"
-            class="d-flex flex-column align-center"
-          >
-          <v-btn
-            class="mx-3 d-flex align-center"
+            class="d-flex flex-column align-center buttons">
+          <v-btn class="mx-3 d-flex align-center"
             color="white"
             rounded="xl"
             variant="text"
-            @click="push({ name: link.name })"
-            style="display: flex !important; flex-wrap: nowrap; align-items: center;">
+            @click="push({ name: link.name })">
             <v-icon class="mx-1" style="line-height: 0;">{{ link.icon }}</v-icon>
             <span class="ml-1" style="line-height: 1.5; font-weight: bold;">{{ link.name }}</span>
           </v-btn>
@@ -49,10 +44,21 @@ const { push } = useRouter();
 
 <style scoped>
 .background-image {
+ 
   background-image: url(background.jpg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  height: 100vh;
+  height: 100% !important;
+}
+
+.buttons{
+  display: flex !important;
+  flex-wrap: nowrap;
+  align-items: center;
+  transition: all 0.5s ease-in-out;
+}
+.buttons:hover{
+  transform: scale(1.3);
 }
 </style>

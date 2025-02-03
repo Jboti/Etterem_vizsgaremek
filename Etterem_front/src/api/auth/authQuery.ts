@@ -49,36 +49,37 @@ export const useLogin = () => {
 }
 
 
-// const Logout = async (data: LoginData) => {
-//     const response = await axiosClient.post('http://localhost:3000/api/v1/login', data)
-//     return response.data
-// }
+const Logout = async () => {
+    const response = await axiosClient.post('http://localhost:3000/api/v1/logout', {})
+    return response.data
+}
 
-// export const useLogout = () => {
-//     const {push} = useRouter()
-//     const queryClient = useQueryClient()
-//     return useMutation({
-//         mutationFn:Logout,
-//         onSuccess(){
-//             document.cookie = "token=; path=/;";
-//             queryClient.removeQueries({ queryKey: [QUERY_KEYS.user] });
-//             push({name:'Főoldal'})
-//         },
-//     })
-// }
+export const useLogout = () => {
+    const queryClient = useQueryClient()
+    const {push} = useRouter()
+    return useMutation({
+        mutationFn:Logout,
+        onSuccess(){
+            document.cookie = "token=; path=/;"
+            queryClient.removeQueries({ queryKey: [QUERY_KEYS.user] })
+            push({name:'Főoldal'})
+            window.location.reload()
+        },
+    })
+}
 
 
 const PasswordReset = async (token: string, data: SetPasswordData) => {
-    const response = await axiosClient.post(`http://localhost:3000/api/v1/password-reset/${token}`, data)
+    const response = await axiosClient.post(`http://localhost:3000/api/v1/password-reset/${token}`, data) // erre endpointra (passwprd-reset) userroute, meg controllerbe megírni, hogy ha valid a token akkor módosítsa a jelszót
     console.log(response.data.token)
     return response.data
 }
-//----------------------------------------/\
+
 export const usePasswordReset = () => {
     const {push} = useRouter()
     return useMutation({
-        mutationFn:({token,data} : {token:string, data:SetPasswordData}) => PasswordReset(token,data),
-        onSuccess(data){
+        mutationFn:({token,data} : {token:string, data: SetPasswordData }) => PasswordReset(token,data),
+        onSuccess(){
             push({name:'login'})
         },
     })
@@ -87,16 +88,11 @@ export const usePasswordReset = () => {
 
 const PasswordResetEmail = async (data: ResetPasswordData) => {
     const response = await axiosClient.patch('http://localhost:3000/api/v1/password-reset-email', data)
-    console.log(response.data.token)
     return response.data
 }
 
 export const usePasswordResetEmail = () => {
     return useMutation({
         mutationFn:PasswordResetEmail,
-        onSuccess(data){
-            document.cookie = `token=${data.token}; path=/; SameSite=Strict;`
-            console.log(document.cookie)
-        },
     })
 }

@@ -9,6 +9,7 @@ import EmailSentView from '@/views/auth/EmailSentView.vue'
 import EmailVerifyView from '@/views/auth/EmailVerifyView.vue'
 import PasswordResetView from '@/views/auth/PasswordResetView.vue'
 import PasswordResetEmailView from '@/views/auth/PasswordResetEmailView.vue'
+import EmailSentPasswordChangeView from '@/views/auth/EmailSentPasswordChangeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -52,6 +53,11 @@ const router = createRouter({
       path: '/email-sent',
       name: 'email-sent',
       component: EmailSentView,
+    },
+    {
+      path: '/email-sent-pw-change',
+      name: 'email-sent-pw-change',
+      component: EmailSentPasswordChangeView,
     },
     {
       path: '/password-reset-email',

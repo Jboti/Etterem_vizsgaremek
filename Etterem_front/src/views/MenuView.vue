@@ -22,12 +22,22 @@ const handleAddToCart = () => {
 </script>
 
 <template>
-  <div class="pb-2 mb-4 text-center" style="background: linear-gradient(90deg, black 0%, #B71C1C 50%, black 100%);">
-    <h1 class="pb-2" style="font-weight: 700;">Étlap</h1>
-    <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl"><b>Menük</b></v-btn>
-    <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl"><b>Kebabok</b></v-btn>
-    <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl"><b>Köretek</b></v-btn>
-    <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1" rounded="xl"><b>Üdítők</b></v-btn>
+  <div class="pb-2 mb-4 text-center topMenu" style="background: linear-gradient(90deg, black 0%, #B71C1C 50%, black 100%); border-bottom: solid 1px white;">
+    <h1 class="pb-2 pt-2" style="font-weight: bold; color: whitesmoke;">Étlap</h1>
+    <v-row style="width: 100%; margin: auto;">
+      <v-col cols="6" sm="3">
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Menük</b></v-btn>
+      </v-col>
+      <v-col cols="6" sm="3">
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Kebabok</b></v-btn>  
+      </v-col>
+      <v-col cols="6" sm="3">
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Köretek</b></v-btn>  
+      </v-col>
+      <v-col cols="6" sm="3">
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Üdítők</b></v-btn>
+      </v-col>
+    </v-row>
   </div>
   <div>
     <button @click="notify"></button>
@@ -40,12 +50,8 @@ const handleAddToCart = () => {
         :key="index" 
         cols="12" sm="6" md="4" xl="3"
       >
-        <v-card class="mx-auto mb-6" max-width="344" style="background-image: url(background.jpg); background-size: cover; background-position: center; background-repeat: no-repeat; border: solid 2px whitesmoke; border-radius: 3px; border-top-left-radius: 10px; border-top-right-radius: 10px; box-shadow: 0 0 2px 1px whitesmoke inset, 0 0 5px 2px whitesmoke;">
-          <v-img 
-            
-            height="275px"
-          ></v-img>
-
+        <v-card class="mx-auto mb-6 dish-card" max-width="344" style="background-image: url(background.jpg);">
+          <v-img height="275px"></v-img>
           <v-card-text class="pt-2" style="border-top: solid whitesmoke 3px; border-top-left-radius: 40px; border-top-right-radius: 40px; background-color: whitesmoke; box-shadow: 0 0 3px 1px whitesmoke; ">
             <div class="mt-4" style=" display: flex;
                         flex-direction: row;
@@ -62,7 +68,7 @@ const handleAddToCart = () => {
                 <div><b>{{ dish.name }}</b></div>
                 <div>{{ dish.price }} Ft</div>
               </div>
-              <v-btn class="pl-4 pr-4 pt-2 pb-2" style="background-color: rgb(22, 139, 22); box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black; " @click="handleAddToCart()">
+              <v-btn class="pl-4 pr-4 pt-2 pb-2 cartButtons" @click="handleAddToCart()">
                 <b>Kosárba</b>
               </v-btn>
             </div>
@@ -72,3 +78,72 @@ const handleAddToCart = () => {
     </v-row>
   </v-container>
 </template>
+
+<style scoped>
+
+.dish-card{
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: solid 2px whitesmoke;
+  border-radius: 3px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  box-shadow: 0 0 2px 1px whitesmoke inset, 0 0 5px 2px whitesmoke;
+  animation: 1s ease-in-out sizeUp;
+  transition: transform .5s ease-in-out, box-shadow .7s ease-in-out;
+}
+
+.dish-card:has(.cartButtons:hover) {
+  transform: scale(1.05);
+  box-shadow: 0 0 2px 1px black inset, 0 0 5px 2px black;
+  border: black;
+}
+
+.cartButtons{
+  background-color: rgb(22, 139, 22);
+  box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black; 
+}
+.cartButtons:hover{
+  box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black;
+}
+
+
+
+.topMenu{
+  animation: 1s ease-in fade;
+}
+
+.buttons{
+  border-radius: 8px !important;
+  width: 75%;
+  box-shadow: 0 0 5px .5px whitesmoke;
+  transition: all .7s ease-in-out, box-shadow .7s ease-in-out;
+  animation: 1s ease-in slideInFromTop;
+}
+
+.buttons:hover{
+  transform: scale(1.2);
+  box-shadow: 0 0 2px .5px whitesmoke inset, 0 0 10px 2px whitesmoke;
+
+}
+
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes sizeUp {
+  0%   { transform:scale(0); }
+  100% { transform:scale(1); }
+}
+
+@keyframes fade {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+</style>

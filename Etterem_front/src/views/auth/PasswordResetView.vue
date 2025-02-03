@@ -3,6 +3,7 @@ import type {  emailVerifyData, SetPasswordData } from '@/api/auth/auth';
 import { usePasswordReset } from '@/api/auth/authQuery';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { toast } from 'vue3-toastify';
 
 const PasswordResetDataRef = ref<SetPasswordData>({
     password: '',
@@ -12,24 +13,23 @@ const PasswordResetDataRef = ref<SetPasswordData>({
 const {query} = useRoute()
 const token = query.token as string
 
-const emailverifyDataRef = ref<emailVerifyData>({
-    token:'',
-})
-emailverifyDataRef.value.token = token
 
-const errorMessage = ref<string | null>(null)
+
+const notify = () => {
+    toast.success("Email Sikeresen elküldve!")
+}
+
 const { mutate, isPending} = usePasswordReset()
 
 const handlePasswordReset = (PasswordResetDataRef : SetPasswordData) => {
-    errorMessage.value = null
     if( PasswordResetDataRef.password == '' || PasswordResetDataRef.password_confirmation == ''){
-        errorMessage.value = "Hiányzó adatok, kérlek töltsd ki az összes mezőt mielőtt tovább haladsz!"
+        toast.error("Hiányzó adatok, kérlek töltsd ki az összes mezőt mielőtt tovább haladsz!")
     }else if(PasswordResetDataRef.password != PasswordResetDataRef.password_confirmation){
-        errorMessage.value = "A két jelsző eltérő!"
+        toast.error("A két jelszó eltérő!")
     }else{
-        mutate({ token: token, data: PasswordResetDataRef },{
+        mutate({token:token, data: PasswordResetDataRef},{
         onError(error: any){
-            errorMessage.value = error.response?.data?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!"
+            toast.error(error.response?.data?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!")
             }
         })
     }
@@ -45,9 +45,8 @@ const handlePasswordReset = (PasswordResetDataRef : SetPasswordData) => {
         </v-card-text>
         <v-card-actions>
             <v-btn @click="handlePasswordReset(PasswordResetDataRef)" :loading="isPending ">
-                Új jelszó
+                Jelszó változtatás
             </v-btn>
         </v-card-actions>
     </v-card>
-    <p style="color: red;">{{ errorMessage }}</p>
 </template>

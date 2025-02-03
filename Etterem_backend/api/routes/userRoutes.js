@@ -15,6 +15,8 @@ router.get("/get-users", userController.getAllUser)
 router.post("/register", userController.createUser)
 // user login, body: email, jelszo
 router.post("/login", userController.loginUser)
+// user logout
+router.post("/logout", userController.logoutUser)
 // user törlés id alapján, param: id
 router.delete("/delete-user/:id",userController.deleteUser)
 // aktiválja a usert az email megerősítés után
