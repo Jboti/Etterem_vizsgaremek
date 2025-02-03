@@ -40,8 +40,8 @@
             this.toolStripLabel5 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel6 = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripLabel7 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripLabel7 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel8 = new System.Windows.Forms.ToolStripLabel();
             this.toolStrip1.SuspendLayout();
@@ -59,11 +59,11 @@
             this.toolStripLabel4,
             this.toolStripLabel5,
             this.toolStripSeparator4,
-            this.toolStripLabel6,
-            this.toolStripSeparator5,
             this.toolStripLabel7,
             this.toolStripSeparator6,
-            this.toolStripLabel8});
+            this.toolStripLabel8,
+            this.toolStripSeparator5,
+            this.toolStripLabel6});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(741, 25);
@@ -125,22 +125,24 @@
             // 
             // toolStripLabel6
             // 
+            this.toolStripLabel6.ForeColor = System.Drawing.Color.Red;
             this.toolStripLabel6.Name = "toolStripLabel6";
             this.toolStripLabel6.Size = new System.Drawing.Size(74, 22);
             this.toolStripLabel6.Text = "Kijelentkezés";
             this.toolStripLabel6.Click += new System.EventHandler(this.toolStripLabel6_Click);
             // 
-            // toolStripLabel7
-            // 
-            this.toolStripLabel7.Name = "toolStripLabel7";
-            this.toolStripLabel7.Size = new System.Drawing.Size(120, 22);
-            this.toolStripLabel7.Text = "Felhasználók kezelése";
-            this.toolStripLabel7.Click += new System.EventHandler(this.toolStripLabel7_Click);
-            // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
             this.toolStripSeparator5.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripLabel7
+            // 
+            this.toolStripLabel7.ForeColor = System.Drawing.Color.Blue;
+            this.toolStripLabel7.Name = "toolStripLabel7";
+            this.toolStripLabel7.Size = new System.Drawing.Size(120, 22);
+            this.toolStripLabel7.Text = "Felhasználók kezelése";
+            this.toolStripLabel7.Click += new System.EventHandler(this.toolStripLabel7_Click);
             // 
             // toolStripSeparator6
             // 
@@ -149,6 +151,7 @@
             // 
             // toolStripLabel8
             // 
+            this.toolStripLabel8.ForeColor = System.Drawing.Color.Blue;
             this.toolStripLabel8.Name = "toolStripLabel8";
             this.toolStripLabel8.Size = new System.Drawing.Size(58, 22);
             this.toolStripLabel8.Text = "Új termék";
