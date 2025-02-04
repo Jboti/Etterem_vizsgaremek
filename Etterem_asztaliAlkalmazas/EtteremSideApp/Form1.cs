@@ -1,16 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Linq;
 
 //csak C:-n lehet futtatni!!
 
@@ -30,7 +26,9 @@ namespace EtteremSideApp
         public static int fontSize = 12;
         public static Color backGroundColor = Color.Black;
         public static bool adminLoggedIn = false;
-        
+        public FlowLayoutPanel panel2 = new FlowLayoutPanel();
+        public FlowLayoutPanel panel3 = new FlowLayoutPanel();
+
 
 
         //------Global values------\\
@@ -331,7 +329,7 @@ namespace EtteremSideApp
             }
         }
 
-        private void DisplayOrders(List<Order> all_orders)
+        public void DisplayOrders(List<Order> all_orders)
         {
             if (must_Update)
             {
@@ -339,7 +337,10 @@ namespace EtteremSideApp
             }
 
             FlowLayoutPanel flowLayoutPanel = CreateFlowLayoutPanel();
+
             this.Controls.Add(flowLayoutPanel);
+
+            //a name a flowLayoutPanel
 
             foreach (var order in all_orders)
             {
@@ -349,7 +350,7 @@ namespace EtteremSideApp
             }
         }
 
-        private FlowLayoutPanel CreateFlowLayoutPanel()
+        public static FlowLayoutPanel CreateFlowLayoutPanel()
         {
             //ez az alap panel
             return new FlowLayoutPanel
@@ -673,6 +674,9 @@ namespace EtteremSideApp
             loginForm.ShowDialog();
         }
 
+        
+
+
         private void ShowAdminButtons()
         {
             if (adminLoggedIn)
@@ -699,33 +703,230 @@ namespace EtteremSideApp
 
         private string getLogin(string givenEmail, string givenPw)
         {
-            string username = "awd";
+            string username = "awdawd";
 
             //MessageBox.Show(givenEmail, givenPw);
 
             return username;
         }
 
+
+
+        //a name a flowLayoutPanel
+
         private void toolStripLabel6_Click(object sender, EventArgs e)
         {
             //Kijelentkezés
+            //minden panel hátra küld + hide
+
+
+
+            panel2.SendToBack();
+
 
             adminLoggedIn = false;
+            ShowAdminButtons();
         }
 
         private void toolStripLabel7_Click(object sender, EventArgs e)
         {
-            //Felhasználók kezelése
+
+
+            // Felhasználók kezelése
+                     
+            panel2.Visible = true;
+            panel2.Dock = DockStyle.Fill;
+            panel2.FlowDirection = FlowDirection.LeftToRight;
+            panel2.WrapContents = true;
+            panel2.Padding = new Padding(20, 20, 20, 200);
+            panel2.AutoScroll = true;
+            panel2.BackColor = Color.Red;
+
+
+
+            CreateUserControl(1,"xXx_TesztMatyi_xXx","Tesztelő Mátyás","matyizom@gmail.com",6969,true,true);
+
+            this.Controls.Add(panel2);
+            panel2.BringToFront();
+        }
+        private void CreateUserControl(int id, string username, string fullname, string email, int points, bool admin, bool active)
+        {
+            panel2.Controls.Clear();
+
+            Panel centralPanel = new Panel
+            {
+                Size = new Size(400, 400), 
+                Location = new Point(
+                    (panel2.Width - 400) / 2, 
+                    (panel2.Height - 400) / 2 
+                ),
+                BorderStyle = BorderStyle.FixedSingle
+            };
+
+            TextBox searchTextBox = new TextBox
+            {
+                Location = new Point(20, 20),
+                Width = 250
+            };
+
+            Button searchButton = new Button
+            {
+                Text = "Search",
+                Location = new Point(280, 18),
+                Width = 80
+            };
+            searchButton.Click += SearchButton_Click;
+
+            Label idLabel = new Label
+            {
+                Text = "ID:",
+                Location = new Point(20, 60),
+                AutoSize = true
+            };
+            TextBox idTextBox = new TextBox
+            {
+                Location = new Point(150, 58),
+                Width = 210,
+                Text = id.ToString(),
+                ReadOnly = true
+            };
+
+            Label usernameLabel = new Label
+            {
+                Text = "Felhasználó név:",
+                Location = new Point(20, 100),
+                AutoSize = true
+            };
+            TextBox usernameTextBox = new TextBox
+            {
+                Location = new Point(150, 98),
+                Width = 210,
+                Text = username 
+            };
+
+            Label fullNameLabel = new Label
+            {
+                Text = "Teljes név:",
+                Location = new Point(20, 140),
+                AutoSize = true
+            };
+            TextBox fullNameTextBox = new TextBox
+            {
+                Location = new Point(150, 138),
+                Width = 210,
+                Text = fullname 
+            };
+
+            Label emailLabel = new Label
+            {
+                Text = "E-mail:",
+                Location = new Point(20, 180),
+                AutoSize = true
+            };
+            TextBox emailTextBox = new TextBox
+            {
+                Location = new Point(150, 178),
+                Width = 210,
+                Text = email 
+            };
+
+            Label pointsLabel = new Label
+            {
+                Text = "Pontok:",
+                Location = new Point(20, 220),
+                AutoSize = true
+            };
+            NumericUpDown pointsNumericUpDown = new NumericUpDown
+            {
+                Location = new Point(150, 218),
+                Width = 100,
+                Minimum = 0,
+                Maximum = 1000000, 
+                Value = points 
+            };
+
+            CheckBox adminCheckBox = new CheckBox
+            {
+                Text = "Admin",
+                Location = new Point(20, 260),
+                AutoSize = true,
+                Checked = admin 
+            };
+            CheckBox activeCheckBox = new CheckBox
+            {
+                Text = "Aktív",
+                Location = new Point(150, 260),
+                AutoSize = true,
+                Checked = active 
+            };
+
+            Button saveButton = new Button
+            {
+                Text = "Mentés",
+                Location = new Point(150, 290),
+                Width = 80
+            };
+            saveButton.Click += SaveButton_Click;
+            Button deleteButton = new Button
+            {
+                Text = "Törlés",
+                Location = new Point(240, 290),
+                Width = 80
+            };
+            deleteButton.Click += DeleteButton_Click;
+
+            centralPanel.Controls.Add(searchTextBox);
+            centralPanel.Controls.Add(searchButton);
+            centralPanel.Controls.Add(idLabel);
+            centralPanel.Controls.Add(idTextBox);
+            centralPanel.Controls.Add(usernameLabel);
+            centralPanel.Controls.Add(usernameTextBox);
+            centralPanel.Controls.Add(fullNameLabel);
+            centralPanel.Controls.Add(fullNameTextBox);
+            centralPanel.Controls.Add(emailLabel);
+            centralPanel.Controls.Add(emailTextBox);
+            centralPanel.Controls.Add(pointsLabel);
+            centralPanel.Controls.Add(pointsNumericUpDown);
+            centralPanel.Controls.Add(adminCheckBox);
+            centralPanel.Controls.Add(activeCheckBox);
+            centralPanel.Controls.Add(saveButton);
+            centralPanel.Controls.Add(deleteButton);
+
+            panel2.Controls.Add(centralPanel);
+        }
+
+
+        private void DeleteButton_Click(object sender, EventArgs e)
+        {
+            //kiüríti a mezőket
+
+            CreateUserControl(0,null,null,null,0,false,false);
+
+
+        }
+
+        private void SaveButton_Click(object sender, EventArgs e)
+        {
+            //menti a módosításokat
+
+            //ide kell megírni azt hogy feltöltse az új adatokat
+
+            CreateUserControl(0, null, null, null, 0, false, false);
+
+        }
+
+        private void SearchButton_Click(object sender, EventArgs e)
+        {
+            //itt kell keresni email cím alapján
+
+
+
+            //CreateUserControl(0, null, null, null, 0, false, false);
         }
 
         private void toolStripLabel8_Click(object sender, EventArgs e)
         {
             //Új termék
-        }
-
-        private void toolStripLabel9_Click(object sender, EventArgs e)
-        {
-            //Vissza a rendelésekhez
         }
     }
 
