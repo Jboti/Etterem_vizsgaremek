@@ -156,7 +156,7 @@ namespace EtteremSideApp
                             items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
                     }
 
-                    all_orders.Add(new Order(items, id, totalprice, true, date, name, message,takeAway));
+                    all_orders.Add(new Order(items, id, totalprice, true, date, name, message, takeAway));
                     Console.WriteLine("lefutott " + all_orders.Count());
                 }
             }
@@ -289,7 +289,7 @@ namespace EtteremSideApp
                             items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
                     }
 
-                    all_orders.Add(new Order(items, id, totalprice, true, date, name,message,takeAway));
+                    all_orders.Add(new Order(items, id, totalprice, true, date, name, message, takeAway));
                 }
 
                 //kell e frissítsen?
@@ -454,20 +454,20 @@ namespace EtteremSideApp
             string orderContent = GenerateOrderContent(order);
             maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Tartalom:\n{orderContent}", ref currentTop));
 
-            AddDoneButton(orderPanel, order, currentTop+50,maxLabelWidth);
+            AddDoneButton(orderPanel, order, currentTop + 50, maxLabelWidth);
 
-            ColorOrderPanel(ref orderPanel,ref order);
+            ColorOrderPanel(ref orderPanel, ref order);
         }
 
-        private void ColorOrderPanel( ref Panel orderPanel, ref Order order)
+        private void ColorOrderPanel(ref Panel orderPanel, ref Order order)
         {
             if (order.takeAway)
             {
                 orderPanel.BackColor = Color.LightSalmon;
             }
             else
-            { 
-                orderPanel.BackColor= Color.LightSteelBlue;
+            {
+                orderPanel.BackColor = Color.LightSteelBlue;
             }
         }
 
@@ -483,7 +483,7 @@ namespace EtteremSideApp
             panel.Controls.Add(label);
 
             top += label.Height + 5;
-            return label.Width; 
+            return label.Width;
         }
 
         private void AddSeparator(Panel panel, ref int currentTop)
@@ -556,7 +556,7 @@ namespace EtteremSideApp
             Button doneButton = new Button
             {
                 Text = "Kész",
-                Width = width+200,
+                Width = width + 200,
                 Height = 30,
                 Location = new Point(10, currentTop),
                 BackColor = Color.LightGreen,
@@ -673,7 +673,7 @@ namespace EtteremSideApp
             loginForm.ShowDialog();
         }
 
-        
+
 
 
         private void ShowAdminButtons()
@@ -718,10 +718,8 @@ namespace EtteremSideApp
             //Kijelentkezés
             //minden panel hátra küld + hide
 
-
-
             panel2.SendToBack();
-
+            panel3.SendToBack();
 
             adminLoggedIn = false;
             ShowAdminButtons();
@@ -732,7 +730,7 @@ namespace EtteremSideApp
 
 
             // Felhasználók kezelése
-                     
+
             panel2.Visible = true;
             panel2.Dock = DockStyle.Fill;
             panel2.FlowDirection = FlowDirection.LeftToRight;
@@ -743,7 +741,7 @@ namespace EtteremSideApp
 
 
 
-            CreateUserControl(1,"xXx_TesztMatyi_xXx","Tesztelő Mátyás","matyizom@gmail.com",6969,true,true);
+            CreateUserControl(1, "xXx_TesztMatyi_xXx", "Tesztelő Mátyás", "matyizom@gmail.com", 6969, true, true);
 
             this.Controls.Add(panel2);
             panel2.BringToFront();
@@ -754,10 +752,9 @@ namespace EtteremSideApp
 
             Panel centralPanel = new Panel
             {
-                Size = new Size(400, 400), 
+                Size = new Size(400, 400),
                 Location = new Point(
-                    (panel2.Width - 400) / 2, 
-                    (panel2.Height - 400) / 2 
+                    200,200
                 ),
                 BorderStyle = BorderStyle.FixedSingle
             };
@@ -800,7 +797,7 @@ namespace EtteremSideApp
             {
                 Location = new Point(150, 98),
                 Width = 210,
-                Text = username 
+                Text = username
             };
 
             Label fullNameLabel = new Label
@@ -813,7 +810,7 @@ namespace EtteremSideApp
             {
                 Location = new Point(150, 138),
                 Width = 210,
-                Text = fullname 
+                Text = fullname
             };
 
             Label emailLabel = new Label
@@ -826,7 +823,7 @@ namespace EtteremSideApp
             {
                 Location = new Point(150, 178),
                 Width = 210,
-                Text = email 
+                Text = email
             };
 
             Label pointsLabel = new Label
@@ -840,8 +837,8 @@ namespace EtteremSideApp
                 Location = new Point(150, 218),
                 Width = 100,
                 Minimum = 0,
-                Maximum = 1000000, 
-                Value = points 
+                Maximum = 1000000,
+                Value = points
             };
 
             CheckBox adminCheckBox = new CheckBox
@@ -849,14 +846,14 @@ namespace EtteremSideApp
                 Text = "Admin",
                 Location = new Point(20, 260),
                 AutoSize = true,
-                Checked = admin 
+                Checked = admin
             };
             CheckBox activeCheckBox = new CheckBox
             {
                 Text = "Aktív",
                 Location = new Point(150, 260),
                 AutoSize = true,
-                Checked = active 
+                Checked = active
             };
 
             Button saveButton = new Button
@@ -899,7 +896,7 @@ namespace EtteremSideApp
         {
             //kiüríti a mezőket
 
-            CreateUserControl(0,null,null,null,0,false,false);
+            CreateUserControl(0, null, null, null, 0, false, false);
 
 
         }
@@ -926,7 +923,7 @@ namespace EtteremSideApp
         private void toolStripLabel8_Click(object sender, EventArgs e)
         {
             //Új termék
-            
+
 
             panel3.Visible = true;
             panel3.Dock = DockStyle.Fill;
