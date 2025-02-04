@@ -44,8 +44,6 @@
             this.toolStripLabel7 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel8 = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripLabel9 = new System.Windows.Forms.ToolStripLabel();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -64,13 +62,8 @@
             this.toolStripLabel7,
             this.toolStripSeparator6,
             this.toolStripLabel8,
-<<<<<<< HEAD
-            this.toolStripSeparator7,
-            this.toolStripLabel9});
-=======
             this.toolStripSeparator5,
             this.toolStripLabel6});
->>>>>>> 689c9fbac267f2259928152adc37b76a5a2b930a
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(741, 25);
@@ -145,10 +138,7 @@
             // 
             // toolStripLabel7
             // 
-<<<<<<< HEAD
-=======
             this.toolStripLabel7.ForeColor = System.Drawing.Color.Blue;
->>>>>>> 689c9fbac267f2259928152adc37b76a5a2b930a
             this.toolStripLabel7.Name = "toolStripLabel7";
             this.toolStripLabel7.Size = new System.Drawing.Size(120, 22);
             this.toolStripLabel7.Text = "Felhasználók kezelése";
@@ -166,18 +156,6 @@
             this.toolStripLabel8.Size = new System.Drawing.Size(58, 22);
             this.toolStripLabel8.Text = "Új termék";
             this.toolStripLabel8.Click += new System.EventHandler(this.toolStripLabel8_Click);
-            // 
-            // toolStripSeparator7
-            // 
-            this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(6, 25);
-            // 
-            // toolStripLabel9
-            // 
-            this.toolStripLabel9.Name = "toolStripLabel9";
-            this.toolStripLabel9.Size = new System.Drawing.Size(66, 22);
-            this.toolStripLabel9.Text = "Rendelések";
-            this.toolStripLabel9.Click += new System.EventHandler(this.toolStripLabel9_Click);
             // 
             // Form1
             // 
@@ -215,8 +193,5 @@
         private System.Windows.Forms.ToolStripLabel toolStripLabel7;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripLabel toolStripLabel8;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel9;
     }
 }
-

@@ -9,6 +9,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{60687E08-D599-49BD-BAEA-BB101FD28AAE}|EtteremSideApp\\EtteremSideApp.csproj|H:\\FINALPROJECT\\Etterem_vizsgaremek\\Etterem_asztaliAlkalmazas\\etteremsideapp\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{60687E08-D599-49BD-BAEA-BB101FD28AAE}|EtteremSideApp\\EtteremSideApp.csproj|solutionrelative:etteremsideapp\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{60687E08-D599-49BD-BAEA-BB101FD28AAE}|EtteremSideApp\\EtteremSideApp.csproj|h:\\finalproject\\etterem_vizsgaremek\\etterem_asztalialkalmazas\\etteremsideapp\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{60687E08-D599-49BD-BAEA-BB101FD28AAE}|EtteremSideApp\\EtteremSideApp.csproj|solutionrelative:etteremsideapp\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,8 +22,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Form1.Designer.cs",
+              "DocumentMoniker": "H:\\FINALPROJECT\\Etterem_vizsgaremek\\Etterem_asztaliAlkalmazas\\EtteremSideApp\\Form1.Designer.cs",
+              "RelativeDocumentMoniker": "EtteremSideApp\\Form1.Designer.cs",
+              "ToolTip": "H:\\FINALPROJECT\\Etterem_vizsgaremek\\Etterem_asztaliAlkalmazas\\EtteremSideApp\\Form1.Designer.cs",
+              "RelativeToolTip": "EtteremSideApp\\Form1.Designer.cs",
+              "ViewState": "AgIAAJkAAAAAAAAAAAAAwLYAAABMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-04T08:15:02.904Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 1,
@@ -40,7 +57,7 @@
               "RelativeDocumentMoniker": "EtteremSideApp\\Form1.cs",
               "ToolTip": "H:\\FINALPROJECT\\Etterem_vizsgaremek\\Etterem_asztaliAlkalmazas\\EtteremSideApp\\Form1.cs",
               "RelativeToolTip": "EtteremSideApp\\Form1.cs",
-              "ViewState": "AgIAAKMAAAAAAAAAAAAcwLQAAAA5AAAAAAAAAA==",
+              "ViewState": "AgIAAF0DAAAAAAAAAADwv4cDAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-12-02T08:16:28.028Z",
               "EditorCaption": ""
