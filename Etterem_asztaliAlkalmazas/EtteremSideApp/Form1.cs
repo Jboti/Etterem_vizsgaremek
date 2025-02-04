@@ -991,12 +991,10 @@ namespace EtteremSideApp
             panel3.AutoScroll = true;
             panel3.BackColor = Color.Blue;
 
-            //
             CreateProductControl();
 
             this.Controls.Add(panel3);
             panel3.BringToFront();
-            //hehe
         }
 
         private void CreateProductControl()
@@ -1148,7 +1146,7 @@ namespace EtteremSideApp
             };
             saveButton.Click += (sender, e) =>
             {
-                // Implement the save functionality here
+                // save cucc
             };
 
             Button deleteButton = new Button
@@ -1160,14 +1158,12 @@ namespace EtteremSideApp
             };
             deleteButton.Click += (sender, e) =>
             {
-                // Clear all input fields
                 nameTextBox.Clear();
                 priceNumericUpDown.Value = 0;
                 optionsDataGridView.Rows.Clear();
                 optionsDataGridView.Rows.Add();
                 descriptionTextBox.Clear();
                 typeComboBox.SelectedIndex = -1;
-                // Handle image clearing if necessary
             };
 
             centralPanel.Controls.Add(nameLabel);
