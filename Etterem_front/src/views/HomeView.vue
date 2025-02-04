@@ -43,19 +43,19 @@ const handleLogout = () => {
     </v-container>
     <div class="infoBoxok">
       <v-card class="nyitvaTartas">
-        <p class="pl-4 pt-2"><b>Nyitvatartás:</b></p>
-        <v-card-text class="pt-2" style="align-items: center; padding: 0;">
-          <p style="font-size: clamp(10px, 4dvw, 30px);"><b>H-P:</b> 8:00 - 23:00</p>
-          <p style="font-size: clamp(10px, 4dvw, 30px);"><b>Sz:</b> 10:00 - 21:00</p>
-          <p style="font-size: clamp(10px, 4dvw, 30px);"><b>V:</b> 11:00 - 20:00</p>
+        <p class="pl-4 pt-2" style="height: 10%;"><b>Nyitvatartás:</b></p>
+        <v-card-text class="pt-2" style="align-items: center; padding: 0; height: 90%;">
+          <p style="font-size: clamp(14px, 2.5dvw, 20px);"><b>H-P:</b> 8:00 - 23:00</p>
+          <p style="font-size: clamp(14px, 2.5dvw, 20px);"><b>Sz:</b> 10:00 - 21:00</p>
+          <p style="font-size: clamp(14px, 2.5dvw, 20px);"><b>V:</b> 11:00 - 20:00</p>
         </v-card-text>
       </v-card>
       <v-card class="info">
         <v-card  class="infoCard">
           <v-card-text style="text-align: left;">
-            <p style="font-size: clamp(8px, 3.25dvw, 30px);"><b>Email:</b> donercegled@gmail.com</p>
-            <p style="font-size: clamp(8px, 3.25dvw, 30px);"><b>Tel szám.:</b> 06 xx xxx xxxx</p>
-            <p style="font-size: clamp(8px, 3.25dvw, 30px);"><b>Cím:</b> 2700 Cegléd, xy</p>
+            <p style="font-size: clamp(12px, 2.5vw, 30px);"><b>Email:</b> donercegled@gmail.com</p>
+            <p style="font-size: clamp(12px, 2.5dvw, 30px);"><b>Tel szám.:</b> 06 xx xxx xxxx</p>
+            <p style="font-size: clamp(12px, 2.5dvw, 30px);"><b>Cím:</b> 2700 Cegléd, xy</p>
           </v-card-text>
         </v-card>
         <div class="terkepInfo">
@@ -177,7 +177,8 @@ const handleLogout = () => {
   width: 50dvw;
   max-width: 500px;
   min-width: 150px;
-  margin: 1%;
+  margin: 1.5%;
+  margin-top: .5%;
 }
 
 .terkep{

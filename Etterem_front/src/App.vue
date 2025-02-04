@@ -53,6 +53,7 @@ const { push } = useRouter();
 }
 
 .buttons{
+  width: 100%;
   display: flex !important;
   flex-wrap: nowrap;
   align-items: center;
