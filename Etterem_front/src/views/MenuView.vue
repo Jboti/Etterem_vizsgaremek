@@ -8,8 +8,11 @@ const { data } = useGetDishes()
 const { isError } = useGetUserInfo()
 
 const selectedDish = ref<any>(null)
+const sauceSelected = ref<boolean>(false)
+const selectedSauce = ref<any>(null)
+const selectedOptions = ref<any[]>([])
 const isModalOpen = ref(false)
-
+const totalVal = ref<number>(0)
 
 const notify = () => {
     toast.success("A termék a kosárba került!")
@@ -18,29 +21,87 @@ const notify = () => {
 const handleAddToCart = (dish:any) => {
   if(isError.value)
     toast.error("Ahoz hogy a terméket a kosárba rakd be kell jelentkezned!")
-  else
-      openModal(dish)
+  else{
+    sauceSelected.value = false
+    openModal(dish)
+  }
 }
 
-const addToCart = () =>{
+const addToCart = (dish:any) =>{
   if(isError.value)
-    toast.error("Ahoz hogy a terméket a kosárba rakd be kell jelentkezned!")
+    toast.error("Ahoz hogy a terméket a kosárba rakd be kell jelentkezz!")
   else{
-    toast.success("A termék a kosárba került!")
-    closeModal()
+    if(dish.type == 'Drink'){
+      console.log('-----Kosárba----')
+      console.log(dish.name +" "+ dish.price)
+      totalVal.value += dish.price
+      console.log(totalVal.value+' Ft')
+      console.log('----------------')
+    }else{
+      if(JSON.parse(dish.sauceOptions).length == 1)
+        selectedSauce.value = JSON.parse(dish.sauceOptions)[0].name
+      if(selectedSauce.value){
+        toast.success("A termék a kosárba került!")
+        console.log('-----Kosárba----')
+        console.log(dish.name + " " + dish.price+" Ft")
+        totalVal.value += dish.price
+        console.log("szósz: "+selectedSauce.value)
+        selectedOptions.value.forEach(o => {"Módosítás: " +console.log(o.name + " " + o.price); totalVal.value += o.price})
+        console.log(totalVal.value+' Ft')
+        console.log('----------------')
+        
+        closeModal()
+      }else
+        toast.error("Nincs kiválasztva szósz!")
+    }
   }
 }
 
 
 const openModal = (dish:any) => {
-  selectedDish.value = dish;
-  isModalOpen.value = true;
-};
+  if(dish.type == 'Drink'){
+    addToCart(dish)
+    toast.success("A termék a kosárba került!")
+  }else{
+    selectedDish.value = dish
+    isModalOpen.value = true
+  }
+}
 
 const closeModal = () => {
-  isModalOpen.value = false;
-};
+  isModalOpen.value = false
+  selectedSauce.value = null
+  selectedOptions.value = []
+}
 
+const handleOptionSelected = (option: any) => {
+  const index = selectedOptions.value.findIndex(o => o.name == option.name)
+  
+  if (index > -1) {
+    selectedOptions.value.splice(index, 1);
+  } else {
+    selectedOptions.value.push(option)
+  }
+}
+
+
+const handleSauceSelected = (sauce: any) => {
+  if(!sauceSelected.value){
+    sauceSelected.value = true
+    selectedSauce.value = sauce.name
+  }
+  else{
+    
+    if(sauce.name != selectedSauce.value){
+      toast.error("Csak egy féle szószt választhatsz!")
+    }else{
+      selectedSauce.value = null
+      sauceSelected.value = false
+    }
+
+  }
+    
+}
 
 </script>
 
@@ -75,7 +136,8 @@ const closeModal = () => {
             <div class="mt-4 dish-data-box">
               <div class="ml-2 mr-2 dish-data">
                 <div><b>{{ dish.name }}</b></div>
-                <div>{{ dish.price }} Ft</div>
+                <div v-if="dish.type == 'Drink'">{{ dish.price }}+50 Ft</div>
+                <div v-else>{{ dish.price }} Ft</div>
               </div>
               <v-btn class="pl-4 pr-4 pt-2 pb-2 cartButtons" @click="handleAddToCart(dish)">
                 <b>Kosárba</b>
@@ -92,24 +154,46 @@ const closeModal = () => {
 
   
   <!-- Modal -->
-   <v-dialog v-model="isModalOpen" max-width="500px">
+   <v-dialog v-model="isModalOpen" max-width="800px" @click:outside="closeModal" style="background-color: rgba(0, 0, 0, 0.7);">
     <v-card>
-      <v-img v-if="selectedDish" :src="selectedDish.image" height="200px"></v-img>
-      <v-card-title v-if="selectedDish">{{ selectedDish.name }}</v-card-title>
-      <v-card-text v-if="selectedDish">
-        <p><b>Ár:</b> {{ selectedDish.price }} Ft</p>
-        <p><b>Leírás:</b> {{ selectedDish.description }}</p>
-        <v-row>
-          <v-col v-for="(dishOption,index) in JSON.parse(selectedDish.customizationOptions)" :key="index" >
-            <p>{{ dishOption.name }}</p>
-            <p>{{ dishOption.price }}</p>
-            <v-btn><v-icon>mdi-check</v-icon></v-btn>
+      <div class="modalHeader">
+        <div class="modalImg">
+          <v-img v-if="selectedDish" :src="selectedDish.image" style="background-image: url(background.jpg); background-size: cover; width: 96%; height: 96%; border: 2px solid black; border-radius: 40px; border-top-right-radius: 4px; margin: 2%; box-shadow: 0 0 5px .5px black;"></v-img>
+        </div>
+        <div class="modalInfo">
+          <v-card-title v-if="selectedDish" class="mb-10"><b>{{ selectedDish.name }}</b></v-card-title>
+          <v-card-text v-if="selectedDish">
+            <p class="mb-2"><b>Ár:</b> {{ selectedDish.price }} Ft</p>
+            <p><b>Leírás:</b> {{ selectedDish.description }}</p>
+          </v-card-text>
+        </div>
+      </div>
+      <v-card-text>
+        <p class="mt-2 mb-4"><b v-if="selectedDish.sauceOptions" style="margin-bottom: 2%;">Szósz:</b></p>
+        <v-row style="border-bottom: solid 2px black; padding-bottom: 3%;">
+          <v-col v-if="selectedDish.sauceOptions" v-for="(sauce,index) in JSON.parse(selectedDish.sauceOptions)" :key="index" cols="12" sm="6" md="6" lg="6" xl="4">
+            <div style="display: flex; border: 2px solid rgba(0, 0, 0, 0.4); box-shadow: 0 0 5px .5px rgba(0, 0, 0, 0.4); border-radius: 10px; width: 100%; align-items: center; padding: 3%;">
+              <p style="width: 80%;"><b>{{ sauce.name }}: </b></p>
+              <v-btn style="width: 20%; padding: 0; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleSauceSelected(sauce)" :class="{ 'selected-button': selectedSauce == sauce.name || JSON.parse(selectedDish.sauceOptions).length == 1}"><v-icon>mdi-check</v-icon></v-btn>
+            </div>
+          </v-col>
+        </v-row>
+        <p class="mt-4 mb-4" style="padding-top: 3%;"><b v-if="selectedDish.customizationOptions" style="margin-bottom: 2%;">Opciók:</b></p>
+        <v-row style="border-bottom: solid 2px black; padding-bottom: 3%; align-items: center;">
+          <v-col v-if="selectedDish.customizationOptions" v-for="(dishOption,index) in JSON.parse(selectedDish.customizationOptions)" :key="index" cols="12" sm="6" md="6" lg="6" xl="4">
+            <div style="display: flex; border: 2px solid rgba(0, 0, 0, 0.4); box-shadow: 0 0 5px .5px rgba(0, 0, 0, 0.4); border-radius: 10px; width: 100%; align-items: center; padding-left: 2%; padding-right: 2%; flex-direction: column; padding-bottom: 2%;">
+              <p style="width: 96%; padding: 2%;"><b>{{ dishOption.name }}: </b></p>
+              <div style="display: flex; justify-content: space-evenly; align-items: center;width: 96%; padding: 2%;">
+                <p style="width: 50%; ">{{ dishOption.price }} Ft</p>
+                <v-btn style="width: 25%; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleOptionSelected(dishOption)" :class="{'selected-button': selectedOptions.some(o => o.name == dishOption.name) }"><v-icon>mdi-check</v-icon></v-btn>
+              </div>
+            </div>
           </v-col>
         </v-row>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="red" @click="closeModal">Vissza</v-btn>
-        <v-btn color="green" @click="addToCart">Kosárba</v-btn>
+        <v-btn color="red" @click="closeModal" style="float: left;">Vissza</v-btn>
+        <v-btn color="green" @click="addToCart(selectedDish)">Kosárba</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -163,8 +247,6 @@ const closeModal = () => {
   box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black;
 }
 
-
-
 .topMenu{
   animation: 1s ease-in fade;
 }
@@ -183,6 +265,42 @@ const closeModal = () => {
 
 }
 
+.modalHeader{
+  display: flex;
+  flex-direction: row-reverse;
+  width: 100%; border-bottom:
+  solid 2px black;
+  padding-bottom: 2%;
+}
+
+.modalInfo{
+  width: 70%;
+}
+
+.modalImg{
+  width: 30%;
+  visibility: visible;
+}
+
+.selected-button{
+  background-color: green;
+  color: white;
+}
+
+
+
+@media screen and (max-width: 800px){
+  .modalInfo{
+    width: 100%;
+  }
+  .modalHeader{
+    display: block;
+  }
+   .modalImg{
+    visibility: hidden;
+    width: 0;
+   }
+}
 @keyframes slideInFromTop {
   0% {
     transform: translateY(-100%);

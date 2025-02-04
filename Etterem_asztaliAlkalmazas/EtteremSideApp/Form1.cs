@@ -28,6 +28,7 @@ namespace EtteremSideApp
         public static bool adminLoggedIn = false;
         public FlowLayoutPanel panel2 = new FlowLayoutPanel();
         public FlowLayoutPanel panel3 = new FlowLayoutPanel();
+        public FlowLayoutPanel panel4 = new FlowLayoutPanel();
 
 
 
@@ -683,20 +684,24 @@ namespace EtteremSideApp
                 toolStripSeparator4.Visible = true;
                 toolStripSeparator5.Visible = true;
                 toolStripSeparator6.Visible = true;
+                toolStripSeparator7.Visible = true;
 
                 toolStripLabel6.Visible = true;
                 toolStripLabel7.Visible = true;
                 toolStripLabel8.Visible = true;
+                toolStripLabel9.Visible = true;
             }
             else
             {
                 toolStripSeparator4.Visible = false;
                 toolStripSeparator5.Visible = false;
                 toolStripSeparator6.Visible = false;
+                toolStripSeparator7.Visible = false;
 
                 toolStripLabel6.Visible = false;
                 toolStripLabel7.Visible = false;
                 toolStripLabel8.Visible = false;
+                toolStripLabel9.Visible = false;
             }
         }
 
@@ -720,6 +725,7 @@ namespace EtteremSideApp
 
             panel2.SendToBack();
             panel3.SendToBack();
+            panel4.SendToBack();
 
             adminLoggedIn = false;
             ShowAdminButtons();
@@ -733,15 +739,13 @@ namespace EtteremSideApp
 
             panel2.Visible = true;
             panel2.Dock = DockStyle.Fill;
-            panel2.FlowDirection = FlowDirection.LeftToRight;
-            panel2.WrapContents = true;
             panel2.Padding = new Padding(20, 20, 20, 200);
             panel2.AutoScroll = true;
-            panel2.BackColor = Color.Red;
+            panel2.BackColor = backGroundColor;
 
 
 
-            CreateUserControl(1, "xXx_TesztMatyi_xXx", "Tesztelő Mátyás", "matyizom@gmail.com", 6969, true, true);
+            CreateUserControl(1, "xXx_TesztMatyi_xXx", "Tesztelő Mátyás", "matyizom@gmail.com", 6969, true, false);
 
             this.Controls.Add(panel2);
             panel2.BringToFront();
@@ -753,10 +757,8 @@ namespace EtteremSideApp
             Panel centralPanel = new Panel
             {
                 Size = new Size(400, 400),
-                Location = new Point(
-                    200,200
-                ),
-                BorderStyle = BorderStyle.FixedSingle
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.Gray,
             };
 
             TextBox searchTextBox = new TextBox
@@ -767,9 +769,10 @@ namespace EtteremSideApp
 
             Button searchButton = new Button
             {
-                Text = "Search",
+                Text = "Keresés",
                 Location = new Point(280, 18),
-                Width = 80
+                Width = 80,
+                Height = 30,
             };
             searchButton.Click += SearchButton_Click;
 
@@ -841,33 +844,86 @@ namespace EtteremSideApp
                 Value = points
             };
 
-            CheckBox adminCheckBox = new CheckBox
+            Label adminLabel = new Label
             {
-                Text = "Admin",
+                Text = "Admin:",
                 Location = new Point(20, 260),
                 AutoSize = true,
-                Checked = admin
+                //Checked = admin
             };
-            CheckBox activeCheckBox = new CheckBox
+
+            Panel AdminRadioButtonPanel = new Panel
             {
-                Text = "Aktív",
-                Location = new Point(150, 260),
-                AutoSize = true,
-                Checked = active
+                Location = new Point(150,260),
+                Size = new Size(150,20),
             };
+
+            RadioButton adminYesRadioButton = new RadioButton
+            {
+                Text = "Igen",
+                Location = new Point(0, 0),
+                AutoSize = true,
+                Checked = admin,
+            };
+
+            RadioButton adminNoRadioButton = new RadioButton
+            {
+                Text = "Nem",
+                Location = new Point(70, 0),
+                AutoSize = true,
+                Checked = !admin,
+            };
+
+            AdminRadioButtonPanel.Controls.Add(adminYesRadioButton);
+            AdminRadioButtonPanel.Controls.Add (adminNoRadioButton);
+
+            Label ActiveLabel = new Label
+            {
+                Text = "Aktív:",
+                Location = new Point(20, 285),
+                AutoSize = true,
+                
+            };
+
+            Panel ActiveRadioButtonPanel = new Panel
+            {
+                Location = new Point(150, 285),
+                Size = new Size(150, 20),
+            };
+
+            RadioButton ActiveYesRadioButton = new RadioButton
+            {
+                Text = "Igen",
+                Location = new Point(0, 0),
+                AutoSize = true,
+                Checked = active,
+            };
+
+            RadioButton ActiveNoRadioButton = new RadioButton
+            {
+                Text = "Nem",
+                Location = new Point(70, 0),
+                AutoSize = true,
+                Checked = !active,
+            };
+
+            ActiveRadioButtonPanel.Controls.Add(ActiveYesRadioButton);
+            ActiveRadioButtonPanel.Controls.Add(ActiveNoRadioButton);
 
             Button saveButton = new Button
             {
                 Text = "Mentés",
-                Location = new Point(150, 290),
-                Width = 80
+                Location = new Point(150, 310),
+                Width = 80,
+                Height = 30,
             };
             saveButton.Click += SaveButton_Click;
             Button deleteButton = new Button
             {
                 Text = "Törlés",
-                Location = new Point(240, 290),
-                Width = 80
+                Location = new Point(240, 310),
+                Width = 80,
+                Height = 30,
             };
             deleteButton.Click += DeleteButton_Click;
 
@@ -883,8 +939,10 @@ namespace EtteremSideApp
             centralPanel.Controls.Add(emailTextBox);
             centralPanel.Controls.Add(pointsLabel);
             centralPanel.Controls.Add(pointsNumericUpDown);
-            centralPanel.Controls.Add(adminCheckBox);
-            centralPanel.Controls.Add(activeCheckBox);
+            centralPanel.Controls.Add(adminLabel);
+            centralPanel.Controls.Add(AdminRadioButtonPanel);
+            centralPanel.Controls.Add(ActiveLabel);
+            centralPanel.Controls.Add(ActiveRadioButtonPanel);
             centralPanel.Controls.Add(saveButton);
             centralPanel.Controls.Add(deleteButton);
 
@@ -933,11 +991,216 @@ namespace EtteremSideApp
             panel3.AutoScroll = true;
             panel3.BackColor = Color.Blue;
 
-            //
+            CreateProductControl();
 
             this.Controls.Add(panel3);
             panel3.BringToFront();
-            //hehe
+        }
+
+        private void CreateProductControl()
+        {
+            panel3.Controls.Clear();
+
+            Panel centralPanel = new Panel
+            {
+                Size = new Size(500, 600),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.LightGray,
+            };
+
+            Label nameLabel = new Label
+            {
+                Text = "Név:",
+                Location = new Point(20, 20),
+                AutoSize = true
+            };
+            TextBox nameTextBox = new TextBox
+            {
+                Location = new Point(150, 18),
+                Width = 300
+            };
+
+            Label priceLabel = new Label
+            {
+                Text = "Ár:",
+                Location = new Point(20, 60),
+                AutoSize = true
+            };
+            NumericUpDown priceNumericUpDown = new NumericUpDown
+            {
+                Location = new Point(150, 58),
+                Width = 100,
+                Minimum = 0,
+                Maximum = 1000000,
+                DecimalPlaces = 2
+            };
+
+            Label optionsLabel = new Label
+            {
+                Text = "Opciók:",
+                Location = new Point(20, 100),
+                AutoSize = true
+            };
+            DataGridView optionsDataGridView = new DataGridView
+            {
+                Location = new Point(150, 98),
+                Width = 300,
+                Height = 150,
+                ColumnCount = 2,
+                Columns = { [0] = { Name = "Opció" }, [1] = { Name = "Felár" } },
+                AllowUserToAddRows = false
+            };
+            optionsDataGridView.Rows.Add();
+
+            Button addOptionButton = new Button
+            {
+                Text = "+",
+                Location = new Point(460, 98),
+                Width = 30,
+                Height = 30
+            };
+            addOptionButton.Click += (sender, e) =>
+            {
+                optionsDataGridView.Rows.Add();
+            };
+
+            Button removeOptionButton = new Button
+            {
+                Text = "-",
+                Location = new Point(460, 138),
+                Width = 30,
+                Height = 30
+            };
+            removeOptionButton.Click += (sender, e) =>
+            {
+                foreach (DataGridViewRow row in optionsDataGridView.SelectedRows)
+                {
+                    optionsDataGridView.Rows.Remove(row);
+                }
+            };
+
+            ToolTip toolTip = new ToolTip();
+            toolTip.SetToolTip(addOptionButton, "Sor hozzáadása");
+            toolTip.SetToolTip(removeOptionButton, "Kijelölt sor törlése");
+
+            Label descriptionLabel = new Label
+            {
+                Text = "Leírás:",
+                Location = new Point(20, 260),
+                AutoSize = true
+            };
+            TextBox descriptionTextBox = new TextBox
+            {
+                Location = new Point(150, 258),
+                Width = 300,
+                Height = 80,
+                Multiline = true
+            };
+
+            Label typeLabel = new Label
+            {
+                Text = "Típus:",
+                Location = new Point(20, 350),
+                AutoSize = true
+            };
+            ComboBox typeComboBox = new ComboBox
+            {
+                Location = new Point(150, 348),
+                Width = 300,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            typeComboBox.Items.AddRange(new string[] { "Típus1", "Típus2", "Típus3" });
+
+            Label imageLabel = new Label
+            {
+                Text = "Kép:",
+                Location = new Point(20, 390),
+                AutoSize = true
+            };
+            Button imageButton = new Button
+            {
+                Text = "Kép kiválasztása",
+                Location = new Point(150, 388),
+                Width = 150,
+                Height = 30
+            };
+            imageButton.Click += (sender, e) =>
+            {
+                using (OpenFileDialog openFileDialog = new OpenFileDialog())
+                {
+                    openFileDialog.Filter = "PNG fájlok (*.png)|*.png";
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        // A kiválasztott fájl elérési útja: openFileDialog.FileName
+                        // Itt lehet kezelni a kiválasztott képet
+                    }
+                }
+            };
+
+            Button saveButton = new Button
+            {
+                Text = "Mentés",
+                Location = new Point(150, 430),
+                Width = 80,
+                Height = 30
+            };
+            saveButton.Click += (sender, e) =>
+            {
+                // save cucc
+            };
+
+            Button deleteButton = new Button
+            {
+                Text = "Törlés",
+                Location = new Point(240, 430),
+                Width = 80,
+                Height = 30
+            };
+            deleteButton.Click += (sender, e) =>
+            {
+                nameTextBox.Clear();
+                priceNumericUpDown.Value = 0;
+                optionsDataGridView.Rows.Clear();
+                optionsDataGridView.Rows.Add();
+                descriptionTextBox.Clear();
+                typeComboBox.SelectedIndex = -1;
+            };
+
+            centralPanel.Controls.Add(nameLabel);
+            centralPanel.Controls.Add(nameTextBox);
+            centralPanel.Controls.Add(priceLabel);
+            centralPanel.Controls.Add(priceNumericUpDown);
+            centralPanel.Controls.Add(optionsLabel);
+            centralPanel.Controls.Add(optionsDataGridView);
+            centralPanel.Controls.Add(addOptionButton);
+            centralPanel.Controls.Add(removeOptionButton);
+            centralPanel.Controls.Add(descriptionLabel);
+            centralPanel.Controls.Add(descriptionTextBox);
+            centralPanel.Controls.Add(typeLabel);
+            centralPanel.Controls.Add(typeComboBox);
+            centralPanel.Controls.Add(imageLabel);
+            centralPanel.Controls.Add(imageButton);
+            centralPanel.Controls.Add(saveButton);
+            centralPanel.Controls.Add(deleteButton);
+
+            panel3.Controls.Add(centralPanel);
+        }
+
+
+        private void toolStripLabel9_Click(object sender, EventArgs e)
+        {
+            //meglévő termék módosítása
+
+            
+            panel4.Visible = true;
+            panel4.Dock = DockStyle.Fill;
+            panel4.FlowDirection = FlowDirection.LeftToRight;
+            panel4.WrapContents = true;
+            panel4.Padding = new Padding(20, 20, 20, 200);
+            panel4.AutoScroll = true;
+            panel4.BackColor = Color.Green;
+            this.Controls.Add(panel4);
+            panel4.BringToFront();
         }
     }
 
