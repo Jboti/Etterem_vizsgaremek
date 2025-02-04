@@ -28,7 +28,7 @@ class dishRepository
 
     async createDish(dish)
     {
-        await this.Dish.create(dish)
+        return await this.Dish.create(dish)
     }
 
     async deleteDish(dish)
