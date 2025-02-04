@@ -351,6 +351,7 @@ namespace EtteremSideApp
 
         private FlowLayoutPanel CreateFlowLayoutPanel()
         {
+            //ez az alap panel
             return new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -698,7 +699,7 @@ namespace EtteremSideApp
 
         private string getLogin(string givenEmail, string givenPw)
         {
-            string username = "";
+            string username = "awd";
 
             //MessageBox.Show(givenEmail, givenPw);
 
@@ -720,6 +721,11 @@ namespace EtteremSideApp
         private void toolStripLabel8_Click(object sender, EventArgs e)
         {
             //Új termék
+        }
+
+        private void toolStripLabel9_Click(object sender, EventArgs e)
+        {
+            //Vissza a rendelésekhez
         }
     }
 
