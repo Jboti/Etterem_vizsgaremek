@@ -105,6 +105,20 @@ class userRepository
         )
     }
 
+    async changeUserName(userName,id)
+    {
+        return await this.User.update(
+            {
+                userName:userName
+            },
+            {
+                where:{
+                    id:id
+                }
+            }
+        )
+    }
+
 }
 
 

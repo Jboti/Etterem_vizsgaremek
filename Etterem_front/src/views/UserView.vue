@@ -1,9 +1,43 @@
 <script lang="ts" setup>
 import { useGetUserInfo } from "@/api/user/userQuery"
 import { useRouter } from 'vue-router'
+import type { ChangeUserName } from '@/api/auth/auth';
+import { useLogin, useUserNameChange } from '@/api/auth/authQuery';
+import { ref } from 'vue';
+import { toast } from 'vue3-toastify';
+const notify = () => {
+    toast.success("Sikeres felhasználónév változtatás!")
+}
 
+const { mutate, isPending } = useUserNameChange()
+const showPassword = ref<boolean>(false)
+const showPasswordRe = ref<boolean>(false)
 const { data, isError, error, isLoading } = useGetUserInfo()
 const { push } = useRouter();
+
+const ChangeUserNameRef = ref<ChangeUserName>({
+  userName:'',
+  password:'',
+})
+
+const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
+  if(ChangeUserNameRef.userName == '' || ChangeUserNameRef.password == ''){
+      toast.error("Hiányzó adatok, kérlek töltsd ki az összes mezőt mielőtt tovább haladsz!")
+  }else{
+      mutate(ChangeUserNameRef,{
+          onSuccess(){
+              push({name:'Főoldal'})
+              setTimeout(() => {
+                      toast.success("Sikeres bejelentkezés!")
+              }, 100)
+          },
+          onError(error: any){
+              toast.error(error.response?.data?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!")
+          }
+      })
+  }
+}
+
 </script>
 
 <template>
@@ -20,21 +54,21 @@ const { push } = useRouter();
 
     
     <div v-else class="egesz">
-      <div style=" padding: 10px;font-size: 2vw; height: auto; width: 95%; text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);">
+      <div style=" width: 100%; padding: 10px;font-size: 2vw; height: auto; width: 95%; text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);">
       <div data-v-b4e148ca class="v-card v-theme--light v-card--density-default v-card--variant-elevated info text-h5 pa-12"
-      style="  width: 100%; ">
+      style=" width: 100%">
       <div style="width: 100%;">
       <b>Felhasználó:</b> {{data.userName }} <br>
       <b>Teljes név:</b> {{data.fullName}}<br>
       <b>Email:</b> {{data.email}}<br>
       <b>Fiók készítése:</b> {{data.created}} <br>
       </div>
-      <div style="width: 50%; flex: none;">
+      <div style="width: 50%; flex: none; justify-items: center;">
 
       Rudolf<br>
       <v-container style="height: 100%;">
         <v-row style="display: flex;flex-direction: row-reverse; align-items: center;">
-          <v-col cols="12" md="10" >
+          <v-col cols="12" md="12" >
             <v-dialog
               transition="dialog-top-transition"
               width="auto"
@@ -90,19 +124,54 @@ const { push } = useRouter();
       <div data-v-b4e148ca class="div2 v-card v-theme--light v-card--density-default v-card--variant-elevated info text-h5 pa-12" 
       style="text-align: center; display: block; width: 55%; font-size: 2vw">
       <p><b>Fiókbeállítások:</b></p><br>
-      <v-btn
-          text="Felhasználónév megváltoztatása"
-          block
-          style="padding-left: 20px; padding-right: 20px; width: 100%; font-size: 1vw; text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);"
-          @click="push()"
-        ></v-btn><br>
-        <v-btn
-          text="Jelszó megváltoztatása"
-          block
-          style="padding-left: 20px; padding-right: 20px; width: 100%; font-size: 1vw; text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);"
-          @click="push({name:'password-reset-email'})"
-        ></v-btn><br>
+      <v-container style="height: auto;">
+        <v-row style="display: flex;flex-direction: row-reverse; align-items: center;">
+          <v-col cols="12" md="12" >
+            <v-dialog
+              transition="dialog-top-transition"
+              width="auto"
+            >
+              <template v-slot:activator="{ props: activatorProps }">
+                <v-btn
+                v-bind="activatorProps"
+                text="Felhasználónév megváltoztatása"
+                block
+                style="padding-left: 20px; padding-right: 20px; width: 100%; font-size: 1vw; text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);"
+              ></v-btn><br>
+              <v-btn 
+                text="Jelszó megváltoztatása"
+                block
+                style="padding-left: 20px; padding-right: 20px; width: 100%; font-size: 1vw; text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);"
+                @click="push({name:'password-reset-email'})"
+              ></v-btn><br>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-card>
+                  <v-toolbar title="Felhasználónév változtatás" style="height: auto; text-align: center; background: linear-gradient(to right, black, rgb(183, 28, 28), black); color: white;"></v-toolbar>
+                  <v-card-text class="text-h4 pa-12" style="background-color: whitesmoke;">
+                    <v-text-field v-model="ChangeUserNameRef.userName" label="Felhasználó név" variant="outlined" class="field"></v-text-field>
+                    <v-text-field v-model="ChangeUserNameRef.password" label="Jelszó" variant="outlined" class="field"></v-text-field>
+                  </v-card-text>
 
+                  <v-card-actions class="justify-end" style="height: auto; background: linear-gradient(to right, black, rgb(183, 28, 28), black);">
+                    <v-btn
+                      text="MEGERŐSÍTÉS"
+                      @click="handleUserNameChange(ChangeUserNameRef)"
+                      style="color: whitesmoke; font-size: 1vw;"
+                    ></v-btn>
+                    <v-btn
+                      text="Bezárás"
+                      @click="isActive.value = false"
+                      style="color: whitesmoke; font-size: 1vw; text-align: end;"
+                    ></v-btn>
+                    
+                  </v-card-actions>
+                </v-card>
+              </template>
+            </v-dialog>
+          </v-col>
+        </v-row>
+      </v-container>
       </div>
       </div>
       </div>
@@ -198,5 +267,9 @@ const { push } = useRouter();
     display: flex;
     background-color: rgba(255, 255, 255, 0.9);
     box-shadow: 0 0 10px .5px #B71C1C;
+}
+
+.justify-end {
+    justify-content: space-around !important;
 }
 </style>

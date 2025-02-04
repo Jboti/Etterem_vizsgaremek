@@ -32,3 +32,8 @@ export type SetPasswordData = {
 export type ResetPasswordData = {
     email:string
 }
+
+export type ChangeUserName ={
+    userName: string,
+    password: string
+}
