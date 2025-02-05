@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -854,8 +855,8 @@ namespace EtteremSideApp
 
             Panel AdminRadioButtonPanel = new Panel
             {
-                Location = new Point(150,260),
-                Size = new Size(150,20),
+                Location = new Point(150, 260),
+                Size = new Size(150, 20),
             };
 
             RadioButton adminYesRadioButton = new RadioButton
@@ -875,14 +876,14 @@ namespace EtteremSideApp
             };
 
             AdminRadioButtonPanel.Controls.Add(adminYesRadioButton);
-            AdminRadioButtonPanel.Controls.Add (adminNoRadioButton);
+            AdminRadioButtonPanel.Controls.Add(adminNoRadioButton);
 
             Label ActiveLabel = new Label
             {
                 Text = "Aktív:",
                 Location = new Point(20, 285),
                 AutoSize = true,
-                
+
             };
 
             Panel ActiveRadioButtonPanel = new Panel
@@ -1046,12 +1047,38 @@ namespace EtteremSideApp
                 Location = new Point(150, 98),
                 Width = 300,
                 Height = 150,
-                ColumnCount = 2,
-                Columns = { [0] = { Name = "Opció" }, [1] = { Name = "Felár" } },
                 AllowUserToAddRows = false
             };
-            optionsDataGridView.Rows.Add();
+            optionsDataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Opció", HeaderText = "Opció" });
+            optionsDataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Felár", HeaderText = "Felár" });
+            optionsDataGridView.Columns.Add(new DataGridViewCheckBoxColumn { Name = "Szósz", HeaderText = "Szósz" });
 
+            optionsDataGridView.CellValueChanged += (sender, e) =>
+            {
+                if (e.ColumnIndex == optionsDataGridView.Columns["Szósz"].Index && e.RowIndex >= 0)
+                {
+                    var checkBoxCell = (DataGridViewCheckBoxCell)optionsDataGridView.Rows[e.RowIndex].Cells["Szósz"];
+                    var priceCell = (DataGridViewTextBoxCell)optionsDataGridView.Rows[e.RowIndex].Cells["Felár"];
+
+                    if ((bool)checkBoxCell.Value)
+                    {
+                        priceCell.Value = 0;
+                        priceCell.ReadOnly = true;
+                    }
+                    else
+                    {
+                        priceCell.ReadOnly = false;
+                    }
+                }
+            };
+
+            optionsDataGridView.CurrentCellDirtyStateChanged += (sender, e) =>
+            {
+                if (optionsDataGridView.IsCurrentCellDirty && optionsDataGridView.CurrentCell is DataGridViewCheckBoxCell)
+                {
+                    optionsDataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                }
+            };
             Button addOptionButton = new Button
             {
                 Text = "+",
@@ -1189,9 +1216,27 @@ namespace EtteremSideApp
 
         private void toolStripLabel9_Click(object sender, EventArgs e)
         {
-            //meglévő termék módosítása
 
-            
+            var modifications = new List<(string, int, bool)>
+            {
+                ("Extra Cheese", 200, false),
+                ("Spicy Sauce", 100, true)
+            };
+
+            Image image = Image.FromFile("C:\\Users\\xboxh\\Pictures\\2024-04-29\\001.jpg");
+
+            var menuItem = new MenuItem(
+                name: "Kebab Wrap",
+                price: 1500,
+                available: true,
+                modifications: modifications,
+                description: "A delicious kebab wrap with fresh ingredients.",
+                category: "Kebab wrap",
+                img: image
+            );
+
+
+
             panel4.Visible = true;
             panel4.Dock = DockStyle.Fill;
             panel4.FlowDirection = FlowDirection.LeftToRight;
@@ -1201,48 +1246,323 @@ namespace EtteremSideApp
             panel4.BackColor = Color.Green;
             this.Controls.Add(panel4);
             panel4.BringToFront();
-        }
-    }
 
-    public class Order
-    {
-        public List<OrderItem> Items { get; set; }
-        public int Id { get; set; }
-        public int price { get; set; }
-        public bool paid { get; set; }
-        public DateTime timestamp { get; set; }
-        public string customer_name { get; set; }
-        public string message { get; set; }
-        public bool takeAway { get; set; }
-        public Order(List<OrderItem> items, int id, int price, bool paid, DateTime timestamp, string customer_name, string message, bool takeAway)
-        {
-            Items = items;
-            Id = id;
-            this.price = price;
-            this.paid = paid;
-            this.timestamp = timestamp;
-            this.customer_name = customer_name;
-            this.message = message;
-            this.takeAway = takeAway;
-        }
-    }
+            CreateProductEdit(menuItem);
 
-    public class OrderItem
-    {
-        public string name { get; set; }
-        public List<string> modifications { get; set; }
-        public string category { get; set; }
-
-        public OrderItem(string name, List<string> modifications, string category)
-        {
-            this.name = name;
-            this.modifications = modifications;
-            this.category = category;
         }
 
-        public override string ToString()
+        private void CreateProductEdit(MenuItem item)
         {
-            return $"{name} - {category}";
+            panel4.Controls.Clear();
+
+            Panel centralPanel = new Panel
+            {
+                Size = new Size(600, 700),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.LightGray,
+                Location = new Point(20, 60)
+            };
+
+            TextBox searchTextBox = new TextBox
+            {
+                Location = new Point(20, 20),
+                Width = 300
+            };
+            Button searchButton = new Button
+            {
+                Text = "Keresés",
+                Location = new Point(330, 18),
+                Width = 80,
+                Height = 25
+            };
+            searchButton.Click += (sender, e) =>
+            {
+                string searchTerm = searchTextBox.Text;
+            };
+
+            Label nameLabel = new Label
+            {
+                Text = "Név:",
+                Location = new Point(20, 60),
+                AutoSize = true
+            };
+            TextBox nameTextBox = new TextBox
+            {
+                Location = new Point(150, 58),
+                Width = 300,
+                Text = item.name
+            };
+
+            Label priceLabel = new Label
+            {
+                Text = "Ár:",
+                Location = new Point(20, 100),
+                AutoSize = true
+            };
+            NumericUpDown priceNumericUpDown = new NumericUpDown
+            {
+                Location = new Point(150, 98),
+                Width = 100,
+                Minimum = 0,
+                Maximum = 1000000,
+                DecimalPlaces = 2,
+                Value = item.price
+            };
+
+            Label optionsLabel = new Label
+            {
+                Text = "Opciók:",
+                Location = new Point(20, 140),
+                AutoSize = true
+            };
+            DataGridView optionsDataGridView = new DataGridView
+            {
+                Location = new Point(150, 138),
+                Width = 400,
+                Height = 150,
+                AllowUserToAddRows = false
+            };
+
+            optionsDataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Opció", HeaderText = "Opció" });
+            optionsDataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Felár", HeaderText = "Felár" });
+            optionsDataGridView.Columns.Add(new DataGridViewCheckBoxColumn { Name = "Szósz", HeaderText = "Szósz" });
+
+            foreach (var mod in item.modifications)
+            {
+                optionsDataGridView.Rows.Add(mod.Item1, mod.Item2, mod.Item3);
+            }
+
+            optionsDataGridView.CellValueChanged += (sender, e) =>
+            {
+                if (e.ColumnIndex == optionsDataGridView.Columns["Szósz"].Index && e.RowIndex >= 0)
+                {
+                    var checkBoxCell = (DataGridViewCheckBoxCell)optionsDataGridView.Rows[e.RowIndex].Cells["Szósz"];
+                    var priceCell = (DataGridViewTextBoxCell)optionsDataGridView.Rows[e.RowIndex].Cells["Felár"];
+
+                    if ((bool)checkBoxCell.Value)
+                    {
+                        priceCell.Value = 0;
+                        priceCell.ReadOnly = true;
+                    }
+                    else
+                    {
+                        priceCell.ReadOnly = false;
+                    }
+                }
+            };
+
+            optionsDataGridView.CurrentCellDirtyStateChanged += (sender, e) =>
+            {
+                if (optionsDataGridView.IsCurrentCellDirty && optionsDataGridView.CurrentCell is DataGridViewCheckBoxCell)
+                {
+                    optionsDataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                }
+            };
+
+            Button addOptionButton = new Button
+            {
+                Text = "+",
+                Location = new Point(560, 138),
+                Width = 30,
+                Height = 30
+            };
+            addOptionButton.Click += (sender, e) =>
+            {
+                optionsDataGridView.Rows.Add();
+            };
+
+            Button removeOptionButton = new Button
+            {
+                Text = "-",
+                Location = new Point(560, 178),
+                Width = 30,
+                Height = 30
+            };
+            removeOptionButton.Click += (sender, e) =>
+            {
+                foreach (DataGridViewRow row in optionsDataGridView.SelectedRows)
+                {
+                    optionsDataGridView.Rows.Remove(row);
+                }
+            };
+
+            ToolTip toolTip = new ToolTip();
+            toolTip.SetToolTip(addOptionButton, "Sor hozzáadása");
+            toolTip.SetToolTip(removeOptionButton, "Kijelölt sor törlése");
+
+            Label descriptionLabel = new Label
+            {
+                Text = "Leírás:",
+                Location = new Point(20, 300),
+                AutoSize = true
+            };
+            TextBox descriptionTextBox = new TextBox
+            {
+                Location = new Point(150, 298),
+                Width = 300,
+                Height = 80,
+                Multiline = true,
+                Text = item.description
+            };
+
+            Label typeLabel = new Label
+            {
+                Text = "Típus:",
+                Location = new Point(20, 390),
+                AutoSize = true
+            };
+            ComboBox typeComboBox = new ComboBox
+            {
+                Location = new Point(150, 388),
+                Width = 300,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            typeComboBox.Items.AddRange(new string[] { "Kebab wrap", "Kebab box", "Kebab tál", "Köret", "Üdítő" });
+            typeComboBox.SelectedItem = item.category;
+
+            Label imageLabel = new Label
+            {
+                Text = "Kép:",
+                Location = new Point(20, 420),
+                AutoSize = true
+            };
+            PictureBox pictureBox = new PictureBox
+            {
+                Location = new Point(150, 418),
+                Size = new Size(150, 150),
+                BorderStyle = BorderStyle.FixedSingle,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Image = item.img
+            };
+
+            Button imageButton = new Button
+            {
+                Text = "Új kép kiválasztása",
+                Location = new Point(310, 548),
+                Width = 150,
+                Height = 30
+            };
+            imageButton.Click += (sender, e) =>
+            {
+                using (OpenFileDialog openFileDialog = new OpenFileDialog())
+                {
+                    openFileDialog.Filter = "PNG fájlok (*.png)|*.png";
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        Image selectedImage = Image.FromFile(openFileDialog.FileName);
+                        pictureBox.Image = selectedImage;
+                        item.img = selectedImage;
+                    }
+                }
+            };
+
+            Label availabilityLabel = new Label
+            {
+                Text = "Elérhetőség:",
+                Location = new Point(20, 590),
+                AutoSize = true
+            };
+            RadioButton availableRadioButton = new RadioButton
+            {
+                Text = "Elérhető",
+                Location = new Point(150, 588),
+                AutoSize = true,
+                Checked = item.available
+            };
+            RadioButton notAvailableRadioButton = new RadioButton
+            {
+                Text = "Nem elérhető",
+                Location = new Point(250, 588),
+                AutoSize = true,
+                Checked = !item.available
+            };
+
+            centralPanel.Controls.Add(searchTextBox);
+            centralPanel.Controls.Add(searchButton);
+            centralPanel.Controls.Add(nameLabel);
+            centralPanel.Controls.Add(nameTextBox);
+            centralPanel.Controls.Add(priceLabel);
+            centralPanel.Controls.Add(priceNumericUpDown);
+            centralPanel.Controls.Add(optionsLabel);
+            centralPanel.Controls.Add(optionsDataGridView);
+            centralPanel.Controls.Add(addOptionButton);
+            centralPanel.Controls.Add(removeOptionButton);
+            centralPanel.Controls.Add(descriptionLabel);
+            centralPanel.Controls.Add(descriptionTextBox);
+            centralPanel.Controls.Add(typeLabel);
+            centralPanel.Controls.Add(typeComboBox);
+            centralPanel.Controls.Add(imageLabel);
+            centralPanel.Controls.Add(pictureBox);
+            centralPanel.Controls.Add(imageButton);
+            centralPanel.Controls.Add(availabilityLabel);
+            centralPanel.Controls.Add(availableRadioButton);
+            centralPanel.Controls.Add(notAvailableRadioButton);
+
+            panel4.Controls.Add(centralPanel);
+        }
+
+        public class Order
+        {
+            public List<OrderItem> Items { get; set; }
+            public int Id { get; set; }
+            public int price { get; set; }
+            public bool paid { get; set; }
+            public DateTime timestamp { get; set; }
+            public string customer_name { get; set; }
+            public string message { get; set; }
+            public bool takeAway { get; set; }
+            public Order(List<OrderItem> items, int id, int price, bool paid, DateTime timestamp, string customer_name, string message, bool takeAway)
+            {
+                Items = items;
+                Id = id;
+                this.price = price;
+                this.paid = paid;
+                this.timestamp = timestamp;
+                this.customer_name = customer_name;
+                this.message = message;
+                this.takeAway = takeAway;
+            }
+        }
+
+        public class OrderItem
+        {
+            public string name { get; set; }
+            public List<string> modifications { get; set; }
+            public string category { get; set; }
+
+            public OrderItem(string name, List<string> modifications, string category)
+            {
+                this.name = name;
+                this.modifications = modifications;
+                this.category = category;
+            }
+
+            public override string ToString()
+            {
+                return $"{name} - {category}";
+            }
+        }
+
+        public class MenuItem
+        {
+            public string name { get; set; }
+            public int price { get; set; }
+            public bool available { get; set; }
+            public List<(string, int, bool)> modifications { get; set; } //név, ár, sauce e?
+            public string description { get; set; }
+            public string category { get; set; }
+            public Image img { get; set; }
+
+            public MenuItem(string name, int price, bool available, List<(string, int, bool)> modifications, string description, string category, Image img)
+            {
+                this.name = name;
+                this.price = price;
+                this.available = available;
+                this.modifications = modifications;
+                this.description = description;
+                this.category = category;
+                this.img = img;
+            }
         }
     }
 }
