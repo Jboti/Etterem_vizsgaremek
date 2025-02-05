@@ -249,7 +249,7 @@ exports.deleteUser = async (req,res,next) =>
 
 exports.changePassword = async (req, res, next) => {
     try {
-        let { password,token } = req.body
+        const { password, token } = req.body
         if (!token) {
             const error = new Error("No token provided!")
             error.status = 403
@@ -284,7 +284,41 @@ exports.changePassword = async (req, res, next) => {
         res.status(200).send("Jelszó megváltoztatva!")
     } catch (error) {
         next(error)
+    }
+}
+
+exports.changeUserName = async(req,res,next) =>{
+    try{
+        const { userName, password } = req.body
+        let id = req.uid
+        //username helyes
+        id = Number(id)
+        if (!id || isNaN(id)) {
+            const error = new Error("User id not found or id is not a number!")
+            error.status = 404
+            throw error
         }
+        if (!password) {
+            const error = new Error("Password not found!")
+            error.status = 404
+            throw error
+        }
+        //
+        const user = await userService.getUser(id)
+        if (!(await bcrypt.compare(password, user.password))) {
+            res.status(400).json({errmessage:"Helytelen jelszó!"})
+        }
+        const result = await userService.changeUserName(userName, id)
+        if (!result) {
+            const error = new Error("UserName change went wrong!")
+            error.status = 404
+            throw error
+        }
+        res.status(200).send("Felhasználónév megváltoztatva!")
+    } catch(error){
+        next(error)
+    }
+
 }
 
 exports.sendEmail = async(req,res,next) =>{

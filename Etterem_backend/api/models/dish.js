@@ -25,9 +25,13 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.BOOLEAN,
           allowNull: false,
         },
+        sauceOptions: {
+          type: DataTypes.JSON,
+          allowNull: true,
+        },
         customizationOptions: {
           type: DataTypes.JSON,
-          allowNull: false,
+          allowNull: true,
         },
         description: {
           type: DataTypes.TEXT,

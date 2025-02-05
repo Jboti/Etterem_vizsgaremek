@@ -1,5 +1,5 @@
 import axiosClient from "@/lib/axios"
-import type { emailVerifyData, LoginData, LoginResponse, RegistrationData,SetPasswordData , ResetPasswordData} from "./auth"
+import type { emailVerifyData, LoginData, LoginResponse, RegistrationData,SetPasswordData , ResetPasswordData, ChangeUserName} from "./auth"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query"
 import { useRoute, useRouter } from "vue-router"
 import { QUERY_KEYS } from "@/utils/queryKeys"
@@ -94,5 +94,16 @@ const PasswordResetEmail = async (data: ResetPasswordData) => {
 export const usePasswordResetEmail = () => {
     return useMutation({
         mutationFn:PasswordResetEmail,
+    })
+}
+
+const UserNameChange = async (data: ChangeUserName) => {
+    const response = await axiosClient.patch('http://localhost:3000/api/v1/user-name-change', data, {withCredentials: true})
+    return response.data
+}
+
+export const useUserNameChange = () => {
+    return useMutation({
+        mutationFn:UserNameChange,
     })
 }

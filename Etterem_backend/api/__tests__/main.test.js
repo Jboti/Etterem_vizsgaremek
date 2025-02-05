@@ -8,6 +8,9 @@ const dishController = require("../controllers/dishController");
 const purchaseController = require("../controllers/purchaseController");
 const testController = require("../controllers/testController");
 const userController = require("../controllers/userController");
+jest.mock("../db/dbContext", () => require("../../__mocks__/db"));
+
+
 
 describe("Backend tesztek",()=>
 {
@@ -168,46 +171,83 @@ describe("Controller tesztek", ()=>
             expect(userService[funkcio]).toBeDefined();
         });
     })
-        
-})
 
-describe("Frontend tesztek:",()=>{
-    describe("View tesztelések",()=>{
-        test.each(["HomeView","MenuView","OrderView","UserView"])
-        ("Sima View fileok léteznek-e: %s",(file)=>{
-            var view = require(`../../../Etterem_front/src/views/${file}`);
-            expect(view).toBeDefined();
+
+    const dishRepository = require("../repositories/dishRepository");
+
+    describe("Repository tests", () => {
+      beforeAll(async () => {
+        await require("../../__mocks__/db").sequelize.sync({ force: true });
+      });
+  
+      describe("DishRepo tests", () => {
+        beforeAll(async () => {
+          const mockDish = {
+            id: 1,
+            name: "Mock Dish",
+            created: new Date(),
+            price: 10,
+            available: true,
+            customizationOptions: {},
+            description: "This is a mock dish",
+            type: "Mock Type",
+            img: null
+          };
+          await dishRepository.createDish(mockDish);
         });
-    })
-})
-
-const bcrypt = require('bcrypt');
-jest.mock("../api/db/dbContext", () => require('../../__mocks__/userMockock'));
-
-describe('Mock User információk', () => {
-
-    beforeAll( async () => 
-        {
-            await require("../../__mocks__/userMock").sequelize.sync({ force: true });
+  
+        test("GetAllDishes returns 1 dish", async () => {
+          expect((await dishRepository.getAllDishes()).length).toBe(1);
         });
-
-    test('Mock User helyes struktúra', async () => {
-        const users = await mockUsers();
-        const user = users[0]; // Csak egy felhasználó van a mockban
-
-        expect(user).toHaveProperty('id', null);
-        expect(user).toHaveProperty('timestamp');
-        expect(user).toHaveProperty('created');
-        expect(user).toHaveProperty('userName', 'mockUserName');
-        expect(user).toHaveProperty('fullName', 'Mock FullName');
-        expect(user).toHaveProperty('email', 'mock@example.com');
-        expect(user).toHaveProperty('password');
-        expect(user).toHaveProperty('points', 0);
-        expect(user).toHaveProperty('isAdmin', false);
-        expect(user).toHaveProperty('isActive', false);
-
-        // Ellenőrizheted, hogy a jelszó hashelve lett-e
-        const isPasswordValid = await bcrypt.compare('mockPassword', user.password);
-        expect(isPasswordValid).toBe(true);
+  
+        test("deleteDish deletes the dish and GetAllDishes returns 0 dishes", async () => {
+            const mockDish = {
+                id: 1,
+                name: "Mock Dish",
+                created: new Date(),
+                price: 10,
+                available: true,
+                customizationOptions: {},
+                description: "This is a mock dish",
+                type: "Mock Type",
+                img: null
+              };
+            await dishRepository.deleteDish(mockDish);
+          expect((await dishRepository.getAllDishes()).length).toBe(0);
+        });
+      });
     });
-});
+  });
+  
+  describe("Frontend tests", () => {
+    describe("View tests", () => {
+      test.each(["HomeView", "MenuView", "OrderView", "UserView"])("has %s view", async (view) => {
+        const viewFile = require(`../../../Etterem_front/src/views/${view}`);
+        expect(viewFile).toBeDefined();
+      });
+    });
+  });
+  
+  const bcrypt = require("bcrypt");
+  const mockUsers = require("../../__mocks__/userMock");
+  
+  describe("Mock User tests", () => {
+    test("Mock User has correct structure", async () => {
+      const users = await mockUsers();
+      const user = users[0];
+  
+      expect(user).toHaveProperty("id", null);
+      expect(user).toHaveProperty("timestamp");
+      expect(user).toHaveProperty("created");
+      expect(user).toHaveProperty("userName", "mockUserName");
+      expect(user).toHaveProperty("fullName", "Mock FullName");
+      expect(user).toHaveProperty("email", "mock@example.com");
+      expect(user).toHaveProperty("password");
+      expect(user).toHaveProperty("points", 0);
+      expect(user).toHaveProperty("isAdmin", false);
+      expect(user).toHaveProperty("isActive", false);
+  
+      const isPasswordValid = await bcrypt.compare("mockPassword", user.password);
+      expect(isPasswordValid).toBe(true);
+    });
+  });

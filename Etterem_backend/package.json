@@ -104,6 +104,7 @@
     "setprototypeof": "^1.2.0",
     "side-channel": "^1.0.6",
     "simple-update-notifier": "^2.0.0",
+    "sqlite3": "^5.1.7",
     "sqlstring": "^2.3.3",
     "statuses": "^2.0.1",
     "supertest": "^7.0.0",
