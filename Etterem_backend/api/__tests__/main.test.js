@@ -182,9 +182,15 @@ describe("Frontend tesztek:",()=>{
 })
 
 const bcrypt = require('bcrypt');
-const mockUsers = require('../../__mocks__/userMockock');
+jest.mock("../api/db/dbContext", () => require('../../__mocks__/userMockock'));
 
 describe('Mock User információk', () => {
+
+    beforeAll( async () => 
+        {
+            await require("../../__mocks__/userMock").sequelize.sync({ force: true });
+        });
+
     test('Mock User helyes struktúra', async () => {
         const users = await mockUsers();
         const user = users[0]; // Csak egy felhasználó van a mockban
