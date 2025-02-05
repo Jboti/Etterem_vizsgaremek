@@ -291,6 +291,7 @@ exports.changeUserName = async(req,res,next) =>{
     try{
         const { userName, password } = req.body
         let id = req.uid
+       
         //username helyes
         id = Number(id)
         if (!id || isNaN(id)) {
@@ -304,7 +305,7 @@ exports.changeUserName = async(req,res,next) =>{
             throw error
         }
         //
-        const user = await userService.getUser(id)
+        const user = await userService.getUserPwById(id)
         if (!(await bcrypt.compare(password, user.password))) {
             res.status(400).json({errmessage:"Helytelen jelszó!"})
         }

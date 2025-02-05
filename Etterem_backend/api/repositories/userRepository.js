@@ -119,6 +119,17 @@ class userRepository
         )
     }
 
+    async getUserPwById(id)
+    {
+        return await this.User.findOne({
+            where:
+            {
+                id:id
+            },
+            attributes: ['password']
+        })
+    }
+
 }
 
 
