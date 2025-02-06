@@ -41,7 +41,7 @@ const handleLogout = () => {
           </v-btn>
       </v-card>
     </v-container>
-    <div class="infoBoxok">
+    <v-container class="infoBoxok">
       <v-card class="nyitvaTartas">
         <p class="pl-4 pt-2" style="height: 10%;"><b>Nyitvatartás:</b></p>
         <v-card-text class="pt-2" style="align-items: center; padding: 0; height: 90%;">
@@ -65,7 +65,7 @@ const handleLogout = () => {
           </v-card>
         </div>
       </v-card>
-    </div>
+    </v-container>
 </template>
 <style scoped>
 

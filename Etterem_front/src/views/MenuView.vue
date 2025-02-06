@@ -110,13 +110,13 @@ const handleSauceSelected = (sauce: any) => {
     <h1 class="pb-2 pt-2" style="font-weight: bold; color: whitesmoke;">Étlap</h1>
     <v-row style="width: 100%; margin: auto;">
       <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Menük</b></v-btn>
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Wrappek</b></v-btn>
       </v-col>
       <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Kebabok</b></v-btn>  
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Csirke Kebabok</b></v-btn>  
       </v-col>
       <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Köretek</b></v-btn>  
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Borjú Kebabok</b></v-btn>  
       </v-col>
       <v-col cols="6" sm="3">
         <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Üdítők</b></v-btn>

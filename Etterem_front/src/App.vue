@@ -44,12 +44,9 @@ const { push } = useRouter();
 
 <style scoped>
 .background-image {
- 
-  background-image: url(background.jpg);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  height: 100% !important;
+  background-image: linear-gradient(135deg, black, rgb(50,50,50), black);
+  background-size: 300% 300%;
+  animation: anim-bg 12s ease-in-out infinite;
 }
 
 .buttons{
@@ -61,5 +58,17 @@ const { push } = useRouter();
 }
 .buttons:hover{
   transform: scale(1.3);
+}
+
+@keyframes anim-bg {
+  0% {
+    background-position: 0 50%;
+  }
+  50%{
+    background-position: 100% 50%;
+  }
+  100%{
+    background-position: 0 50%;
+  }
 }
 </style>
