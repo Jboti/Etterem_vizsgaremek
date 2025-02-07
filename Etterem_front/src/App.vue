@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { VueQueryDevtools } from '@tanstack/vue-query-devtools'
+import { useCartStore } from './stores/cartStore';
 
 const links = [
   { name: 'Főoldal', icon: 'mdi-home'},
@@ -9,6 +10,8 @@ const links = [
   { name: 'Felhasználó', icon: 'mdi-account'},
 ]
 
+
+const cartStore = useCartStore()
 const { push } = useRouter();
 </script>
 
@@ -31,6 +34,7 @@ const { push } = useRouter();
             @click="push({ name: link.name })">
             <v-icon class="mx-1" style="line-height: 0;">{{ link.icon }}</v-icon>
             <span class="ml-1" style="line-height: 1.5; font-weight: bold;">{{ link.name }}</span>
+            <p class="mx-1" style="line-height: 1; background-color: green; border: 2px solid green; border-radius: 100%; padding: 2%; filter: drop-shadow(0 0 5px black);" v-if="link.name == 'Rendelés' && cartStore.items.length!=0">{{cartStore.items.length}}</p>
           </v-btn>
           </v-col>
           <v-col class="text-center" cols="12">

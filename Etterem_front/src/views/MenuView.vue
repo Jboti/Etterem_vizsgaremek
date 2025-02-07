@@ -1,18 +1,20 @@
 <script lang="ts" setup>
+import type { cartItem } from '@/api/menuItems/items';
 import { useGetDishes } from '@/api/menuItems/itemsQuery'
 import { useGetUserInfo } from '@/api/user/userQuery';
+import { useCartStore } from '@/stores/cartStore';
 import { ref } from 'vue';
 import { toast } from 'vue3-toastify';
 
 const { data } = useGetDishes()
 const { isError } = useGetUserInfo()
 
+const cartStore = useCartStore()
 const selectedDish = ref<any>(null)
 const sauceSelected = ref<boolean>(false)
 const selectedSauce = ref<any>(null)
 const selectedOptions = ref<any[]>([])
 const isModalOpen = ref(false)
-const totalVal = ref<number>(0)
 
 const notify = () => {
     toast.success("A termék a kosárba került!")
@@ -31,25 +33,38 @@ const addToCart = (dish:any) =>{
   if(isError.value)
     toast.error("Ahoz hogy a terméket a kosárba rakd be kell jelentkezz!")
   else{
+    const item = ref<cartItem>()
     if(dish.type == 'Drink'){
-      console.log('-----Kosárba----')
-      console.log(dish.name +" "+ dish.price)
-      totalVal.value += dish.price
-      console.log(totalVal.value+' Ft')
-      console.log('----------------')
+      item.value = {
+        cartId: -1,
+        dishId: dish.id,
+        name: dish.name,
+        price: dish.price+50,
+        sause: selectedSauce.value,
+        options: selectedOptions.value.map(o => o.name).join(', '),
+        type: dish.type
+      }
+      cartStore.addItem(1,item.value)
     }else{
       if(JSON.parse(dish.sauceOptions).length == 1)
         selectedSauce.value = JSON.parse(dish.sauceOptions)[0].name
       if(selectedSauce.value){
+        let value = 0
+        value += dish.price
+        selectedOptions.value.forEach(o => { value += o.price})
+
+        item.value = {
+          cartId: -1,
+          dishId: dish.id,
+          name: dish.name,
+          price: value,
+          sause: selectedSauce.value,
+          options: selectedOptions.value.map(o => o.name).join(', '),
+          type: dish.type
+        }
+        cartStore.addItem(1,item.value)
         toast.success("A termék a kosárba került!")
-        console.log('-----Kosárba----')
-        console.log(dish.name + " " + dish.price+" Ft")
-        totalVal.value += dish.price
-        console.log("szósz: "+selectedSauce.value)
-        selectedOptions.value.forEach(o => {"Módosítás: " +console.log(o.name + " " + o.price); totalVal.value += o.price})
-        console.log(totalVal.value+' Ft')
-        console.log('----------------')
-        
+  
         closeModal()
       }else
         toast.error("Nincs kiválasztva szósz!")
@@ -241,12 +256,13 @@ const handleSauceSelected = (sauce: any) => {
 
 .cartButtons{
   background-color: rgb(22, 139, 22);
-  box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black; 
+  box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black !important; 
+  transition: .7s ease-in-out;
 }
 .cartButtons:hover{
   box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black;
+  transform: scale(1.2);
 }
-
 .topMenu{
   animation: 1s ease-in fade;
 }

@@ -11,7 +11,9 @@ exports.authenticateToken = (req, res, next) =>
         if (err) {
             return res.status(500).json({ errmessage: 'Invalid or expired token.'})
         }
-
+        if(!decoded.validLogin){
+            return res.status(403).json({ errmessage: 'Invalid token.'})
+        }
         
         req.uid = decoded.id
         next()

@@ -13,3 +13,13 @@ export type customizationOptions = {
     name: string,
     price: number
 }
+
+export type cartItem = {
+    cartId:number,
+    dishId:number,
+    name:string,
+    price:number
+    sause:string,
+    options:string,
+    type:string
+}
