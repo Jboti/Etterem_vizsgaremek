@@ -27,6 +27,8 @@ namespace EtteremSideApp
         public static int fontSize = 12;
         public static Color backGroundColor = Color.Black;
         public static bool adminLoggedIn = false;
+        public static string adminName = "---";
+
         public FlowLayoutPanel panel2 = new FlowLayoutPanel();
         public FlowLayoutPanel panel3 = new FlowLayoutPanel();
         public FlowLayoutPanel panel4 = new FlowLayoutPanel();
@@ -636,13 +638,13 @@ namespace EtteremSideApp
             showPasswordButton.BackColor = Color.White;
 
             Button okButton = new Button() { Text = "OK", Left = 100, Top = 100, Width = 80 };
-            okButton.Click += (s, ev) =>
+            okButton.Click += async (s, ev) =>
             {
                 string email = emailTextBox.Text;
                 string password = passwordTextBox.Text;
                 if (email != "" && password != "")
                 {
-                    string check = getLogin(email, password);
+                    string check = await getLogin(email, password);
                     if (check == "")
                     {
                         MessageBox.Show("Hibás jelszó/e-mail cím vagy nincs jogosultsága itt bejelentkezni!");
@@ -652,8 +654,8 @@ namespace EtteremSideApp
                         //sikeres bejelentkezés |
                         //                      V
                         adminLoggedIn = true;
+                        adminName = check;
                         ShowAdminButtons();
-
 
                         loginForm.Close();
                     }
@@ -691,6 +693,8 @@ namespace EtteremSideApp
                 toolStripLabel7.Visible = true;
                 toolStripLabel8.Visible = true;
                 toolStripLabel9.Visible = true;
+
+                toolStripLabel5.Text = adminName;
             }
             else
             {
@@ -703,16 +707,53 @@ namespace EtteremSideApp
                 toolStripLabel7.Visible = false;
                 toolStripLabel8.Visible = false;
                 toolStripLabel9.Visible = false;
+
+                adminName = "---";
+                toolStripLabel5.Text = adminName;
+
             }
         }
 
-        private string getLogin(string givenEmail, string givenPw)
+
+
+        public async Task<string> getLogin(string givenEmail, string givenPw)
         {
-            string username = "awdawd";
+            string url = "http://localhost:3000/api/v1/get-users";
+            try
+            {
+                HttpResponseMessage response = await sharedClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return "";
+                }
 
-            //MessageBox.Show(givenEmail, givenPw);
 
-            return username;
+                string responseBody = await response.Content.ReadAsStringAsync();
+
+                var users = JsonSerializer.Deserialize<List<User>>(responseBody, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (users == null)
+                { 
+                    return "";                
+                }
+
+                foreach (var user in users)
+                {
+                    if (user.Email == givenEmail && user.Password == givenPw && user.isAdmin)
+                    {
+                        return user.Username ?? "";
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return "";
+            }
+
+            return "";
         }
 
 
@@ -1499,6 +1540,22 @@ namespace EtteremSideApp
             centralPanel.Controls.Add(notAvailableRadioButton);
 
             panel4.Controls.Add(centralPanel);
+        }
+
+        public class User
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
+            public string Username { get; set; }
+            public bool isAdmin { get; set; }
+
+            public User(string email, string password, string username, bool isAdmin     )
+            {
+                Email = email;
+                Password = password;
+                Username = username;
+                this.isAdmin = isAdmin;
+            }
         }
 
         public class Order
