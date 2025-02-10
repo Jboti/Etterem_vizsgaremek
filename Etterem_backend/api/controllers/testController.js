@@ -17,7 +17,7 @@ exports.DataCreate = async (req,res,next) =>
             userName: 'béla',
             fullName: 'Big Béla',
             email: 'bigbela@gmail.com',
-            password: 'asd',
+            password: '$2b$10$dRmj7JL4z3yd8QrntEinx.QDeOLaf6uFpYQPatK9xzP8GXVYtEgmC', //asd a jelszó
             points: 200,
             isAdmin: true,
             isActive: true

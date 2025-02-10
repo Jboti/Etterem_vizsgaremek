@@ -29,8 +29,8 @@ const handleLogout = () => {
                 <span class="ml-1" style="line-height: 1.5; font-weight: bold;">{{ link.name }}</span>
           </v-btn>
       </v-card>
-      <v-card v-else class="mr-8 ml-3 logo-buttons-placement">
-        <v-card-title><h2 style="font-size: clamp(16px, 4vw, 50px);"><b>{{ data?.userName }}</b></h2></v-card-title>
+        <v-card v-else class="mr-8 ml-3 logo-buttons-placement">
+        <v-card-title><h2 style="font-size: clamp(16px, 4vw, 50px);"><b>Szia {{ data?.userName }}!</b></h2></v-card-title>
         <v-btn
                 class="mx-1 mt-2 mb-4 pl-5 pr-5 auth-buttons"
                 color="white"
@@ -41,7 +41,7 @@ const handleLogout = () => {
           </v-btn>
       </v-card>
     </v-container>
-    <div class="infoBoxok">
+    <v-container class="infoBoxok">
       <v-card class="nyitvaTartas">
         <p class="pl-4 pt-2" style="height: 10%;"><b>Nyitvatartás:</b></p>
         <v-card-text class="pt-2" style="align-items: center; padding: 0; height: 90%;">
@@ -61,11 +61,11 @@ const handleLogout = () => {
         <div class="terkepInfo">
           <p><b>Térkép:</b></p>
           <v-card class="mb-2 terkep">
-            
+            <!-- iframe map -->
           </v-card>
         </div>
       </v-card>
-    </div>
+    </v-container>
 </template>
 <style scoped>
 

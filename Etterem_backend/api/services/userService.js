@@ -51,6 +51,10 @@ class UserService
     {
         return await userRepository.changeUserName(userName,id)
     }
+    async getUserPwById(id)
+    {
+        return await userRepository.getUserPwById(id)
+    }
 }
 
 module.exports = new UserService()

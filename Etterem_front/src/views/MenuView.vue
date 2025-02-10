@@ -1,18 +1,20 @@
 <script lang="ts" setup>
+import type { cartItem } from '@/api/menuItems/items';
 import { useGetDishes } from '@/api/menuItems/itemsQuery'
 import { useGetUserInfo } from '@/api/user/userQuery';
+import { useCartStore } from '@/stores/cartStore';
 import { ref } from 'vue';
 import { toast } from 'vue3-toastify';
 
 const { data } = useGetDishes()
 const { isError } = useGetUserInfo()
 
+const cartStore = useCartStore()
 const selectedDish = ref<any>(null)
 const sauceSelected = ref<boolean>(false)
 const selectedSauce = ref<any>(null)
 const selectedOptions = ref<any[]>([])
 const isModalOpen = ref(false)
-const totalVal = ref<number>(0)
 
 const notify = () => {
     toast.success("A termék a kosárba került!")
@@ -31,25 +33,38 @@ const addToCart = (dish:any) =>{
   if(isError.value)
     toast.error("Ahoz hogy a terméket a kosárba rakd be kell jelentkezz!")
   else{
+    const item = ref<cartItem>()
     if(dish.type == 'Drink'){
-      console.log('-----Kosárba----')
-      console.log(dish.name +" "+ dish.price)
-      totalVal.value += dish.price
-      console.log(totalVal.value+' Ft')
-      console.log('----------------')
+      item.value = {
+        cartId: -1,
+        dishId: dish.id,
+        name: dish.name,
+        price: dish.price+50,
+        sause: selectedSauce.value,
+        options: selectedOptions.value.map(o => o.name).join(', '),
+        type: dish.type
+      }
+      cartStore.addItem(1,item.value)
     }else{
       if(JSON.parse(dish.sauceOptions).length == 1)
         selectedSauce.value = JSON.parse(dish.sauceOptions)[0].name
       if(selectedSauce.value){
+        let value = 0
+        value += dish.price
+        selectedOptions.value.forEach(o => { value += o.price})
+
+        item.value = {
+          cartId: -1,
+          dishId: dish.id,
+          name: dish.name,
+          price: value,
+          sause: selectedSauce.value,
+          options: selectedOptions.value.map(o => o.name).join(', '),
+          type: dish.type
+        }
+        cartStore.addItem(1,item.value)
         toast.success("A termék a kosárba került!")
-        console.log('-----Kosárba----')
-        console.log(dish.name + " " + dish.price+" Ft")
-        totalVal.value += dish.price
-        console.log("szósz: "+selectedSauce.value)
-        selectedOptions.value.forEach(o => {"Módosítás: " +console.log(o.name + " " + o.price); totalVal.value += o.price})
-        console.log(totalVal.value+' Ft')
-        console.log('----------------')
-        
+  
         closeModal()
       }else
         toast.error("Nincs kiválasztva szósz!")
@@ -110,13 +125,13 @@ const handleSauceSelected = (sauce: any) => {
     <h1 class="pb-2 pt-2" style="font-weight: bold; color: whitesmoke;">Étlap</h1>
     <v-row style="width: 100%; margin: auto;">
       <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Menük</b></v-btn>
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Wrappek</b></v-btn>
       </v-col>
       <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Kebabok</b></v-btn>  
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Csirke Kebabok</b></v-btn>  
       </v-col>
       <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Köretek</b></v-btn>  
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Borjú Kebabok</b></v-btn>  
       </v-col>
       <v-col cols="6" sm="3">
         <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Üdítők</b></v-btn>
@@ -174,7 +189,7 @@ const handleSauceSelected = (sauce: any) => {
           <v-col v-if="selectedDish.sauceOptions" v-for="(sauce,index) in JSON.parse(selectedDish.sauceOptions)" :key="index" cols="12" sm="6" md="6" lg="6" xl="4">
             <div style="display: flex; border: 2px solid rgba(0, 0, 0, 0.4); box-shadow: 0 0 5px .5px rgba(0, 0, 0, 0.4); border-radius: 10px; width: 100%; align-items: center; padding: 3%;">
               <p style="width: 80%;"><b>{{ sauce.name }}: </b></p>
-              <v-btn style="width: 20%; padding: 0; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleSauceSelected(sauce)" :class="{ 'selected-button': selectedSauce == sauce.name || JSON.parse(selectedDish.sauceOptions).length == 1}"><v-icon>mdi-check</v-icon></v-btn>
+              <v-btn style="width: 20%; padding: 0; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleSauceSelected(sauce)" :class="{ 'selected-button': selectedSauce == sauce.name || JSON.parse(selectedDish.sauceOptions).length == 1}"><v-icon>mdi-plus</v-icon></v-btn>
             </div>
           </v-col>
         </v-row>
@@ -185,7 +200,7 @@ const handleSauceSelected = (sauce: any) => {
               <p style="width: 96%; padding: 2%;"><b>{{ dishOption.name }}: </b></p>
               <div style="display: flex; justify-content: space-evenly; align-items: center;width: 96%; padding: 2%;">
                 <p style="width: 50%; ">{{ dishOption.price }} Ft</p>
-                <v-btn style="width: 25%; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleOptionSelected(dishOption)" :class="{'selected-button': selectedOptions.some(o => o.name == dishOption.name) }"><v-icon>mdi-check</v-icon></v-btn>
+                <v-btn style="width: 25%; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleOptionSelected(dishOption)" :class="{'selected-button': selectedOptions.some(o => o.name == dishOption.name) }"><v-icon>mdi-plus</v-icon></v-btn>
               </div>
             </div>
           </v-col>
@@ -241,12 +256,13 @@ const handleSauceSelected = (sauce: any) => {
 
 .cartButtons{
   background-color: rgb(22, 139, 22);
-  box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black; 
+  box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black !important; 
+  transition: .7s ease-in-out;
 }
 .cartButtons:hover{
   box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black;
+  transform: scale(1.2);
 }
-
 .topMenu{
   animation: 1s ease-in fade;
 }
