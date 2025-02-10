@@ -720,39 +720,39 @@ namespace EtteremSideApp
 
         public async Task<string> getLogin(string givenEmail, string givenPw)
         {
-            //string url = "http://localhost:3000/api/v1/get-admin-user";
-            //var credentials = new
-            //{
-            //    email = givenEmail,
-            //    password = givenPw
-            //};
+            string url = "http://localhost:3000/api/v1/get-admin-user";
+            var credentials = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("email", givenEmail),
+                new KeyValuePair<string, string>("password", givenPw)
+            };
 
-            //try
-            //{
-            //    using (var client = new HttpClient())
-            //    {
-            //        var json = JsonSerializer.Serialize(credentials);
-            //        var content = new StringContent(json, Encoding.UTF8, "application/json");
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var content = new FormUrlEncodedContent(credentials);
 
-            //        HttpResponseMessage response = await client.PostAsync(url, content);
-            //        if (response.IsSuccessStatusCode)
-            //        {
-            //            string responseBody = await response.Content.ReadAsStringAsync();
-            //            return responseBody;
-            //        }
-            //        else
-            //        {
-            //            return "";
-            //        }
-            //    }
-            //}
-            //catch (Exception)
-            //{
-            //    // Handle exceptions as needed
-            //    return "";
-            //}
-            return "hehe";
+                    HttpResponseMessage response = await client.PostAsync(url, content);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        return responseBody.Replace("{","").Replace("}","").Replace(",","").Replace("\":\"", ": ").Replace("\"","").Replace("email","e-mail").Replace("userName"," Név");
+                    }
+                    else
+                    {
+                        // Handle unsuccessful response as needed
+                        return "";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions as needed
+                return "";
+            }
         }
+
 
 
 
