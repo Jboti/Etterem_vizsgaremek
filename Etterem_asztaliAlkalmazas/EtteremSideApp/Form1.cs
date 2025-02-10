@@ -4,8 +4,10 @@ using System.Drawing;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -718,42 +720,38 @@ namespace EtteremSideApp
 
         public async Task<string> getLogin(string givenEmail, string givenPw)
         {
-            string url = "http://localhost:3000/api/v1/get-users";
-            try
-            {
-                HttpResponseMessage response = await sharedClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return "";
-                }
+            //string url = "http://localhost:3000/api/v1/get-admin-user";
+            //var credentials = new
+            //{
+            //    email = givenEmail,
+            //    password = givenPw
+            //};
 
+            //try
+            //{
+            //    using (var client = new HttpClient())
+            //    {
+            //        var json = JsonSerializer.Serialize(credentials);
+            //        var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                string responseBody = await response.Content.ReadAsStringAsync();
-
-                var users = JsonSerializer.Deserialize<List<User>>(responseBody, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (users == null)
-                { 
-                    return "";                
-                }
-
-                foreach (var user in users)
-                {
-                    if (user.Email == givenEmail && user.Password == givenPw && user.isAdmin)
-                    {
-                        return user.Username ?? "";
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                return "";
-            }
-
-            return "";
+            //        HttpResponseMessage response = await client.PostAsync(url, content);
+            //        if (response.IsSuccessStatusCode)
+            //        {
+            //            string responseBody = await response.Content.ReadAsStringAsync();
+            //            return responseBody;
+            //        }
+            //        else
+            //        {
+            //            return "";
+            //        }
+            //    }
+            //}
+            //catch (Exception)
+            //{
+            //    // Handle exceptions as needed
+            //    return "";
+            //}
+            return "hehe";
         }
 
 
@@ -1264,7 +1262,7 @@ namespace EtteremSideApp
                 ("Spicy Sauce", 100, true)
             };
 
-            Image image = Image.FromFile("C:\\Users\\xboxh\\Pictures\\2024-04-29\\001.jpg");
+            //Image image = Image.FromFile("C:\\Users\\xboxh\\Pictures\\2024-04-29\\001.jpg");
 
             var menuItem = new MenuItem(
                 name: "Kebab Wrap",
@@ -1273,7 +1271,7 @@ namespace EtteremSideApp
                 modifications: modifications,
                 description: "A delicious kebab wrap with fresh ingredients.",
                 category: "Kebab wrap",
-                img: image
+                img: null
             );
 
 
@@ -1545,16 +1543,12 @@ namespace EtteremSideApp
         public class User
         {
             public string Email { get; set; }
-            public string Password { get; set; }
             public string Username { get; set; }
-            public bool isAdmin { get; set; }
 
-            public User(string email, string password, string username, bool isAdmin     )
+            public User(string email, string username)
             {
                 Email = email;
-                Password = password;
                 Username = username;
-                this.isAdmin = isAdmin;
             }
         }
 

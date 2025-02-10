@@ -409,7 +409,6 @@ exports.getAdminUser = async (req,res,next) =>
                 error.status = 404
                 throw error
             }
-
             const user = await userService.getUserByEmail(email)
             if(!user){
                 res.status(404).json({errmessage:"Az email címmel nincs regisztálva felhasználó!"})
