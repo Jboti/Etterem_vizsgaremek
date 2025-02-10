@@ -18,7 +18,7 @@ const { push } = useRouter();
 <template>
   <v-app>
     <v-main class="fill-height background-image" style=" --v-layout-bottom: 0px; font-family: 'Times New Roman', Times, serif;">
-      <VueQueryDevtools />
+      <!-- <VueQueryDevtools /> -->
       <RouterView />
     </v-main>
     <v-navigation-drawer style="transform: translateY(0%)" location="bottom" app>
@@ -34,7 +34,7 @@ const { push } = useRouter();
             @click="push({ name: link.name })">
             <v-icon class="mx-1" style="line-height: 0;">{{ link.icon }}</v-icon>
             <span class="ml-1" style="line-height: 1.5; font-weight: bold;">{{ link.name }}</span>
-            <p class="mx-1" style="line-height: 1; background-color: green; border: 2px solid green; border-radius: 100%; padding: 2%; filter: drop-shadow(0 0 5px black);" v-if="link.name == 'Rendelés' && cartStore.items.length!=0">{{cartStore.items.length}}</p>
+            <p class="mx-3" style="line-height: 1; background-color: green; border: 2px solid green; border-radius: 100%; padding: 2%; filter: drop-shadow(0 0 5px black);" v-if="link.name == 'Rendelés' && cartStore.totalItems !=0">{{cartStore.totalItems}}</p>
           </v-btn>
           </v-col>
           <v-col class="text-center" cols="12">

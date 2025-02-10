@@ -4,9 +4,16 @@ export type dishData = {
     created: Date,
     price: number,
     available: boolean,
+    sauceOptions: sauseOptions,
     customizationOptions: CustomizationOptions,
     description: string,
-    type: string
+    type: string,
+    img: Blob,
+    filter?: any;
+}
+
+export type sauseOptions = {
+    name: string
 }
 
 export type customizationOptions = {
@@ -21,5 +28,6 @@ export type cartItem = {
     price:number
     sause:string,
     options:string,
-    type:string
+    type:string,
+    quantity: number
 }

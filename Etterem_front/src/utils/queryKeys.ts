@@ -1,10 +1,6 @@
 const USER_KEYS = {
-    users: 'users',
-    user: 'user'
-}
-
-const AUTH_KEYS = {
-    passwordReset:'passwordReset'
+    user: 'user',
+    validToken: 'validToken',
 }
 
 const DISH_KEYS = {
@@ -15,6 +11,5 @@ const DISH_KEYS = {
 
 export const QUERY_KEYS = {
     ...USER_KEYS,
-    ...AUTH_KEYS,
     ...DISH_KEYS,
 } as const

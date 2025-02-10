@@ -2,8 +2,13 @@
 import { useGetUserInfo, useUserNameChange } from "@/api/user/userQuery"
 import { useRouter } from 'vue-router'
 import type { ChangeUserName } from '@/api/auth/auth';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { toast } from 'vue3-toastify';
+
+onMounted(() => {
+  window.scrollTo(0, 0);
+})
+
 const notify = () => {
     toast.success("Sikeres felhasználónév változtatás!")
 }
@@ -44,11 +49,7 @@ const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
     <div v-if="isLoading" class="spinner"></div>
 
     <div v-else-if="isError">
-      <v-card>
-        <h1>Hiba a validáció során, kérlek jelentkezz be újra!</h1>
-        <h2>{{ data }}</h2>
-      </v-card>
-      <!-- <p>{{ error?.response?.data?.errmessage || "An error occurred." }}</p> -->
+      <v-card class="mt-8 logged-out" style="text-align: center;"><h1 style="font-size: clamp(12px, 2.5vh, 30px);"><b>Ahoz hogy megnézd és módosítsd az adataidat először be kell hogy jelentkezz!</b></h1></v-card>
     </div>
 
     
@@ -189,6 +190,21 @@ const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
   border-radius: 50%; 
   animation: spin 1s linear infinite;
 }
+
+.logged-out{
+  margin: auto;
+  width: 90%;
+  max-width: 1000px;
+  height: 20dvh;
+  background-color: #B71C1C;
+  box-shadow: 0 0 40px 8px black inset, 0 0 5px 2px black;
+  color: whitesmoke;
+  text-shadow: 0 3px black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 
 .Tooltip {
     position: relative;

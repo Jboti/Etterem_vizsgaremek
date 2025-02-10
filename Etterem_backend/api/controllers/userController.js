@@ -207,7 +207,7 @@ exports.loginUser = async (req,res,next) =>
             res.status(404).json({errmessage:"A felhasználó nincs aktiválva, ha még nem aktiválta email címét tegye meg az azon kapott üzeneten keresztül! Más hiba esetén vegye fel velünk a kapcsolatot a: donercegled@gmail.com címen!"})
         }
         else if(await bcrypt.compare(password, user.password)){
-            const token = jwt.sign({ id:user.id, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" })
+            const token = jwt.sign({ id:user.id, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" })   
             res.status(200).json({token:token})
         }
         else
@@ -395,37 +395,37 @@ exports.sendEmail = async(req,res,next) =>{
 }
 
 exports.getAdminUser = async (req,res,next) =>
+{
+    try
     {
-        try
-        {
-            const {email, password} = req.body
-            if(!email){
-                or = new Error("Email not found!")
-                error.status = 404
-                throw error
-            }
-            if (!password) {
-                const error = new Error("Password not found!")
-                error.status = 404
-                throw error
-            }
-            const user = await userService.getUserByEmail(email)
-            if(!user){
-                res.status(404).json({errmessage:"Az email címmel nincs regisztálva felhasználó!"})
-            }
-            else if(user.isActive == false){
-                res.status(404).json({errmessage:"A felhasználó nincs aktiválva, ha még nem aktiválta email címét tegye meg az azon kapott üzeneten keresztül! Más hiba esetén vegye fel velünk a kapcsolatot a: donercegled@gmail.com címen!"})
-            }
-            else if(await bcrypt.compare(password, user.password)){
-                if(user.isAdmin)
-                    res.status(200).json({email:user.email,userName:user.userName})
-                else
-                   res.status(500).json({errmessage:"Nem admin fiók!"}) 
-            }
-            else
-                res.status(400).json({errmessage:"Helytelen email cím vagy jelszó!"})
-
-        }catch(error){
-            next(error)
+        const {email, password} = req.body
+        if(!email){
+            or = new Error("Email not found!")
+            error.status = 404
+            throw error
         }
+        if (!password) {
+            const error = new Error("Password not found!")
+            error.status = 404
+            throw error
+        }
+        const user = await userService.getUserByEmail(email)
+        if(!user){
+            res.status(404).json({errmessage:"Az email címmel nincs regisztálva felhasználó!"})
+        }
+        else if(user.isActive == false){
+            res.status(404).json({errmessage:"A felhasználó nincs aktiválva, ha még nem aktiválta email címét tegye meg az azon kapott üzeneten keresztül! Más hiba esetén vegye fel velünk a kapcsolatot a: donercegled@gmail.com címen!"})
+        }
+        else if(await bcrypt.compare(password, user.password)){
+            if(user.isAdmin)
+                res.status(200).json({email:user.email,userName:user.userName})
+            else
+                res.status(500).json({errmessage:"Nem admin fiók!"}) 
+        }
+        else
+            res.status(400).json({errmessage:"Helytelen email cím vagy jelszó!"})
+
+    }catch(error){
+        next(error)
     }
+}
