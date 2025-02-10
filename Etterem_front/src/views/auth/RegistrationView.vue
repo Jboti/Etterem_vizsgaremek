@@ -26,7 +26,7 @@ const notify = () => {
 
 
 const validateUsername = (userName: string): boolean => {
-    const userNameRegex = /^[A-Za-z][A-Za-z0-9_]{5,18}$/ //min 6 hosszú, max 18 hosszú, ne kezdődjön számmal
+    const userNameRegex = /^[A-Za-záÁéÉöÖőŐóÓüÜűŰúÚ][A-Za-z0-9_áÁéÉöÖőŐóÓüÜűŰúÚ]{5,18}$/ //min 6 hosszú, max 18 hosszú, ne kezdődjön számmal
     return userNameRegex.test(userName)
 }
 

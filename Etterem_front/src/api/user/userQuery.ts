@@ -27,7 +27,7 @@ export const useGetUserInfo = () => {
         {
             queryKey: [QUERY_KEYS.user],
             queryFn: getUserInfo,
-            staleTime: 1000 * 60 * 10,
+            staleTime: Infinity,
             retry: 0
         }
     )

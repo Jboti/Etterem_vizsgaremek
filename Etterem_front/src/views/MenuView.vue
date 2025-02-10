@@ -189,7 +189,7 @@ const handleSauceSelected = (sauce: any) => {
           <v-col v-if="selectedDish.sauceOptions" v-for="(sauce,index) in JSON.parse(selectedDish.sauceOptions)" :key="index" cols="12" sm="6" md="6" lg="6" xl="4">
             <div style="display: flex; border: 2px solid rgba(0, 0, 0, 0.4); box-shadow: 0 0 5px .5px rgba(0, 0, 0, 0.4); border-radius: 10px; width: 100%; align-items: center; padding: 3%;">
               <p style="width: 80%;"><b>{{ sauce.name }}: </b></p>
-              <v-btn style="width: 20%; padding: 0; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleSauceSelected(sauce)" :class="{ 'selected-button': selectedSauce == sauce.name || JSON.parse(selectedDish.sauceOptions).length == 1}"><v-icon>mdi-check</v-icon></v-btn>
+              <v-btn style="width: 20%; padding: 0; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleSauceSelected(sauce)" :class="{ 'selected-button': selectedSauce == sauce.name || JSON.parse(selectedDish.sauceOptions).length == 1}"><v-icon>mdi-plus</v-icon></v-btn>
             </div>
           </v-col>
         </v-row>
@@ -200,7 +200,7 @@ const handleSauceSelected = (sauce: any) => {
               <p style="width: 96%; padding: 2%;"><b>{{ dishOption.name }}: </b></p>
               <div style="display: flex; justify-content: space-evenly; align-items: center;width: 96%; padding: 2%;">
                 <p style="width: 50%; ">{{ dishOption.price }} Ft</p>
-                <v-btn style="width: 25%; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleOptionSelected(dishOption)" :class="{'selected-button': selectedOptions.some(o => o.name == dishOption.name) }"><v-icon>mdi-check</v-icon></v-btn>
+                <v-btn style="width: 25%; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleOptionSelected(dishOption)" :class="{'selected-button': selectedOptions.some(o => o.name == dishOption.name) }"><v-icon>mdi-plus</v-icon></v-btn>
               </div>
             </div>
           </v-col>

@@ -18,7 +18,7 @@ const { push } = useRouter();
 <template>
   <v-app>
     <v-main class="fill-height background-image" style=" --v-layout-bottom: 0px; font-family: 'Times New Roman', Times, serif;">
-      <!-- <VueQueryDevtools /> -->
+      <VueQueryDevtools />
       <RouterView />
     </v-main>
     <v-navigation-drawer style="transform: translateY(0%)" location="bottom" app>
