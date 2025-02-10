@@ -27,5 +27,5 @@ db.dish = Dish;
 db.orderDishConnection = OrderDishConnection;
 db.orderConnection = OrderConnection;
 db.purchase = Purchase;
-
+db.user = User;
 module.exports = db;
