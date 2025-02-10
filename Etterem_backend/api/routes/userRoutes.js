@@ -27,6 +27,7 @@ router.patch("/password-reset-email",userController.sendEmail)
 router.post("/password-reset",userAuth.authenticateToken ,userController.sendEmail)
 // user felhnév változtatása
 router.patch("/user-name-change",userAuth.authenticateToken, userController.changeUserName)
-
+//admin fiók lekérése
+router.get("/get-admin-user",userController.getAdminUser)
 
 module.exports = router
