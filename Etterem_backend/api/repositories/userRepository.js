@@ -73,11 +73,13 @@ class userRepository
     
     async checkForExistinguserName(userName)
     {
-        return await this.User.findOne({
-            where:{
-                userName: userName
-            }
-        })
+        return await this.User.findOne(
+            {
+                where:
+                {
+                    userName: userName
+                }
+            })
     }
 
     async getUserByEmail(email)
