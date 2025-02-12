@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
-using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static EtteremSideApp.Form1;
 
 //csak C:-n lehet futtatni!!
 
@@ -30,10 +28,23 @@ namespace EtteremSideApp
         public static Color backGroundColor = Color.Black;
         public static bool adminLoggedIn = false;
         public static string adminName = "---";
+        public string[] allCategories = new string[] { "Kebab wrap", "Kebab box", "Kebab tál", "Köret", "Üdítő" }; // ehhez kell majd egy get-all-categories endpoint
+
+        public static List<FullUser> selectedUsers = new List<FullUser>(); // user edit keresési részéhez tartozik
+        public static FullUser selectedUser;
+
+        public static List<MenuItem> selectedMenuItems = new List<MenuItem>();
+        public static MenuItem selectedMenuItem;
 
         public FlowLayoutPanel panel2 = new FlowLayoutPanel();
         public FlowLayoutPanel panel3 = new FlowLayoutPanel();
         public FlowLayoutPanel panel4 = new FlowLayoutPanel();
+
+        public ListBox resultsListBoxUser;
+        public TextBox searchTextBoxUser;
+
+        public ListBox resultsListBoxDish;
+        public TextBox searchTextBoxDish;
 
 
 
@@ -741,14 +752,12 @@ namespace EtteremSideApp
                     }
                     else
                     {
-                        // Handle unsuccessful response as needed
                         return "";
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                // Handle exceptions as needed
                 return "";
             }
         }
@@ -785,11 +794,17 @@ namespace EtteremSideApp
 
 
 
-            CreateUserControl(1, "xXx_TesztMatyi_xXx", "Tesztelő Mátyás", "matyizom@gmail.com", 6969, true, false);
+            CreateUserControl(0,null,null,null,0, false, false);
 
             this.Controls.Add(panel2);
             panel2.BringToFront();
         }
+
+
+
+
+
+
         private void CreateUserControl(int id, string username, string fullname, string email, int points, bool admin, bool active)
         {
             panel2.Controls.Clear();
@@ -798,10 +813,10 @@ namespace EtteremSideApp
             {
                 Size = new Size(400, 400),
                 BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.Gray,
+                BackColor = Color.LightGray,
             };
 
-            TextBox searchTextBox = new TextBox
+            searchTextBoxUser = new TextBox
             {
                 Location = new Point(20, 20),
                 Width = 250
@@ -889,7 +904,6 @@ namespace EtteremSideApp
                 Text = "Admin:",
                 Location = new Point(20, 260),
                 AutoSize = true,
-                //Checked = admin
             };
 
             Panel AdminRadioButtonPanel = new Panel
@@ -967,7 +981,57 @@ namespace EtteremSideApp
             };
             deleteButton.Click += DeleteButton_Click;
 
-            centralPanel.Controls.Add(searchTextBox);
+            // Találatok
+            Panel resultsPanel = new Panel
+            {
+                Location = new Point(410, 0),
+                Size = new Size(250, 400),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.LightGray,
+            };
+
+            Label resultsLabel = new Label
+            {
+                Text = "Találatok",
+                Location = new Point(10, 10),
+                AutoSize = true,
+                Font = new Font("Arial", 10, FontStyle.Bold),
+            };
+
+            resultsListBoxUser = new ListBox
+            {
+                Location = new Point(10, 40),
+                Size = new Size(230, 350),
+            };
+
+            resultsListBoxUser.SelectedIndexChanged += (sender, e) =>
+            {
+                if (resultsListBoxUser.SelectedItem != null)
+                {
+                    string selectedUsername = resultsListBoxUser.SelectedItem.ToString();
+
+                    selectedUser = selectedUsers.FirstOrDefault(user => user.Email == selectedUsername);
+
+                    if (selectedUser != null)
+                    {
+                        idTextBox.Text = selectedUser.Id.ToString();
+                        usernameTextBox.Text = selectedUser.Username;
+                        fullNameTextBox.Text = selectedUser.FullName;
+                        emailTextBox.Text = selectedUser.Email;
+                        pointsNumericUpDown.Value = selectedUser.points;
+                        adminYesRadioButton.Checked = selectedUser.isAdmin;
+                        adminNoRadioButton.Checked = !selectedUser.isAdmin;
+                        ActiveYesRadioButton.Checked = selectedUser.isActive;
+                        ActiveNoRadioButton.Checked = !selectedUser.isActive;
+                    }
+                }
+            };
+
+            resultsPanel.Controls.Add(resultsLabel);
+            resultsPanel.Controls.Add(resultsListBoxUser);
+
+
+            centralPanel.Controls.Add(searchTextBoxUser);
             centralPanel.Controls.Add(searchButton);
             centralPanel.Controls.Add(idLabel);
             centralPanel.Controls.Add(idTextBox);
@@ -987,16 +1051,14 @@ namespace EtteremSideApp
             centralPanel.Controls.Add(deleteButton);
 
             panel2.Controls.Add(centralPanel);
+            panel2.Controls.Add(resultsPanel);
         }
 
 
         private void DeleteButton_Click(object sender, EventArgs e)
         {
             //kiüríti a mezőket
-
             CreateUserControl(0, null, null, null, 0, false, false);
-
-
         }
 
         private void SaveButton_Click(object sender, EventArgs e)
@@ -1004,19 +1066,110 @@ namespace EtteremSideApp
             //menti a módosításokat
 
             //ide kell megírni azt hogy feltöltse az új adatokat
-
+            postUserModifications(selectedUser.Username, selectedUser.FullName, selectedUser.Email, selectedUser.points, selectedUser.isAdmin, selectedUser.isActive);
             CreateUserControl(0, null, null, null, 0, false, false);
-
         }
 
-        private void SearchButton_Click(object sender, EventArgs e)
+        private async void postUserModifications(string givenUsername, string givenFullname, string givenEmail, int givenPoints, bool givenisAdmin,bool givenisActive)
         {
-            //itt kell keresni email cím alapján
 
+            MessageBox.Show(givenUsername + " " + givenFullname + " " + givenEmail + " " + Convert.ToString(givenPoints) + " " + Convert.ToString(givenisAdmin) + " " + Convert.ToString(givenisActive));
 
+            //string url = "http://localhost:3000/api/v1/post-updated-user";
+            //var credentials = new List<KeyValuePair<string, string>>
+            //{
+            //    new KeyValuePair<string, string>("id", null),
+            //    new KeyValuePair<string, string>("username", givenUsername),
+            //    new KeyValuePair<string, string>("fullname", givenFullname),
+            //    new KeyValuePair<string, string>("email", givenEmail),
+            //    new KeyValuePair<string, string>("points", Convert.ToString(givenPoints)),
+            //    new KeyValuePair<string, string>("isAdmin", Convert.ToString(givenisAdmin)),
+            //    new KeyValuePair<string, string>("isActive", Convert.ToString(givenisActive)),
+            //};
 
-            //CreateUserControl(0, null, null, null, 0, false, false);
+            //try
+            //{
+            //    using (var client = new HttpClient())
+            //    {
+            //        var content = new FormUrlEncodedContent(credentials);
+
+            //        HttpResponseMessage response = await client.PostAsync(url, content);
+            //        if (response.IsSuccessStatusCode)
+            //        {
+            //            string responseBody = await response.Content.ReadAsStringAsync();
+            //        }
+            //        else
+            //        {
+            //        }
+            //    }
+            //}
+            //catch
+            //{
+            //}
         }
+
+        private async void SearchButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                selectedUsers.Clear();
+                selectedUsers = await getAllUsers();
+
+                UpdateSearchResults(selectedUsers);
+            }
+            catch
+            {
+                MessageBox.Show("Hiba a keresés során 3");
+            }
+        }
+
+        private void UpdateSearchResults(List<FullUser> users)
+        {
+            resultsListBoxUser.Items.Clear();
+            string searchString = searchTextBoxUser.Text.ToLower();
+
+            foreach (var user in users)
+            {
+                if (user.Email.ToLower().Contains(searchString))
+                {
+                    resultsListBoxUser.Items.Add(user.Email);
+                }
+            }
+        }
+
+
+        public async Task<List<FullUser>> getAllUsers()
+        {
+            string url = "http://localhost:3000/api/v1/get-users";
+
+            try
+            {
+                HttpResponseMessage response = await sharedClient.GetAsync(url).ConfigureAwait(false);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+                    List<FullUser> users = JsonSerializer.Deserialize<List<FullUser>>(jsonResponse, options);
+                    if (users != null)
+                    {
+                        return users;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("HIBA a felhasználók lekérdezése során 1");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("HIBA a felhasználók lekérdezése során 2");
+            }
+
+            return new List<FullUser>(); 
+        }
+    
 
         private void toolStripLabel8_Click(object sender, EventArgs e)
         {
@@ -1302,7 +1455,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 60)
             };
 
-            TextBox searchTextBox = new TextBox
+            searchTextBoxDish = new TextBox
             {
                 Location = new Point(20, 20),
                 Width = 300
@@ -1314,10 +1467,7 @@ namespace EtteremSideApp
                 Width = 80,
                 Height = 25
             };
-            searchButton.Click += (sender, e) =>
-            {
-                string searchTerm = searchTextBox.Text;
-            };
+            searchButton.Click += SearchButton_Dish_Click;
 
             Label nameLabel = new Label
             {
@@ -1456,7 +1606,7 @@ namespace EtteremSideApp
                 Width = 300,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            typeComboBox.Items.AddRange(new string[] { "Kebab wrap", "Kebab box", "Kebab tál", "Köret", "Üdítő" });
+            typeComboBox.Items.AddRange(allCategories);
             typeComboBox.SelectedItem = item.category;
 
             Label imageLabel = new Label
@@ -1516,7 +1666,60 @@ namespace EtteremSideApp
                 Checked = !item.available
             };
 
-            centralPanel.Controls.Add(searchTextBox);
+            Panel resultsPanel = new Panel
+            {
+                Location = new Point(640, 60),
+                Size = new Size(250, 700),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.LightGray
+            };
+
+            Label resultsLabel = new Label
+            {
+                Text = "Keresési találatok",
+                Location = new Point(10, 10),
+                AutoSize = true,
+                Font = new Font("Arial", 10, FontStyle.Bold),
+            };
+
+            resultsListBoxDish = new ListBox
+            {
+                Location = new Point(10, 40),
+                Size = new Size(230, 650),
+            };
+
+            resultsListBoxDish.SelectedIndexChanged += (sender, e) =>
+            {
+                if (resultsListBoxDish.SelectedItem != null)
+                {
+                    string selectedItemname = resultsListBoxDish.SelectedItem.ToString();
+
+                    selectedMenuItem = selectedMenuItems.FirstOrDefault(menu_item => menu_item.name == selectedItemname);
+                    if (selectedMenuItem != null)
+                    {
+                        nameTextBox.Text = selectedMenuItem.name;
+                        priceNumericUpDown.Value = selectedMenuItem.price;
+                        descriptionTextBox.Text = selectedMenuItem.description;
+                        typeComboBox.SelectedItem = selectedMenuItem.category;
+                        pictureBox.Image = selectedMenuItem.img;
+                        availableRadioButton.Checked = selectedMenuItem.available;
+                        notAvailableRadioButton.Checked = !selectedMenuItem.available;
+
+                        //optionsDataGridView.Rows.Clear();
+                        //foreach (var mod in selectedMenuItem.modifications)
+                        //{
+                        //    optionsDataGridView.Rows.Add(mod.Item1, mod.Item2, new CheckBox().Checked = mod.Item3); //kérdéses hogy adja vissza a menu itemeket
+                        //}
+                    }
+                }
+            };
+
+            // Add the results list box and label to the results panel
+            resultsPanel.Controls.Add(resultsLabel);
+            resultsPanel.Controls.Add(resultsListBoxDish);
+
+
+            centralPanel.Controls.Add(searchTextBoxDish);
             centralPanel.Controls.Add(searchButton);
             centralPanel.Controls.Add(nameLabel);
             centralPanel.Controls.Add(nameTextBox);
@@ -1538,6 +1741,106 @@ namespace EtteremSideApp
             centralPanel.Controls.Add(notAvailableRadioButton);
 
             panel4.Controls.Add(centralPanel);
+            panel4.Controls.Add(resultsPanel);
+        }
+
+        private async void SearchButton_Dish_Click(object sender, EventArgs e)
+        {
+            //dish keresés gomb
+            try 
+            { 
+                selectedMenuItems.Clear();
+                selectedMenuItems = await getAllMenuItems();
+
+                UpdateResoultsDish(selectedMenuItems);
+            }
+            catch 
+            {
+                MessageBox.Show("Hiba az ételek lekérdezése során 3");
+            }
+        }
+
+        public async Task<List<MenuItem>> getAllMenuItems()
+        {
+            string url = "http://localhost:3000/api/v1/get-dishes";
+
+            try
+            {
+                HttpResponseMessage response = await sharedClient.GetAsync(url).ConfigureAwait(false);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+                    List<MenuItem> items = JsonSerializer.Deserialize<List<MenuItem>>(jsonResponse, options);
+                    if (items != null)
+                    {
+                        return items;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("HIBA az ételek lekérdezése során 1");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("HIBA az ételek lekérdezése során 2");
+            }
+
+            return new List<MenuItem>();
+        }
+
+        private void UpdateResoultsDish(List<MenuItem> menuitems)
+        { 
+            resultsListBoxDish.Items.Clear();
+            string searchString = searchTextBoxDish.Text.ToLower();
+
+            foreach (MenuItem menuitem in menuitems) 
+            {
+                if (menuitem.name.ToLower().Contains(searchString))
+                { 
+                    resultsListBoxDish.Items.Add(menuitem.name);
+                }
+            }
+        }
+
+        private async void postDishModifications(string givenItemName, int givenPrice, bool givenAvailable, List<(string, int, bool)> givenModifications, string givenDescription, string givenCategory /*ide kerül majd a blob*/)
+        {
+
+            MessageBox.Show(givenItemName + " " + Convert.ToString(givenPrice) + " " + Convert.ToString(givenAvailable) + " " + givenDescription + " " + givenCategory);
+
+            //string url = "http://localhost:3000/api/v1/post-updated-user";
+            //var credentials = new List<KeyValuePair<string, string>>
+            //{
+            //    new KeyValuePair<string, string>("name", givenItemName),
+            //    new KeyValuePair<string, string>("price", Convert.ToString(givenPrice)),
+            //    new KeyValuePair<string, string>("available", Convert.ToString(givenAvailable)),
+            //    new KeyValuePair<string, string>("lista", null), //ez kérdéses hogy oldom meg
+            //    new KeyValuePair<string, string>("description", givenDescription),
+            //    new KeyValuePair<string, string>("category", givenCategory),
+            //};
+
+            //try
+            //{
+            //    using (var client = new HttpClient())
+            //    {
+            //        var content = new FormUrlEncodedContent(credentials);
+
+            //        HttpResponseMessage response = await client.PostAsync(url, content);
+            //        if (response.IsSuccessStatusCode)
+            //        {
+            //            string responseBody = await response.Content.ReadAsStringAsync();
+            //        }
+            //        else
+            //        {
+            //        }
+            //    }
+            //}
+            //catch
+            //{
+            //}
         }
 
         public class User
@@ -1549,6 +1852,28 @@ namespace EtteremSideApp
             {
                 Email = email;
                 Username = username;
+            }
+        }
+
+        public class FullUser
+        { 
+            public int Id { get; set; }
+            public string Email { get; set; }
+            public string Username { get; set; }
+            public string FullName { get; set; }
+            public int points { get; set; }
+            public bool isAdmin { get; set; }
+            public bool isActive { get; set; }
+
+            public FullUser(int id, string email, string username, string fullName, int points, bool isAdmin, bool isActive)
+            {
+                Id = id;
+                Email = email;
+                Username = username;
+                FullName = fullName;
+                this.points = points;
+                this.isAdmin = isAdmin;
+                this.isActive = isActive;
             }
         }
 
