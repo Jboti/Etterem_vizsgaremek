@@ -12,6 +12,7 @@ export const useGetDishes = () => {
     return useQuery(
         {
             queryKey: [QUERY_KEYS.getDishes],
+            staleTime:Infinity,
             queryFn: getDishes
         }
     )

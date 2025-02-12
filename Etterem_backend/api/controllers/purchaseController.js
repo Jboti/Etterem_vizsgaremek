@@ -1,5 +1,6 @@
 const purchaseService = require('../services/purchaseService')
 const orderConnectionService = require('../services/orderConnectionService')
+const dish = require('../models/dish')
 
 exports.getAllActivePurchase = async (req,res,next) =>
 {
@@ -33,57 +34,49 @@ exports.deActivatePurchase = async (req,res,next) =>
     }
 }
 
-exports.PlaceOrder = async (req,res,next) =>
+exports.placeOrder = async (req,res,next) =>
 {
     try
     {
         const currentDate = new Date()
-        let {uid} = req.params
-        let {totalPrice, message, dishInfo} = req.body
-        uid = Number(uid)
+
+        const id = Number(req.uid)
+        let {totalPrice, message, takeAway, dishIds, dishAmounts, dishCustomizations} = req.body
+        
         totalPrice = Number(totalPrice)
-        dishInfo.dishIds = dishInfo.dishIds.map(id => Number(id))
-        dishInfo.dishAmounts = dishInfo.dishAmounts.map(amount => Number(amount))
-        if(!totalPrice || isNaN(totalPrice)){
-            const error = new Error("Purchase totalPrice is not found or totalPrice is not a number!")
+        dishIds = dishIds.map(id => Number(id))
+        dishAmounts = dishAmounts.map(amount => Number(amount))
+      
+        console.log(id, totalPrice, message, takeAway, dishIds, dishAmounts, dishCustomizations);
+
+        if(!id || !totalPrice || !message || !String(takeAway) || !dishIds || !dishAmounts || !dishCustomizations){
+            const error = new Error("Missing data in placeOrder")
             error.status = 404
             throw error
         }
-        if(!message){
-            const error = new Error("Purchase message is not found!")
+        if(isNaN(id) || isNaN(totalPrice) || dishIds.some(id => isNaN(id)) || dishAmounts.some(amount => isNaN(amount)))
+        {
+            const error = new Error("Wrong type of data in placeOrder!")
             error.status = 404
             throw error
         }
-        if(!uid || isNaN(uid)){
-            const error = new Error("Purchase userId is not found or userId is not a number!")
-            error.status = 404
-            throw error
-        }
+
         const purchase = {
             id: null,
             date: currentDate.toISOString(),
             totalPrice: totalPrice,
             message: message,
-            isActive: true
+            isActive: true,
+            takeAway: takeAway
         }
-        if(!dishInfo.dishIds || !dishInfo.dishAmounts || !dishInfo.dishCustomizations)
-        {
-            const error = new Error("Purchase missing input in dishInfo!")
-            error.status = 404
-            throw error
-        }
-        if(dishInfo.dishIds.some(id => isNaN(id))) {
-            const error = new Error("Purchase dishId is not a number!")
-            error.status = 404
-            throw error
-        }
-        if(dishInfo.dishAmounts.some(amount => isNaN(amount))){
-            const error = new Error("Purchase dishAmount is not a number!")
-            error.status = 404
-            throw error
+        const dishInfo = {
+            dishIds: dishIds,
+            dishAmounts: dishAmounts,
+            dishCustomizations: dishCustomizations
         }
 
-        const result = await orderConnectionService.createPurchaseConnection(uid,purchase,dishInfo)
+
+        const result = await orderConnectionService.createPurchaseConnection(id,purchase,dishInfo)
         if(result)
         {
             res.status(201).json(result)

@@ -29,7 +29,7 @@ const handleLogin = (LoginDataRef: LoginData) => {
             onSuccess(){
                 push({name:'Főoldal'})
                 setTimeout(() => {
-                        toast.success("Sikeres bejelentkezés!")
+                    toast.success("Sikeres bejelentkezés!")
                 }, 100)
             },
             onError(error: any){
