@@ -30,9 +30,9 @@ const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
   }else{
       mutate(ChangeUserNameRef,{
           onSuccess(){
-              push({name:'Főoldal'})
+              push({name:'Felhasználó'})
               setTimeout(() => {
-                      toast.success("Sikeres bejelentkezés!")
+                      toast.success("Sikeres bejelentkezés!");
               }, 100)
           },
           onError(error: any){
@@ -149,7 +149,7 @@ const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
                 <v-card>
                   <v-toolbar title="Felhasználónév változtatás" style="height: auto; text-align: center; background: linear-gradient(to right, black, rgb(183, 28, 28), black); color: white;"></v-toolbar>
                   <v-card-text class="text-h4 pa-12" style="background-color: whitesmoke;">
-                    <v-text-field v-model="ChangeUserNameRef.userName" label="Felhasználó név" variant="outlined" class="field"></v-text-field>
+                    <v-text-field v-model="ChangeUserNameRef.userName" label="Új Felhasználónév" variant="outlined" class="field"></v-text-field>
                     <v-text-field v-model="ChangeUserNameRef.password" label="Jelszó" variant="outlined" class="field" type="password"></v-text-field>
                   </v-card-text>
 
