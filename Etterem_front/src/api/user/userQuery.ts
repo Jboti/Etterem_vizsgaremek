@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/vue-query"
 import { QUERY_KEYS } from "@/utils/queryKeys"
 import type { ChangeUserName } from "../auth/auth"
 import { useRouter } from "vue-router"
+import type { placeOrderData } from "../menuItems/items"
 
 
 const getToken = () =>{
@@ -56,5 +57,24 @@ export const useUserNameChange = () => {
                 location.reload()
             }, 10)
         }
+    })
+}
+
+const PlaceOrder = async (data:placeOrderData) => {
+    const token = getToken()
+    let config = {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+    }
+    const response = await axiosClient.post("http://localhost:3000/api/v1/place-order",data, config)
+    return response.data
+}
+
+
+
+export const usePlaceOrder = () => {
+    return useMutation({
+        mutationFn:PlaceOrder,
     })
 }

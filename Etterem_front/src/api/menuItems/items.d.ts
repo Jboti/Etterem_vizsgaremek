@@ -31,3 +31,12 @@ export type cartItem = {
     type:string,
     quantity: number
 }
+
+export type placeOrderData = {
+    totalPrice: number,
+    message: string,
+    takeAway: boolean,
+    dishIds:number[],
+    dishAmounts:number[],
+    dishCustomizations:string[]
+}

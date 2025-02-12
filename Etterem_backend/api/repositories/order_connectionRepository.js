@@ -22,7 +22,7 @@ class order_connectionRepository
         }
         await this.OrderConnection.create(con)
         for(let i = 0;i<dishInfo.dishIds.length;i++)
-        {
+        {            
             const dCon = {
                 id: null,
                 order_id: Purchase.id,
@@ -32,7 +32,7 @@ class order_connectionRepository
             }
             await this.OrderDishConnection.create(dCon)
         }
-        
+        return Purchase
     }
 
 }

@@ -48,23 +48,27 @@ const handleLogout = () => {
     </v-container>
     <v-container class="infoBoxok">
       <v-card class="nyitvaTartas">
-        <p class="pl-4 pt-2" style="height: 10%; font-size: clamp(14px, 3dvw, 20px);"><b>Nyitvatartás:</b></p>
-        <v-card-text class="pt-2" style="align-items: center; padding: 0; height: 90%; display: flex; align-items: center; flex-direction: column; justify-content: center;">
-          <p style="font-size: clamp(14px, 3dvh, 30px);"><b>H-P:</b> 8:00 - 23:00</p>
-          <p style="font-size: clamp(14px, 3dvh, 30px);"><b>Sz:</b> 10:00 - 21:00</p>
-          <p style="font-size: clamp(14px, 3dvh, 30px);"><b>V:</b> 11:00 - 20:00</p>
-        </v-card-text>
+        <div style="height: 20%; padding-bottom: 1dvh;">
+          <p style="height: 100%; font-size: clamp(1.8rem, 3dvw, 5rem);"><b>Nyitvatartás:</b></p>
+        </div>
+        <div style="height: 80%;">
+          <v-card-text style="align-items: center; padding: 0; height: 100%; display: flex; align-items: center; flex-direction: column; justify-content: center;">
+            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>H-P:</b> 8:00 - 23:00</p>
+            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Sz:</b> 10:00 - 21:00</p>
+            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>V:</b> 11:00 - 20:00</p>
+          </v-card-text>
+        </div>
       </v-card>
       <v-card class="info">
         <v-card  class="infoCard">
-          <p style="font-size: clamp(12px, 2.5vh, 30px);"><b>Email:</b> donercegled@gmail.com</p>
-          <p style="font-size: clamp(12px, 2.5dvh, 30px);"><b>Tel szám.:</b> 06 xx xxx xxxx</p>
-          <p style="font-size: clamp(12px, 2.5dvh, 30px);"><b>Cím:</b> 2700 Cegléd, xy</p>
+          <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Email:</b> donercegled@gmail.com</p>
+          <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Tel szám.:</b> 06 xx xxx xxxx</p>
+          <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Cím:</b> 2700 Cegléd, xy</p>
         </v-card>
         <div class="terkepInfo">
           <v-card class="mb-2 terkep">
             <!-- Ez jó csak hogy ez error kódok ne zavarjanak azért van ki kommentezve -->
-            <div style="width: 100%"><iframe width="100%" height="400" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?width=100%25&amp;height=400&amp;hl=en&amp;q=2700%20Cegl%C3%A9d,%20szabads%C3%A1g%20t%C3%A9r+(D%C3%B6ner%20Cegl%C3%A9d)&amp;t=&amp;z=15&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"><a href="https://www.gps.ie/">gps handsets</a></iframe></div>
+            <div style="width: 100%"><iframe class="terkepMeret" width="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?width=100%25&amp;height=400&amp;hl=en&amp;q=2700%20Cegl%C3%A9d,%20szabads%C3%A1g%20t%C3%A9r+(D%C3%B6ner%20Cegl%C3%A9d)&amp;t=&amp;z=15&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"><a href="https://www.gps.ie/">gps handsets</a></iframe></div>
           </v-card>
         </div>
       </v-card>
@@ -137,13 +141,16 @@ const handleLogout = () => {
 }
 
 .infoBoxok{
-  width: 100%;
+  width: 100dvw;
   max-width: 2000px;
   display: flex; 
-  height: 35%;
+  height: 52dvh;
 }
 
 .nyitvaTartas{
+  padding: 1%;
+  display: flex;
+  flex-direction: column;
   width: 30dvw;
   margin: 2%;
   height: 96%;
@@ -153,6 +160,7 @@ const handleLogout = () => {
 }
 
 .info{
+  padding: 1dvw;
   width: 70dvw;
   margin: 2%;
   height: 96%;
@@ -164,11 +172,10 @@ const handleLogout = () => {
 }
 
 .infoCard {
-  padding: 5%;
-  width: 100%;
+  padding: 4%;
+  width: 50%;
   height: 100%;
   display: flex;
-  align-items: center;
   flex-direction: column;
   justify-content: center;
   background-color: transparent;
@@ -177,16 +184,57 @@ const handleLogout = () => {
 
 
 .terkepInfo{
-  margin: auto;
-  margin-right: 2%;
-  width: 90%;
-  height: 90%;
+  width: 50%;
+  height: 100%;
 }
 
 .terkep{
-  height: 100%;
+  height: 400px;
   width: 100%;
   box-shadow: 0 0 5px .5px black;
+}
+
+.terkepMeret{
+  height: 42dvh;
+}
+
+@media screen and (max-width: 1060px){
+  .infoBoxok{
+    flex-direction: column;
+    margin: auto;
+    justify-content: space-around;
+    width: 100dvw;
+    height: 70dvh;
+  }
+  .nyitvaTartas{
+    margin: auto;
+    width: 90dvw;
+    height: 20dvh;
+    margin-bottom: 2dvh;
+  }
+  .info{
+    margin: auto;
+    width: 90dvw;
+    height: 45dvh;
+    margin-bottom: 3dvh;
+    flex-direction: column;
+  }
+  .infoCard{
+    height: 40%;
+    width: 100%;
+  }
+  .terkepInfo{
+    height: 60%;
+    width: 100%;
+    margin: auto;
+    padding: 1%;
+  }
+  .terkep{
+    height: 100%;
+  }
+  .terkepMeret{
+    height: 22dvh;
+  }
 }
 
 @keyframes slideInFromLeft {
@@ -211,29 +259,4 @@ const handleLogout = () => {
   100% { opacity:1; }
 }
 
-@media screen and (max-width: 700px){
-  .infoBoxok{
-    flex-direction: column;
-    margin: auto;
-    width: 100%;
-    height: 75%;
-  }
-  .nyitvaTartas{
-    width: 95%;
-    height: 35%;
-  }
-  .info{
-    width: 95%;
-    height: 50%;
-    flex-direction: column;
-  }
-  .infoCard{
-    height: 50%;
-    align-items: center;
-  }
-  .terkepInfo{
-    margin: auto;
-    padding: 2.5%;
-  }
-}
 </style>

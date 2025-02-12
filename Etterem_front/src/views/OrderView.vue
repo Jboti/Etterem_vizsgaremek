@@ -1,14 +1,20 @@
 <script lang="ts" setup>
-import { useGetUserInfo } from '@/api/user/userQuery';
+import type { placeOrderData } from '@/api/menuItems/items';
+import { useGetUserInfo, usePlaceOrder } from '@/api/user/userQuery';
 import { useCartStore } from '@/stores/cartStore';
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { toast } from 'vue3-toastify';
 
 onMounted(() => {
   window.scrollTo(0, 0);
 })
+const notify = () => {
+    toast.success("Email Sikeresen elküldve!")
+}
 
 const cartStore = useCartStore()
 const { isError } = useGetUserInfo()
+const { mutate, isPending } = usePlaceOrder()
 const categoryOrder = ['Wrap', 'Kebab', 'Drink']
 
 
@@ -27,8 +33,30 @@ const groupedItems = computed(() => {
 })
 
 function placeOrder() {
-  cartStore.clearCart()
-  console.log("Rendelés leadva")
+  const placeOrderDataRef = ref<placeOrderData>({
+    totalPrice: cartStore.totalPrice,
+    message: " ", // TODO változóval, ha nincs üzenet akkor " "!!!! NEM ""
+    takeAway: false, // TODO váltózóval
+    dishIds: [],
+    dishAmounts: [],
+    dishCustomizations: []
+  })
+
+  for (let i = 0; i < cartStore.items.length; i++) {
+    placeOrderDataRef.value.dishIds.push(cartStore.items[i].dishId)
+    placeOrderDataRef.value.dishAmounts.push(cartStore.items[i].quantity)
+    const options = (cartStore.items[i].sause ? cartStore.items[i].sause : '') + (cartStore.items[i].options ? ', '+cartStore.items[i].options : '')
+    placeOrderDataRef.value.dishCustomizations.push(options)
+  }
+  mutate(placeOrderDataRef.value,{
+    onSuccess() {
+      cartStore.clearCart()
+      toast.success("Rendelés leadva!")
+    },
+    onError(error: any) {
+      toast.error(error.response?.data?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!")
+    }
+})
 }
 
 </script>
@@ -52,7 +80,7 @@ function placeOrder() {
             <v-btn @click="cartStore.clearCart()" class="clear-cart" >Kosár kiürítése</v-btn>
           </div>
           <div class="place-order-div">
-            <v-btn @click="placeOrder()" class="place-order">Rendelés</v-btn>
+            <v-btn @click="placeOrder()" class="place-order" :loading="isPending">Rendelés</v-btn>
           </div>
         </div>
       </div>
@@ -81,6 +109,9 @@ function placeOrder() {
           </div>
         </div>
       </div>
+  </div>
+  <div>
+      <button @click="notify"></button>
   </div>
 </template>
 <style scoped>
