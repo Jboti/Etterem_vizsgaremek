@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { VueQueryDevtools } from '@tanstack/vue-query-devtools'
+import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
 import { useCartStore } from './stores/cartStore';
 
 const cartStore = useCartStore()

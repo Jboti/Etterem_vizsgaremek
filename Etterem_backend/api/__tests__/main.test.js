@@ -27,7 +27,7 @@ describe("Controller tesztek", ()=>
         });
     
     
-        test.each(["getAllActivePurchase","deActivatePurchase","PlaceOrder"])
+        test.each(["getAllActivePurchase","deActivatePurchase","placeOrder"])
         ("purchaseControllerben léteznek a kérések: %s", async (keres)=>
         {
             expect(purchaseController[keres]).toBeDefined();
@@ -74,10 +74,28 @@ describe("Controller tesztek", ()=>
     describe("Routes tesztek", ()=>
     {
     
-        test.each(["/get-users"])("dishRouteson helyes státusszal térnek vissza a GET kérések: %s",async (endpoint)=>{
-            const res = await request(app).get(`/api/v1/${endpoint}`);
+        test.each(["/get-user"])("userRouteson helyes státusszal térnek vissza a GET kérések: %s", async (endpoint) => {
+            const token = 'some-valid-token';
+            const userData = { id: 1, name: 'John Doe', email: 'john@example.com' };
+          
+            const res = await request(app)
+              .get(`/api/v1${endpoint}`)
+              .set('Authorization', `Bearer ${token}`);
+          
             expect(res.statusCode).toBe(200);
-        });
+            expect(res.body).toEqual(userData);
+          });
+          
+          test.each(["/get-user"])("userRouteson helyes státusszal térnek vissza a GET kérések (unauthenticated): %s", async (endpoint) => {
+            const token = 'some-invalid-token';
+          
+            const res = await request(app)
+              .get(`/api/v1${endpoint}`)
+              .set('Authorization', `Bearer ${token}`);
+          
+            expect(res.statusCode).toBe(401);
+            expect(res.text).toBe('Unauthorized');
+          });
     
         test.each(["/get-all-active-order"])("purchaseRouteson helyes státusszal térnek vissza a GET kérések: %s",async (endpoint)=>{
             const res = await request(app).get(`/api/v1/${endpoint}`);

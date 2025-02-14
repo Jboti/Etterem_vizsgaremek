@@ -49,6 +49,26 @@ class purchaseRepository
     //     })
     // }
 
+    async getAllPurchaseUserInfo() {
+        return await this.Purchase.findAll({
+            include: [
+                {
+                    model: this.OrderDishConnection,
+                    as: "order_dishes",
+                    include: [
+                        {
+                            model: this.Dish,
+                            as: "dish",
+                            attributes: ["name", "type"]
+                        }
+                    ],
+                    attributes: ["customizations", "amount"]
+                }
+            ],
+            attributes: ["date", "totalPrice", "message", "takeAway"]
+        });
+    }
+
     async getAllActivePurchase() {
         return await this.Purchase.findAll({
             where: {
