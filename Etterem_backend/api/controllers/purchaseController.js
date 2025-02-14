@@ -2,6 +2,18 @@ const purchaseService = require('../services/purchaseService')
 const orderConnectionService = require('../services/orderConnectionService')
 const dish = require('../models/dish')
 
+exports.getAllPurchaseUserInfo = async (req,res,next) =>
+    {
+        try
+        {
+            const purchases = await purchaseService.getAllPurchaseUserInfo()
+    
+            res.status(200).json(purchases)
+        }catch(error){
+            next(error)
+        }
+    }
+
 exports.getAllActivePurchase = async (req,res,next) =>
 {
     try

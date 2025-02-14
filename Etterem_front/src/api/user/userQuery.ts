@@ -35,6 +35,19 @@ export const useGetUserInfo = () => {
     
 }
 
+const getAllPurchaseUserInfo = async() =>{
+    const response = await axiosClient.get("http://localhost:3000/api/v1/get-all-order-user-only")
+    return response.data;
+}
+
+export const useGetAllPurchaseUserInfo = () => {
+    return useQuery({
+        queryKey: ["allPurchaseUserInfo"], // Cache-kulcs
+        queryFn: getAllPurchaseUserInfo,   // Függvény, ami lekéri az adatokat
+        staleTime: 3600 * 1000,  // 1 órán keresztül frissnek tekinti az adatokat
+        retry: 1                 // Egy sikertelen próbálkozás után nem próbálkozik újra
+    });
+};
 
 const UserNameChange = async (data: ChangeUserName) => {
     const token = getToken()
