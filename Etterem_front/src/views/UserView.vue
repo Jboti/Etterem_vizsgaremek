@@ -213,7 +213,7 @@ console.log("API Response:", JSON.stringify(purchases.value, null, 2));
               
               <template v-slot:default="{ isActive }">
                 <v-card>
-                  <v-toolbar title="Jelszó változtatás" style="height: auto; text-align: center; background: linear-gradient(to right, black, rgb(183, 28, 28), black); color: white;"></v-toolbar>
+                  <v-toolbar title="Jelszó megváltoztatás" style="height: auto; text-align: center; background: linear-gradient(to right, black, rgb(183, 28, 28), black); color: white;"></v-toolbar>
                   <v-card-text class="text-h4 pa-12" style="background-color: whitesmoke;">
                     <v-text-field v-model="ResetPasswordDataRef.email" label="Email" variant="outlined" class="field" type="email"></v-text-field>
                   </v-card-text>

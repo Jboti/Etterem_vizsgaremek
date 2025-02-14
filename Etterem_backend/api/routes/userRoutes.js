@@ -24,7 +24,7 @@ router.patch("/verify-user",userController.verifyEmail)
 // emailt küld, hogy jelszót lehessen változtatni
 router.patch("/password-reset-email",userController.sendEmail)
 // user jelszó változtatása
-router.post("/password-reset",userAuth.authenticateToken ,userController.sendEmail)
+router.post("/password-reset",userAuth.authenticateTokenforEmail ,userController.changePassword)
 // user felhnév változtatása
 router.patch("/user-name-change",userAuth.authenticateToken, userController.changeUserName)
 //admin fiók lekérése

@@ -249,21 +249,10 @@ exports.deleteUser = async (req,res,next) =>
 
 exports.changePassword = async (req, res, next) => {
     try {
-        const { password, token } = req.body
-        if (!token) {
-            const error = new Error("No token provided!")
-            error.status = 403
-            throw error 
-        }
-        let id = null
+        let { password } = req.body
+        const id = Number(req.uid)
         
-        jwt.verify(token, process.env.JWT_KEY,(err,decoded) =>{
-            if(err){
-                res.status(500).json({ errmessage:"Érvénytelen vagy lejárt munkamenet!"})
-            }
-            id = decoded.id
-        })
-        id = Number(id)
+
         if (!id || isNaN(id)) {
             const error = new Error("User id not found or id is not a number!")
             error.status = 404
@@ -274,7 +263,7 @@ exports.changePassword = async (req, res, next) => {
             error.status = 404
             throw error
         }
-
+        password= await bcrypt.hash(password, salt);
         const result = await userService.changePassword(password, id)
         if (!result) {
             const error = new Error("Password change went wrong!")
