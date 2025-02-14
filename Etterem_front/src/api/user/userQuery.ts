@@ -36,17 +36,23 @@ export const useGetUserInfo = () => {
     
 }
 
-const getAllPurchaseUserInfo = async() =>{
-    const response = await axiosClient.get("http://localhost:3000/api/v1/get-all-order-user-only")
+const getAllPurchaseUserInfo = async () =>{
+    const token = getToken()
+    let config = {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+    }
+    const response = await axiosClient.get("http://localhost:3000/api/v1/get-all-order-user-only", config)
     return response.data;
 }
 
 export const useGetAllPurchaseUserInfo = () => {
     return useQuery({
-        queryKey: ["allPurchaseUserInfo"], // Cache-kulcs
-        queryFn: getAllPurchaseUserInfo,   // Függvény, ami lekéri az adatokat
-        staleTime: 3600 * 1000,  // 1 órán keresztül frissnek tekinti az adatokat
-        retry: 1                 // Egy sikertelen próbálkozás után nem próbálkozik újra
+        queryKey: [QUERY_KEYS.userPurchases],
+        queryFn: getAllPurchaseUserInfo, 
+        staleTime: 3600 * 1000,  
+        retry: 1                 
     });
 };
 
@@ -91,5 +97,8 @@ const PlaceOrder = async (data:placeOrderData) => {
 export const usePlaceOrder = () => {
     return useMutation({
         mutationFn:PlaceOrder,
+        onSuccess(){
+            queryClient.removeQueries({ queryKey: [QUERY_KEYS.userPurchases] })
+        }
     })
 }
