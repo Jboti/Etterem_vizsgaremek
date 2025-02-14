@@ -3,16 +3,17 @@ const orderConnectionService = require('../services/orderConnectionService')
 const dish = require('../models/dish')
 
 exports.getAllPurchaseUserInfo = async (req,res,next) =>
+{
+    try
     {
-        try
-        {
-            const purchases = await purchaseService.getAllPurchaseUserInfo()
-    
-            res.status(200).json(purchases)
-        }catch(error){
-            next(error)
-        }
+        const id = Number(req.uid)
+        const purchases = await purchaseService.getAllPurchaseUserInfo(id)
+
+        res.status(200).json(purchases)
+    }catch(error){
+        next(error)
     }
+}
 
 exports.getAllActivePurchase = async (req,res,next) =>
 {

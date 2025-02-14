@@ -1,29 +1,24 @@
 <script lang="ts" setup>
 import type { ResetPasswordData } from '@/api/auth/auth';
-import { usePasswordResetEmail } from '@/api/auth/authQuery';
+import { usePasswordResetEmail, useValidateToken } from '@/api/auth/authQuery';
 import { useGetUserInfo, useUserNameChange } from "@/api/user/userQuery"
 import {useGetAllPurchaseUserInfo} from "@/api/user/userQuery" 
 import { useRouter } from 'vue-router'
 import type { ChangeUserName } from '@/api/auth/auth';
-import { onMounted, ref, computed} from 'vue';
+import { onMounted, ref, computed, watch} from 'vue';
 import { toast } from 'vue3-toastify';
 
-onMounted(() => {
-  window.scrollTo(0, 0);
-})
+const notify = () => {}
 
+const { isError, mutate: validateToken } = useValidateToken()
 
-const notify = () => {
-  toast.success("Sikeres felhasználónév változtatás!")
-}
-
-
-const { mutate: changeUserNameMutate, isPending: isUserNameChangePending } = useUserNameChange()
-const { mutate: resetPasswordMutate, isPending: isPasswordResetPending } = usePasswordResetEmail()
-const showPassword = ref<boolean>(false)
-const showPasswordRe = ref<boolean>(false)
-const { data: useGetUserInfodata, isError, error, isLoading } = useGetUserInfo()
-const {data: purchases} = useGetAllPurchaseUserInfo();
+const { mutate: changeUserNameMutate } = useUserNameChange()
+const { mutate: resetPasswordMutate } = usePasswordResetEmail()
+//majd még talán kell
+// const showPassword = ref<boolean>(false)
+// const showPasswordRe = ref<boolean>(false)
+const { data: useGetUserInfodata, isLoading } = useGetUserInfo()
+const { data: purchases } = useGetAllPurchaseUserInfo()
 const { push } = useRouter();
 
 const ChangeUserNameRef = ref<ChangeUserName>({
@@ -38,13 +33,13 @@ const ResetPasswordDataRef = ref<ResetPasswordData>({
 
 const handlePwResetEmailSent = (ResetPasswordDataRef: ResetPasswordData) => {
     if(ResetPasswordDataRef.email == ''){
-        toast.error("Hiányzó adatok, kérlek töltsd ki az összes mezőt mielőtt tovább haladsz!")
+      toast.error("Hiányzó adatok, kérlek töltsd ki az összes mezőt mielőtt tovább haladsz!")
     }else{
         resetPasswordMutate(ResetPasswordDataRef,{
             onSuccess(){
                 push({name:'email-sent-pw-change'})
                 setTimeout(() => {
-                        toast.success("Email sikeresen elküldve!")
+                  toast.success("Email sikeresen elküldve!")
                 }, 100)
             },
             onError(error: any){
@@ -71,12 +66,14 @@ const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
       })
   }
 }
-const formattedPurchases = computed(() => {
-  return JSON.stringify(purchases.value, null, 2); // JSON format with indentation
-});
 
-console.log("API Response:", JSON.stringify(purchases.value, null, 2));
 
+
+onMounted(() => {
+  window.scrollTo(0, 0)
+  validateToken()
+})
+watch(isError, () => {})
 </script>
 
 <template>
@@ -120,14 +117,12 @@ console.log("API Response:", JSON.stringify(purchases.value, null, 2));
               <template v-slot:default="{ isActive }">
                 <v-card>
                   <v-toolbar title="Rendelések" style="height: auto; text-align: center; background: linear-gradient(to right, black, rgb(183, 28, 28), black); color: white;"></v-toolbar>
-                  <v-card-text class="text-h4 pa-12" style="background-color: whitesmoke;">
-                    <table>
-                      <td>
-                        <tr>
-                          {{formattedPurchases}}
-                        </tr>
-                      </td>
-                    </table>
+                  <v-card-text>
+                    
+                    <pre>
+                      {{purchases}}
+                    </pre>
+                  
                   </v-card-text>
 
                   <v-card-actions class="justify-end" style="height: auto; background: linear-gradient(to right, black, rgb(183, 28, 28), black);">
@@ -200,7 +195,9 @@ console.log("API Response:", JSON.stringify(purchases.value, null, 2));
                 </v-card>
               </template>
             </v-dialog>
-            <v-dialog>
+            <v-dialog
+              transition="dialog-top-transition"
+              width="auto">
               <template v-slot:activator="{ props: activatorProps }">
               <v-btn 
                 v-bind="activatorProps"
@@ -248,17 +245,6 @@ console.log("API Response:", JSON.stringify(purchases.value, null, 2));
 </template>
 
 <style scoped>
-.spinner {
-  margin: auto;
-  margin-top: 10vh;
-  width: 50px;
-  height: 50px;
-  border: 6px solid #f3f3f3; 
-  border-top: 6px solid #B71C1C; 
-  border-radius: 50%; 
-  animation: spin 1s linear infinite;
-}
-
 .logged-out{
   margin: auto;
   width: 90%;
@@ -313,14 +299,6 @@ console.log("API Response:", JSON.stringify(purchases.value, null, 2));
   transition: transform .5s ease-in-out, box-shadow .7s ease-in-out;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
 
 @keyframes fade {
   0%   { opacity:0.01; }
@@ -354,5 +332,79 @@ console.log("API Response:", JSON.stringify(purchases.value, null, 2));
 
 .justify-end {
     justify-content: space-around !important;
+}
+
+.loader {
+  margin: auto;
+  margin-top: 20dvh;
+  transform: rotateZ(45deg);
+  perspective: 1000px;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  color: #B71C1C;
+}
+.loader:before, .loader:after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: inherit;
+  height: inherit;
+  border-radius: 50%;
+  transform: rotateX(70deg);
+  animation: 1s spin linear infinite;
+}
+.loader:after {
+  color: white;
+  transform: rotateY(70deg);
+  animation-delay: .4s;
+}
+
+@keyframes rotate {
+  0% {
+    transform: translate(-50%, -50%) rotateZ(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotateZ(360deg);
+  }
+}
+
+@keyframes rotateccw {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(-360deg);
+  }
+}
+
+@keyframes spin {
+  0%,
+  100% {
+    box-shadow: .2em 0px 0 0px currentcolor;
+  }
+  12% {
+    box-shadow: .2em .2em 0 0 currentcolor;
+  }
+  25% {
+    box-shadow: 0 .2em 0 0px currentcolor;
+  }
+  37% {
+    box-shadow: -.2em .2em 0 0 currentcolor;
+  }
+  50% {
+    box-shadow: -.2em 0 0 0 currentcolor;
+  }
+  62% {
+    box-shadow: -.2em -.2em 0 0 currentcolor;
+  }
+  75% {
+    box-shadow: 0px -.2em 0 0 currentcolor;
+  }
+  87% {
+    box-shadow: .2em -.2em 0 0 currentcolor;
+  }
 }
 </style>

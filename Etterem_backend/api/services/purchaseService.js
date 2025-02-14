@@ -3,9 +3,9 @@ const purchaseRepository = require('../repositories/purchaseRepository')
 class PurchaseService
 {
 
-    async getAllPurchaseUserInfo(user)
+    async getAllPurchaseUserInfo(uid)
     {
-        return await purchaseRepository.getAllPurchaseUserInfo(user)
+        return await purchaseRepository.getAllPurchaseUserInfo(uid)
     }
 
     async getAllActivePurchase(user)

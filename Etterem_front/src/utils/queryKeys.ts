@@ -1,6 +1,7 @@
 const USER_KEYS = {
     user: 'user',
     validToken: 'validToken',
+    userPurchases :'userPurchases'
 }
 
 const DISH_KEYS = {
