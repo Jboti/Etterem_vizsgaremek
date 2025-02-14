@@ -10,7 +10,7 @@ onMounted(() => {
 })
 
 const notify = () => {
-    toast.success("Sikeres felhasználónév változtatás!")
+  toast.success("Sikeres felhasználónév változtatás!")
 }
 
 const { mutate, isPending } = useUserNameChange()
@@ -30,7 +30,7 @@ const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
   }else{
       mutate(ChangeUserNameRef,{
           onSuccess(){
-              push({name:'Főoldal'})
+              push({name:'Main'})
               setTimeout(() => {
                       toast.success("Sikeres bejelentkezés!")
               }, 100)

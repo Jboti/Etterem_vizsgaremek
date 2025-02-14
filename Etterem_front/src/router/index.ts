@@ -5,33 +5,35 @@ import UserView from '@/views/UserView.vue'
 import MenuView from '@/views/MenuView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import RegistrationView from '@/views/auth/RegistrationView.vue'
-import EmailSentView from '@/views/auth/EmailSentView.vue'
+import EmailSentView from '@/views/infoPages/EmailSentView.vue'
 import EmailVerifyView from '@/views/auth/EmailVerifyView.vue'
 import PasswordResetView from '@/views/auth/PasswordResetView.vue'
 import PasswordResetEmailView from '@/views/auth/PasswordResetEmailView.vue'
-import EmailSentPasswordChangeView from '@/views/auth/EmailSentPasswordChangeView.vue'
+import EmailSentPasswordChangeView from '@/views/infoPages/EmailSentPasswordChangeView.vue'
+import OrderPlacedView from '@/views/infoPages/OrderPlacedView.vue'
+import PageNotFound from '@/views/infoPages/PageNotFoundView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'Főoldal',
+      name: 'Main',
       component: HomeView,
     },
     {
       path: '/order',
-      name: 'Rendelés',
+      name: 'Order',
       component: OrderView,
     },
     {
       path: '/menu',
-      name: 'Étlap',
+      name: 'Menu',
       component: MenuView,
     },
     {
       path: '/user',
-      name: 'Felhasználó',
+      name: 'User',
       component: UserView,
     },
     {
@@ -68,6 +70,19 @@ const router = createRouter({
       path: '/password-reset',
       name: 'password-reset',
       component: PasswordResetView,
+    },
+    {
+      path: '/order-placed/:id',
+      name: 'order-placed',
+      component: OrderPlacedView,
+    },
+
+
+
+    {
+      path: '/:catchAll(.*)',  
+      name: 'page-not-found',
+      component: PageNotFound,
     },
   ],
 })

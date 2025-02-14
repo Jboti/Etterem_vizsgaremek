@@ -1,20 +1,15 @@
 <script lang="ts" setup>
+import { useValidateToken } from '@/api/auth/authQuery';
 import type { cartItem, dishData } from '@/api/menuItems/items';
 import { useGetDishes } from '@/api/menuItems/itemsQuery'
-import { useGetUserInfo } from '@/api/user/userQuery';
 import { useCartStore } from '@/stores/cartStore';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { toast } from 'vue3-toastify';
 
-onMounted(() => {
-  window.scrollTo(0, 0);
-})
-const notify = () => {
-    toast.success("A termék a kosárba került!")
-}
+const notify = () => {}
 
 const { data } = useGetDishes()
-const { isError } = useGetUserInfo()
+const { isError, mutate: validateToken } = useValidateToken()
 
 const cartStore = useCartStore()
 const selectedDish = ref<any>(null)
@@ -139,6 +134,13 @@ function selectedCategoryHandle(category:string){
 
 }
 
+onMounted(() => {
+  window.scrollTo(0, 0);
+  validateToken()
+})
+watch(isError, () => {})
+
+
 
 </script>
 
@@ -192,7 +194,7 @@ function selectedCategoryHandle(category:string){
   
   <!-- Modal -->
    <v-dialog v-model="isModalOpen" max-width="800px" @click:outside="closeModal" style="background-color: rgba(0, 0, 0, 0.7);">
-    <v-card>
+    <v-card style="background-color:  rgba(255, 255, 255, .95); box-shadow: 0 0 10px 5px white;">
       <div class="modalHeader">
         <div class="modalImg">
           <v-img v-if="selectedDish" :src="selectedDish.image" style="background-image: url(background.jpg); background-size: cover; width: 96%; height: 96%; border: 2px solid black; border-radius: 40px; border-top-right-radius: 4px; margin: 2%; box-shadow: 0 0 5px .5px black;"></v-img>

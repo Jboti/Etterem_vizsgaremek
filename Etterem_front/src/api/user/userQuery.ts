@@ -4,6 +4,7 @@ import { QUERY_KEYS } from "@/utils/queryKeys"
 import type { ChangeUserName } from "../auth/auth"
 import { useRouter } from "vue-router"
 import type { placeOrderData } from "../menuItems/items"
+import queryClient from "@/lib/queryClient"
 
 
 const getToken = () =>{
@@ -28,7 +29,7 @@ export const useGetUserInfo = () => {
         {
             queryKey: [QUERY_KEYS.user],
             queryFn: getUserInfo,
-            staleTime: 3600 * 1000,
+            staleTime: Infinity,
             retry: 0
         }
     )
@@ -52,7 +53,8 @@ export const useUserNameChange = () => {
     return useMutation({
         mutationFn:UserNameChange,
         onSuccess(){
-            push({name:'Főoldal'})
+            queryClient.removeQueries({ queryKey: [QUERY_KEYS.user] })
+            push({name:'Main'})
             setTimeout(() => {
                 location.reload()
             }, 10)
@@ -68,7 +70,7 @@ const PlaceOrder = async (data:placeOrderData) => {
         }
     }
     const response = await axiosClient.post("http://localhost:3000/api/v1/place-order",data, config)
-    return response.data
+    return response.data.data
 }
 
 

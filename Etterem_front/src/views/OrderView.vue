@@ -1,22 +1,45 @@
 <script lang="ts" setup>
+import { useValidateToken } from '@/api/auth/authQuery';
 import type { placeOrderData } from '@/api/menuItems/items';
-import { useGetUserInfo, usePlaceOrder } from '@/api/user/userQuery';
+import { usePlaceOrder } from '@/api/user/userQuery';
 import { useCartStore } from '@/stores/cartStore';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
 
-onMounted(() => {
-  window.scrollTo(0, 0);
-})
-const notify = () => {
-    toast.success("Email Sikeresen elküldve!")
-}
 
+const notify = () => {}
+
+const { push } = useRouter()
 const cartStore = useCartStore()
-const { isError } = useGetUserInfo()
+const { isError, mutate: validateToken } = useValidateToken()
 const { mutate, isPending } = usePlaceOrder()
 const categoryOrder = ['Wrap', 'Kebab', 'Drink']
+const isModalOpen = ref(false)
+const takeAway = ref(false)
+const message = ref("")
 
+const openModal = () => {
+    isModalOpen.value = true 
+}
+
+const closeModal = () => {
+  isModalOpen.value = false
+}
+
+function removeItemFromCart(itemId : number) {
+  const index = cartStore.items.findIndex((item) => item.cartId === itemId)
+  if(cartStore.items[index].quantity == 1){
+    const item = document.getElementById(String(itemId))
+    item?.classList.add('cart-item-remove')
+  
+    setTimeout(() => {
+      cartStore.removeItem(itemId)
+    }, 500);
+  }else
+    cartStore.removeItem(itemId)
+
+}
 
 
 const groupedItems = computed(() => {
@@ -35,8 +58,8 @@ const groupedItems = computed(() => {
 function placeOrder() {
   const placeOrderDataRef = ref<placeOrderData>({
     totalPrice: cartStore.totalPrice,
-    message: " ", // TODO változóval, ha nincs üzenet akkor " "!!!! NEM ""
-    takeAway: false, // TODO váltózóval
+    message: message.value == "" ? " " :  message.value, 
+    takeAway: takeAway.value,
     dishIds: [],
     dishAmounts: [],
     dishCustomizations: []
@@ -49,15 +72,26 @@ function placeOrder() {
     placeOrderDataRef.value.dishCustomizations.push(options)
   }
   mutate(placeOrderDataRef.value,{
-    onSuccess() {
+    onSuccess(data) {
       cartStore.clearCart()
-      toast.success("Rendelés leadva!")
+      push({name:"order-placed",params:{id:data.id}})
+      setTimeout(() => 
+        toast.success("Rendelés leadva!")
+      ,100)
+      
     },
     onError(error: any) {
       toast.error(error.response?.data?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!")
     }
 })
 }
+
+onMounted(() => {
+  window.scrollTo(0, 0);
+  validateToken()
+})
+watch(isError, () => {})
+
 
 </script>
 <template>
@@ -76,22 +110,23 @@ function placeOrder() {
           </v-card>
         </div>
         <div class="order-buttons">
-          <div class="clear-cart-div">
-            <v-btn @click="cartStore.clearCart()" class="clear-cart" >Kosár kiürítése</v-btn>
-          </div>
           <div class="place-order-div">
-            <v-btn @click="placeOrder()" class="place-order" :loading="isPending">Rendelés</v-btn>
+            <v-btn @click="openModal()" class="place-order" :loading="isPending" size="x-large">Rendelés</v-btn>
+          </div>
+          <div class="clear-cart-div">
+            <v-btn @click="cartStore.clearCart()" class="clear-cart" size="x-large">Kosár kiürítése</v-btn>
           </div>
         </div>
       </div>
       <div style="margin-bottom: 17.5dvh;">
           <div v-for="(items, type) in groupedItems" :key="type">
-            <h2 class="mt-4 mb-2 pl-4" style="color: whitesmoke; border-bottom: 2px solid whitesmoke; width: 95%; margin: auto; text-shadow: 2px 2px black; max-width: 1250px;">{{ type === 'Drink' ? "Üdítő" : type}}:</h2>
+            <h2 class="mt-4 mb-2 pl-4 groups">{{ type === 'Drink' ? "Üdítő" : type}}:</h2>
             
             <v-row class="cart">
               <v-col 
                 v-for="item in items" 
                 :key="item.cartId"  
+                :id="item.cartId.toString()"
                 cols="12" sm="12" md="12" xl="12">
                 <v-card color="#B71C1C" style="box-shadow: 0 0 20px 8px black inset, 0 0 5px 2px black; color: whitesmoke; text-shadow: 1px 2px black; max-width: 1000px; margin: auto;">
                   <v-card-item class="ml-5">
@@ -102,7 +137,7 @@ function placeOrder() {
                     <v-card-title v-if="item.type != 'Drink'" class="multiline-text">{{ item.price*item.quantity }} Ft</v-card-title>
                     <v-card-title v-else class="multiline-text">{{ item.price*item.quantity-50*item.quantity }}+{{50*item.quantity}} Ft</v-card-title>
                   </v-card-item>
-                  <v-btn class="mt-5 ml-8 mb-5 remove-button" @click="cartStore.removeItem(item.cartId)" color="red"><v-icon>mdi-delete</v-icon></v-btn>
+                  <v-btn class="mt-5 ml-8 mb-5 remove-button"  @click="removeItemFromCart(item.cartId)" color="red"><v-icon>mdi-delete</v-icon></v-btn>
                 </v-card>
               </v-col>
             </v-row>
@@ -113,14 +148,34 @@ function placeOrder() {
   <div>
       <button @click="notify"></button>
   </div>
+
+
+   <!-- Modal -->
+   <v-dialog v-model="isModalOpen" max-width="800px" @click:outside="closeModal" style="background-color: rgba(0, 0, 0, 0.7);">
+    <v-card style="background-color:  rgba(255, 255, 255, .9); box-shadow: 0 0 10px 5px white;">
+      <v-card-title style="text-align: center; font-weight: bold; font-size: clamp(1rem, 3.5dvh, 3rem);">Rendelés</v-card-title>
+      <v-divider class="mb-6 border-opacity-50"></v-divider>
+      <v-textarea v-model="message" label="Megjegyzés" style=" width: 90%; margin: auto;" variant="solo-filled" clearable auto-grow ></v-textarea>
+      <v-checkbox v-model="takeAway" label="Elvitel (+100 Ft)" color="success" style="width: 92.5%; margin: auto;" @change="takeAway ? cartStore.totalPrice += 100 : cartStore.totalPrice -= 100"></v-checkbox>
+      <v-card-title style="width: 100%; text-align: center;">Végösszeg: {{cartStore.totalPrice}} Ft</v-card-title>
+      <v-divider class="border-opacity-50"></v-divider>
+      <v-card-actions style="display: flex;">
+        <v-btn color="red" @click="closeModal" style="width: 25%;"><b>Vissza</b></v-btn>
+        <div style="width: 40%;"></div>
+        <v-btn color="green" @click="placeOrder()" style="width: 35%;"><b>Megrendel</b></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 <style scoped>
 
 .order-options{
   margin: auto;
+  margin-top: 2dvh;
   height: 20dvh;
   max-width: 1250px;
   display: flex;
+  flex-direction: column;
   width: 100%;
   align-items: center;
 }
@@ -128,9 +183,9 @@ function placeOrder() {
 .order-buttons{
   width: 50%;
   display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: space-evenly;
+  flex-direction: row;
+  height: 50%;
+  align-items: center;
 }
 
 .clear-cart-div{
@@ -144,25 +199,27 @@ function placeOrder() {
   max-width: 300px;
   background-image: linear-gradient(to right, red 10%,  black 100%);
   background-size: 200% auto;
+  animation: .7s ease-in-out slideInFromRight;
 }
 
 .total-price-div{
   width: 50%;
-  
+  height: 50%;
+  animation: .7s ease-in-out slideInFromTop;
 }
 
 .totla-price-card{
-  text-shadow: 1px 2px black;
-  width: 75%;
+
+  width: 95%;
   margin: auto;
-  background-color: #B71C1C ;
-  box-shadow: 0 0 20px 8px black inset, 0 0 5px 2px black;
+  background-color: rgba(255, 255, 255, 0.8) ;
+  box-shadow: 0 0 10px 5px black;
   padding: 1dvw;
 }
 
 
 .total-price{
-  color: whitesmoke;
+  color: black;
   width: 100%;
   text-align: center;
 }
@@ -177,14 +234,14 @@ function placeOrder() {
   max-width: 300px;
   background-image: linear-gradient(to right, green 10%,  black 100%);
   background-size: 200% auto;
+  animation: .7s ease-in-out slideInFromLeft;
 }
 
 
 .place-order, .clear-cart{
   text-shadow: 1px 2px black;
-  width: 50%;
+  width: 100%;
   color: whitesmoke;
-  padding: 1dvw;
   transition: all .7s ease-in-out;
   transform: scale(90%);
   font-size: clamp(10px, 3vw, 20px);
@@ -198,11 +255,23 @@ function placeOrder() {
 .place-order:hover, .clear-cart:hover{
   transform: scale(1.1);
   background-position: right;
+  box-shadow: 0 0 5px 2px black inset, 0 0 5px .5px black;
 }
 
 .cart{
   margin: auto;
   width: 75%;
+  animation: 1.2s ease-in-out fade;
+}
+
+.groups{
+  color: whitesmoke;
+  border-bottom: 2px solid whitesmoke;
+  width: 95%;
+  margin: auto;
+  text-shadow: 2px 2px black;
+  max-width: 1250px;
+  animation: .7s ease-in-out slideInFromLeft;
 }
 
 .multiline-text{
@@ -226,6 +295,10 @@ function placeOrder() {
   box-shadow: 0 0 5px .5px black inset, 0 0 10px .5px black;
 }
 
+.cart-item-remove{
+  animation: slideOutLeft .7s forwards
+}
+
 .logged-out{
   margin: auto;
   width: 90%;
@@ -238,6 +311,7 @@ function placeOrder() {
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: .7s ease-in-out fade;
 }
 
 .empty-cart{
@@ -252,6 +326,7 @@ function placeOrder() {
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: .7s ease-in-out fade;
 }
 
 @media screen and (max-width: 950px){
@@ -259,7 +334,6 @@ function placeOrder() {
     width: 95%;
   }
   .order-options{
-    flex-direction: column;
     margin-bottom: 5dvh;
     width: 100%;
   }
@@ -275,6 +349,49 @@ function placeOrder() {
   }
   .totla-price-card{
     width: 90%;
+  }
+}
+
+@keyframes fade {
+  0%   { opacity:0; }
+  100% { opacity:1; }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideOutLeft {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100%);
+    opacity: 0;
   }
 }
 </style>

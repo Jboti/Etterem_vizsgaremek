@@ -29,5 +29,7 @@ router.post("/password-reset",userAuth.authenticateToken ,userController.sendEma
 router.patch("/user-name-change",userAuth.authenticateToken, userController.changeUserName)
 //admin fiók lekérése
 router.post("/get-admin-user",userController.getAdminUser)
+// token validáció
+router.post("/authenticateToken",userAuth.authenticateToken,userController.authenticateToken)
 
 module.exports = router

@@ -46,8 +46,6 @@ exports.placeOrder = async (req,res,next) =>
         totalPrice = Number(totalPrice)
         dishIds = dishIds.map(id => Number(id))
         dishAmounts = dishAmounts.map(amount => Number(amount))
-      
-        console.log(id, totalPrice, message, takeAway, dishIds, dishAmounts, dishCustomizations);
 
         if(!id || !totalPrice || !message || !String(takeAway) || !dishIds || !dishAmounts || !dishCustomizations){
             const error = new Error("Missing data in placeOrder")
@@ -79,7 +77,7 @@ exports.placeOrder = async (req,res,next) =>
         const result = await orderConnectionService.createPurchaseConnection(id,purchase,dishInfo)
         if(result)
         {
-            res.status(201).json(result)
+            res.status(201).json({data:result})
             console.log("Purchase created successfully!")
         }
         else

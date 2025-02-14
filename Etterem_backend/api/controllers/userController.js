@@ -429,3 +429,7 @@ exports.getAdminUser = async (req,res,next) =>
         next(error)
     }
 }
+
+exports.authenticateToken = (req,res,next) =>{
+    res.status(200).json({status:'success'})
+}

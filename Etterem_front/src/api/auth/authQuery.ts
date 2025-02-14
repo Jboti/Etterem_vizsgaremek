@@ -62,7 +62,7 @@ export const useLogout = () => {
         onSuccess(){
             document.cookie = "token=; path=/;"
             queryClient.removeQueries({ queryKey: [QUERY_KEYS.user] })
-            push({name:'Főoldal'})
+            push({name:'Main'})
             window.location.reload()
         },
     })
@@ -101,3 +101,25 @@ export const usePasswordResetEmail = () => {
     })
 }
 
+const getToken = () =>{
+    const cookies = document.cookie.split('; ')
+    const tokenCookie = cookies.find(row => row.startsWith('token='))
+    return tokenCookie ? tokenCookie.split('=')[1] : null
+}
+
+const validateToken = async () =>{
+    const token = getToken()
+    let config = {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+    }
+    const response = await axiosClient.post("http://localhost:3000/api/v1/authenticateToken",{} ,config)
+    return response.data
+}
+
+export const useValidateToken = () =>{
+    return useMutation({
+        mutationFn:validateToken
+    })
+}
