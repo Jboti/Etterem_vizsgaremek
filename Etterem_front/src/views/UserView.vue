@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import type { ResetPasswordData } from '@/api/auth/auth';
-import { usePasswordResetEmail, useValidateToken } from '@/api/auth/authQuery';
+import { useLogout, usePasswordResetEmail, useValidateToken } from '@/api/auth/authQuery';
 import { useGetUserInfo, useUserNameChange } from "@/api/user/userQuery"
 import {useGetAllPurchaseUserInfo} from "@/api/user/userQuery" 
 import { useRouter } from 'vue-router'
 import type { ChangeUserName } from '@/api/auth/auth';
-import { onMounted, ref, computed, watch} from 'vue';
+import { onMounted, ref, watch} from 'vue';
 import { toast } from 'vue3-toastify';
 
 const notify = () => {}
@@ -19,7 +19,8 @@ const { mutate: resetPasswordMutate } = usePasswordResetEmail()
 // const showPasswordRe = ref<boolean>(false)
 const { data: useGetUserInfodata, isLoading } = useGetUserInfo()
 const { data: purchases } = useGetAllPurchaseUserInfo()
-const { push } = useRouter();
+const { mutate: logout} = useLogout()
+const { push } = useRouter()
 
 const ChangeUserNameRef = ref<ChangeUserName>({
   userName:'',
@@ -31,22 +32,20 @@ const ResetPasswordDataRef = ref<ResetPasswordData>({
 })
 
 
-const handlePwResetEmailSent = (ResetPasswordDataRef: ResetPasswordData) => {
-    if(ResetPasswordDataRef.email == ''){
-      toast.error("Hiányzó adatok, kérlek töltsd ki az összes mezőt mielőtt tovább haladsz!")
-    }else{
-        resetPasswordMutate(ResetPasswordDataRef,{
-            onSuccess(){
-                push({name:'email-sent-pw-change'})
-                setTimeout(() => {
-                  toast.success("Email sikeresen elküldve!")
-                }, 100)
-            },
-            onError(error: any){
-                toast.error(error.response?.useGetUserInfodata?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!")
-            }
-        })
+const handlePwResetEmailSent = () => {
+  ResetPasswordDataRef.value.email = useGetUserInfodata.value.email
+  resetPasswordMutate(ResetPasswordDataRef.value,{
+    onSuccess(){
+        logout()
+        push({name:'email-sent-pw-change'})
+        setTimeout(() => {
+          toast.success("Email sikeresen elküldve!")
+        }, 100)
+    },
+    onError(error: any){
+        toast.error(error.response?.useGetUserInfodata?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!")
     }
+  })
 }
 
 const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
@@ -77,170 +76,172 @@ watch(isError, () => {})
 </script>
 
 <template>
-  <div>
-    <div v-if="isLoading" class="spinner"></div>
-
-    <div v-else-if="isError">
-      <v-card class="mt-8 logged-out" style="text-align: center;"><h1 style="font-size: clamp(12px, 2.5vh, 30px);"><b>Ahoz hogy megnézd és módosítsd az adataidat először be kell hogy jelentkezz!</b></h1></v-card>
-    </div>
-
+  <div v-if="isError">
+    <v-card class="mt-8 logged-out" style="text-align: center;"><h1 style="font-size: clamp(12px, 2.5vh, 30px);"><b>Ahoz hogy megnézd és módosítsd az adataidat először be kell hogy jelentkezz!</b></h1></v-card>
+  </div>
+  
+  <div v-else-if="isLoading" class="spinner"></div>
     
-    <div v-else class="egesz">
-      <div style=" width: 100%; padding: 10px;font-size: 2vw; height: auto; width: 95%; text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);">
-      <div data-v-b4e148ca class="v-card v-theme--light v-card--density-default v-card--variant-elevated info2 text-h5 pa-12"
-      style=" width: 100%">
-      <div style="width: 100%;">
-      <b>Felhasználó:</b> {{useGetUserInfodata.userName }} <br>
-      <b>Teljes név:</b> {{useGetUserInfodata.fullName}}<br>
-      <b>Email:</b> {{useGetUserInfodata.email}}<br>
-      <b>Fiók készítése:</b> {{useGetUserInfodata.created}} <br>
-      </div>
-      <div style="width: 50%; flex: none; justify-items: center;">
-
-      <b>Rendelési előzmények:</b><br>
-      <v-container style="height: 100%;">
-        <v-row style="display: flex;flex-direction: row-reverse; align-items: center;">
-          <v-col cols="12" md="12" >
-            <v-dialog
-              transition="dialog-top-transition"
-              width="auto"
-            >
-              <template v-slot:activator="{ props: activatorProps }">
+    <div v-else class="page">
+      
+      <v-card class="user-info-box">
+        <div class="user-info" v-if="useGetUserInfodata">
+          <v-card-title><b>Felhasználó:</b> {{useGetUserInfodata.userName }}</v-card-title>
+          <v-card-title><b>Teljes név:</b> {{useGetUserInfodata.fullName}}</v-card-title>
+          <v-card-title><b>Email:</b> {{useGetUserInfodata.email}}</v-card-title>
+          <v-card-title><b>Fiók készítése:</b> {{useGetUserInfodata.created}}</v-card-title>
+          <v-card-title><b>Pontok:</b> {{useGetUserInfodata.points}}
+          <v-tooltip text="Pontok a weboldalon lévő vásárlással érhetőek el">
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" style="background-color: transparent; box-shadow: none; border-radius: 100%;"><v-icon>mdi-help</v-icon></v-btn>
+            </template>
+          </v-tooltip>
+          </v-card-title>
+          
+        </div>
+      
+        <div class="order-info">
+          <v-card-title><b>Rendelési előzmények:</b></v-card-title>
+          <v-dialog>
+            <!-- RENDELÉSI ELŐZMÉNY GOMB -->
+            <template v-slot:activator="{ props: activatorProps }">
+              <div style="text-align: center; width: 100%;">
                 <v-btn
                   v-bind="activatorProps"
-                  text="További információ"
-                  block
-                  style="padding-left: 20px; padding-right: 20px; width: 100%; font-size: 1vw; text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);"
+                  text="Megnyitás"
+                  class="button"
+                  ></v-btn>
+              </div>
+            </template>
+            <!-- RENDELÉSI ELŐZMÉNY MODAL -->
+            <template v-slot:default="{ isActive }">
+              <v-card>
+                <v-toolbar title="Rendelések" style="height: auto; text-align: center; background: linear-gradient(to right, black, rgb(183, 28, 28), black); color: white;"></v-toolbar>
 
-                ></v-btn>
-              </template>
-              <template v-slot:default="{ isActive }">
-                <v-card>
-                  <v-toolbar title="Rendelések" style="height: auto; text-align: center; background: linear-gradient(to right, black, rgb(183, 28, 28), black); color: white;"></v-toolbar>
-                  <v-card-text>
-                    
-                    <pre>
-                      {{purchases}}
-                    </pre>
+
+                <v-card-text>
+                  <v-row>
+                    <v-col 
+                      v-for="purchase in purchases" 
+                      :key="purchase.id"  
+                      cols="12" sm="12" md="12" xl="12">
+                      <v-card color="#B71C1C" style="box-shadow: 0 0 20px 8px black inset, 0 0 5px 2px black; color: whitesmoke; max-width: 1000px; margin: auto;">
+                        <v-card-title>Dátum: {{ purchase.purchase.date }}</v-card-title>
+                        <v-card-title>Összeg: {{ purchase.purchase.totalPrice }} Ft</v-card-title>
+
+                        <v-row>
+                          <v-col 
+                            v-for="dish in purchase.purchase.order_dishes" 
+                            :key="dish.dish_id"  
+                            cols="12" sm="12" md="12" xl="12">
+                            <v-card>
+                              <v-card-title v-if="dish.amount > 1">{{ dish.dish.name }} x {{ dish.amount }}</v-card-title>
+                              <v-card-title v-else>{{ dish.dish.name }}</v-card-title>
+                              <div v-if="dish.dish.type != 'Drink'">
+                                <v-card-title>Szósz: {{ String(dish.customizations).split(',')[0] }}</v-card-title>
+                                <div v-if="String(dish.customizations).split(',').length > 1">
+                                  <v-card-title>Módosítás: {{ String(dish.customizations).split(',').splice(1,String(dish.customizations).split(',').length).join(', ') }}</v-card-title>
+                                </div>
+                              </div>
+                            </v-card>
+                          </v-col>
+                        </v-row>
+
+                        <v-btn>Újra rendelés</v-btn>
+                      </v-card>
+                    </v-col>
+                  </v-row>
                   
-                  </v-card-text>
+                </v-card-text>
+                
+                <v-card-actions class="justify-end" style="height: auto; background: linear-gradient(to right, black, rgb(183, 28, 28), black);">
 
-                  <v-card-actions class="justify-end" style="height: auto; background: linear-gradient(to right, black, rgb(183, 28, 28), black);">
-                    <v-btn
-                      text="Bezárás"
-                      @click="isActive.value = false"
-                      style="color: whitesmoke;"
-                    ></v-btn>
-                  </v-card-actions>
-                </v-card>
-              </template>
-            </v-dialog>
-          </v-col>
-        </v-row>
-      </v-container>
-      </div>
-      </div>
-      <div  class="div1" style="display: inline-flex; width:104%; text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2); overflow: visible;">
-      <div data-v-b4e148ca class=" v-card v-theme--light v-card--density-default v-card--variant-elevated info2 text-h5 pa-12"
-      style="align-items: center; padding: 10px; width: 55%; font-size: 2vw; ">
-      
-      <b>Pontok:</b> {{useGetUserInfodata.points}}<br>
-      <div class="field" style="text-align: center;">
-      <div tabindex="-1" class="Tooltip" style="width: 10%;">
-          <v-icon class="TooltipIcon">mdi-help-circle-outline</v-icon>
-          <span class="TooltipText" style="overflow: visible;">Pontok a weboldalon lévő vásárlással érhetőek el</span>
-      </div>
-      </div>
-      
-      </div>
-      <div data-v-b4e148ca class="div2 v-card v-theme--light v-card--density-default v-card--variant-elevated info2 text-h5 pa-12" 
-      style="text-align: center; display: block; width: 55%; font-size: 2vw">
-      <p><b>Fiókbeállítások:</b></p><br>
-      <v-container style="height: auto;">
-        <v-row style="display: flex;flex-direction: row-reverse; align-items: center;">
-          <v-col cols="12" md="12" >
-            <v-dialog
-              transition="dialog-top-transition"
-              width="auto"
-            >
-              <template v-slot:activator="{ props: activatorProps }">
+                  <v-btn
+                  text="Bezárás"
+                  @click="isActive.value = false"
+                  style="color: whitesmoke;"></v-btn>
+
+                </v-card-actions>
+              </v-card>
+            </template>
+          </v-dialog>
+        </div>
+      </v-card>
+
+
+
+   
+      <v-card class="user-info-change-box">
+        <v-card class="user-info-change">
+
+          <v-card-title><b>Fiókbeállítások:</b></v-card-title>
+          
+          <v-dialog>
+            <!-- FELHNÉV MÓDOSÍTÁS GOMB -->
+            <template v-slot:activator="{ props: activatorProps }">
+              <div style="width: 100%; text-align: center;">
                 <v-btn
                 v-bind="activatorProps"
                 text="Felhasználónév megváltoztatása"
-                block
-                style="padding-left: 20px; padding-right: 20px; width: 100%; font-size: 1vw; text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);"
-              ></v-btn><br>
-              </template>
-              <template v-slot:default="{ isActive }">
-                <v-card>
-                  <v-toolbar title="Felhasználónév változtatás" style="height: auto; text-align: center; background: linear-gradient(to right, black, rgb(183, 28, 28), black); color: white;"></v-toolbar>
-                  <v-card-text class="text-h4 pa-12" style="background-color: whitesmoke;">
-                    <v-text-field v-model="ChangeUserNameRef.userName" label="Új Felhasználónév" variant="outlined" class="field"></v-text-field>
-                    <v-text-field v-model="ChangeUserNameRef.password" label="Jelszó" variant="outlined" class="field" type="password"></v-text-field>
-                  </v-card-text>
-
-                  <v-card-actions class="justify-end" style="height: auto; background: linear-gradient(to right, black, rgb(183, 28, 28), black);">
-                    <v-btn
-                      text="MEGERŐSÍTÉS"
-                      @click="handleUserNameChange(ChangeUserNameRef)"
-                      style="color: whitesmoke; font-size: 1vw;"
-                    ></v-btn>
-                    <v-btn
-                      text="Bezárás"
-                      @click="isActive.value = false"
-                      style="color: whitesmoke; font-size: 1vw; text-align: end;"
-                    ></v-btn>
-                    
-                  </v-card-actions>
-                </v-card>
-              </template>
-            </v-dialog>
-            <v-dialog
-              transition="dialog-top-transition"
-              width="auto">
-              <template v-slot:activator="{ props: activatorProps }">
-              <v-btn 
-                v-bind="activatorProps"
-                text="Jelszó megváltoztatása"
-                block
-                style="padding-left: 20px; padding-right: 20px; width: 100%; font-size: 1vw; text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);"
+                class="button mb-6 mt-4"
+                ></v-btn>
+              </div>
+            </template>
+            <!-- FELHNÉV MÓDOSÍTÁS MODAL -->
+            <template v-slot:default="{ isActive }">
+              <v-card>
+                <v-toolbar title="Felhasználónév változtatás" style="height: auto; text-align: center; background: linear-gradient(to right, black, rgb(183, 28, 28), black); color: white;"></v-toolbar>
+                <v-card-text class="text-h4 pa-12" style="background-color: whitesmoke;">
+                  <v-text-field v-model="ChangeUserNameRef.userName" label="Új Felhasználónév" variant="outlined" class="field"></v-text-field>
+                  <v-text-field v-model="ChangeUserNameRef.password" label="Jelszó" variant="outlined" class="field" type="password"></v-text-field>
+                </v-card-text>
                 
-              ></v-btn><br>
-              </template>
-              
-              <template v-slot:default="{ isActive }">
-                <v-card>
-                  <v-toolbar title="Jelszó megváltoztatás" style="height: auto; text-align: center; background: linear-gradient(to right, black, rgb(183, 28, 28), black); color: white;"></v-toolbar>
-                  <v-card-text class="text-h4 pa-12" style="background-color: whitesmoke;">
-                    <v-text-field v-model="ResetPasswordDataRef.email" label="Email" variant="outlined" class="field" type="email"></v-text-field>
-                  </v-card-text>
+                <v-card-actions class="justify-end" style="height: auto; background: linear-gradient(to right, black, rgb(183, 28, 28), black);">
+                  <v-btn
+                  text="MEGERŐSÍTÉS"
+                  @click="handleUserNameChange(ChangeUserNameRef)"
+                  style="color: whitesmoke; font-size: 1vw;"
+                  ></v-btn>
+                  <v-btn
+                  text="Bezárás"
+                  @click="isActive.value = false"
+                  style="color: whitesmoke; font-size: 1vw; text-align: end;"
+                  ></v-btn>
+                  
+                </v-card-actions>
+              </v-card>
+            </template>
+          </v-dialog>
 
-                  <v-card-actions class="justify-end" style="height: auto; background: linear-gradient(to right, black, rgb(183, 28, 28), black);">
-                    <v-btn
-                      text="MEGERŐSÍTÉS"
-                      @click="handlePwResetEmailSent(ResetPasswordDataRef)"
-                      style="color: whitesmoke; font-size: 1vw;"
-                    ></v-btn>
-                    <div>
-                        <button @click="notify"></button>
-                    </div>
-                    <v-btn
-                      text="Bezárás"
-                      @click="isActive.value = false"
-                      style="color: whitesmoke; font-size: 1vw; text-align: end;"
-                    ></v-btn>
-                    
-                  </v-card-actions>
-                </v-card>
-              </template>
-            </v-dialog>
-          </v-col>
-        </v-row>
-      </v-container>
-      </div>
-      </div>
-      </div>
-    </div>
+          <div style="width: 100%; text-align: center;">
+            <v-btn
+              class="button"
+              @click="handlePwResetEmailSent()">
+            Jelszó megváltoztatása</v-btn>
+          </div>
+               
+        </v-card>
+                
+          <div class="allergy-box">
+            <v-card-title><b>Allergén beállítás:</b></v-card-title>
+            <v-card style="padding: 1%; background-color: transparent; box-shadow: none;">
+              <v-row>
+                <v-checkbox label="Glutén érzékenység" color="success" style="width: 50%; margin: auto;" @change=""></v-checkbox>
+                <v-checkbox label="Laktóz érzékenység" color="success" style="width: 50%; margin: auto;" @change=""></v-checkbox>
+                <v-checkbox label="x érzékenység" color="success" style="width: 50%; margin: auto;" @change=""></v-checkbox>
+                <v-checkbox label="y érzékenység" color="success" style="width: 50%; margin: auto;" @change=""></v-checkbox>
+                <v-checkbox label="z érzékenység" color="success" style="width: 50%; margin: auto;" @change=""></v-checkbox>
+                <v-checkbox label="dz érzékenység" color="success" style="width: 50%; margin: auto;" @change=""></v-checkbox>
+                <div style="text-align: center; width: 100%; margin: 1%;">
+                  <v-btn color="success">Mentés</v-btn>
+                </div>
+             
+                
+              </v-row>
+            </v-card>
+          </div>  
+        
+      </v-card>
   </div>
 </template>
 
@@ -259,45 +260,68 @@ watch(isError, () => {})
   justify-content: center;
 }
 
-
-.Tooltip {
-    position: relative;
-    display: inline-block;
-    width: 100%;
-    color: white;
-    animation: 2s ease fade;
-    overflow: visible;
-    z-index: 1;
-}
-
-.TooltipIcon:hover{
-    cursor: pointer;
-}
-
-.Tooltip .TooltipText {
-    visibility: hidden;
-    font-size: medium;
-    background-color: rgba(255, 255, 255, .9);
-    color: black;
-    text-align: center;
-    padding: 5%;
-    border-radius: 6px;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 2;
-    
-}
-  
-.Tooltip:hover .TooltipText {
-    visibility: visible;
-    display: block;
-}
-
-.egesz{
+.page{
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   animation: .25s ease-in-out fade;
   transition: transform .5s ease-in-out, box-shadow .7s ease-in-out;
 }
+
+.user-info-box, .user-info-change-box{
+  height: 40%;
+  max-width: 1750px;
+  width: 96%;
+  margin: 2%;
+  display: flex;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 10px .5px #B71C1C;
+}
+
+.user-info, .order-info, .user-info-change, .allergy-box{
+  width: 50%;
+  height: 100%;
+}
+.user-info{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.order-info{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.user-info-change{
+  background-color: transparent;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.allergy-box{
+  margin: auto;
+  width: 46%;
+  height: 96%;
+}
+
+.button{
+  width: 75%;
+  font-size: clamp(.6rem, 1.5dvw, 1.5rem);
+  text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);
+  
+}
+
+.button:hover{
+  transform: scale(1.2);
+}
+
+.justify-end {
+    justify-content: space-around !important;
+}
+
 
 
 @keyframes fade {
@@ -305,34 +329,37 @@ watch(isError, () => {})
   100% { opacity:1; }
 }
 
-.buttons{
-  width: 100%;
-  display: flex !important;
-  flex-wrap: nowrap;
-  align-items: center;
-  transition: all 0.5s ease-in-out;
-}
-
-@media only screen and (max-width: 768px) {
-   .div1{
-    justify-items: center;
-    width: 100% !important;
-    display: inline-block !important;
+@media only screen and (max-width: 800px) {
+  .page{
+    padding: 5%;
+    margin-bottom: 15dvh;
+    height: 100%;
+  }
+  .user-info-box, .user-info-change-box{
+    flex-direction: column;
+    margin-bottom:  5dvh;
+  }
+  .user-info-box{
+    height: 35%;
+  }
+  .user-info-change-box{
+    height: 47.5%;
+    margin-bottom: 35%;
+  }
+  .user-info, .order-info, .user-info-change, .allergy-box{
+    width: 98%;
+    height: 100%;
+  }
+  .user-info, .user-info-change{
+    margin: auto;
+    border-bottom: solid black 2px;
+    border-radius: 0;
+  }
+  .user-info-change,.order-info{
+    justify-content: flex-start;
   }
 }
 
-.info2[data-v-b4e148ca] {
-    width: 70%;
-    margin: 2%;
-    height:auto;
-    display: flex;
-    background-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 10px .5px #B71C1C;
-}
-
-.justify-end {
-    justify-content: space-around !important;
-}
 
 .loader {
   margin: auto;

@@ -18,7 +18,7 @@ exports.authenticateToken = (req, res, next) =>
             return res.status(500).json({ errmessage: err})
         }
         if(!decoded.validLogin){
-            return res.status(403).json({ errmessage: 'Invalid token.'})
+            return res.status(403).json({ errmessage: 'Invalid token use.'})
         }
         
         req.uid = decoded.id
@@ -42,6 +42,9 @@ exports.authenticateTokenforEmail = (req, res, next) =>
     jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
         if (err) {
             return res.status(500).json({ errmessage: err})
+        }
+        if(decoded.validLogin){
+            return res.status(403).json({ errmessage: 'Invalid token use.'})
         }
         req.uid = decoded.id
         next()

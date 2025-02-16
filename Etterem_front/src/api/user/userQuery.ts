@@ -14,14 +14,22 @@ const getToken = () =>{
 }
 
 const getUserInfo = async () => {
-    const token = getToken()
-    let config = {
-        headers: {
-          'Authorization': 'Bearer ' + token
+    try {
+        const token = getToken()
+        if (!token) return null
+        
+        let config = {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
         }
+        
+        const response = await axiosClient.get("http://localhost:3000/api/v1/get-user", config)
+        return response.data
+    } catch (error) {
+        console.error("Hiba történt a getUserInfo hívás során: ", error)
+        return null
     }
-    const response = await axiosClient.get("http://localhost:3000/api/v1/get-user", config)
-    return response.data
 }
 
 export const useGetUserInfo = () => {

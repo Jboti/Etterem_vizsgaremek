@@ -80,12 +80,8 @@ const PasswordReset = async (token: string, data: SetPasswordData) => {
 }
 
 export const usePasswordReset = () => {
-    const {push} = useRouter()
     return useMutation({
-        mutationFn:({token,data} : {token:string, data: SetPasswordData }) => PasswordReset(token,data),
-        onSuccess(){
-            push({name:'login'})
-        },
+        mutationFn:({token,data} : {token:string, data: SetPasswordData }) => PasswordReset(token,data)
     })
 }
 

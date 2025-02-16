@@ -16,6 +16,11 @@ const token = query.token as string
 const showPassword = ref<boolean>(false)
 const showPassword2 = ref<boolean>(false)
 
+const validatePassword = (password: string): boolean => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/ //min 8 hosszú, min 1 kis betű, min 1 nagy betű, min 1 szám
+    return passwordRegex.test(password)
+}
+
 
 const notify = () => {}
 
@@ -25,7 +30,9 @@ const handlePasswordReset = (PasswordResetDataRef : SetPasswordData) => {
     if( PasswordResetDataRef.password == '' || PasswordResetDataRef.password_confirmation == ''){
         toast.error("Hiányzó adatok, kérlek töltsd ki az összes mezőt mielőtt tovább haladsz!")
     }else if(PasswordResetDataRef.password != PasswordResetDataRef.password_confirmation){
-        toast.error("A két jelszó eltérő!")
+        toast.error("A két jelszó eltérő!")   
+    }else if (!validatePassword(PasswordResetDataRef.password)){
+        toast.error("Nem megfelelő formátumú jelszó!")
     }else{
         mutate({token:token, data: PasswordResetDataRef},{
             onSuccess(){
@@ -35,9 +42,9 @@ const handlePasswordReset = (PasswordResetDataRef : SetPasswordData) => {
                 }, 100)
             },
             onError(error: any){
-                toast.error(error.response?.data?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!")
-                }
-            })
+                toast.error(error)
+            }
+        })
     }
 }
 
