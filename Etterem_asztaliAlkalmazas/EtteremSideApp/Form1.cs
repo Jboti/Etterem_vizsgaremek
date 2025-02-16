@@ -201,7 +201,7 @@ namespace EtteremSideApp
 
         private void InitializeClock()
         {
-            clockTimer = new System.Windows.Forms.Timer
+            clockTimer = new Timer
             {
                 Interval = 1000
             };
@@ -216,7 +216,7 @@ namespace EtteremSideApp
 
         private void InitializeElementUpdater()
         {
-            System.Windows.Forms.Timer updateTimer = new System.Windows.Forms.Timer
+            Timer updateTimer = new Timer
             {
                 Interval = refetchIntervall
             };
@@ -357,8 +357,6 @@ namespace EtteremSideApp
 
             this.Controls.Add(flowLayoutPanel);
 
-            //a name a flowLayoutPanel
-
             foreach (var order in all_orders)
             {
                 Panel orderPanel = CreateOrderPanel();
@@ -374,7 +372,7 @@ namespace EtteremSideApp
                 Dock = DockStyle.Fill,
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents = true,
-                Padding = new Padding(20, 20, 20, 200),
+                Padding = new Padding(20, 20, 20, 20),
                 AutoScroll = true,
             };
         }
@@ -384,10 +382,11 @@ namespace EtteremSideApp
             Panel panel = new Panel
             {
                 AutoSize = true,
-                Margin = new Padding(10, 20, 20, 20),
+                Margin = new Padding(10, 20, 20, 60),
                 BackColor = Color.White,
             };
-
+            
+            //hogy mindig szépen igazodjanak a cakkok a "blokk" alján//
             panel.SizeChanged += (s, e) =>
             {
                 if (panel.Width % 15 != 0)
@@ -396,6 +395,7 @@ namespace EtteremSideApp
                     panel.Width = newWidth;
                 }
             };
+            //-------------------------------------------------------//
 
             panel.Paint += (s, e) => PaintPanel(e.Graphics, panel);
 
@@ -447,33 +447,32 @@ namespace EtteremSideApp
                 g.DrawLines(rightBottomPen, zigzagPoints);
             }
         }
-
-
-
-
-
-
         private void PopulateOrderPanel(Panel orderPanel, Order order)
         {
             int currentTop = 10;
             int maxLabelWidth = 0;
+            int allLabelHeight = 0;
 
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Rendelés ID: {order.Id}\n", ref currentTop));
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Dátum: {order.timestamp.ToShortDateString()} {order.timestamp.ToShortTimeString()}\n", ref currentTop));
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Megrendelő: {order.customer_name}\n", ref currentTop));
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Ár: {order.price} Ft\n", ref currentTop));
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Kifizetve: {(order.paid ? "Igen" : "Nem")}\n", ref currentTop));
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Elvitelre: {(order.takeAway ? "Igen" : "Nem")}\n", ref currentTop));
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Megjegyzés: {order.message}\n", ref currentTop));
+            allLabelHeight += AddLabel(orderPanel, $"Rendelés ID: {order.Id}\n", ref currentTop, ref maxLabelWidth);
+            allLabelHeight += AddLabel(orderPanel, $"Dátum: {order.timestamp.ToShortDateString()} {order.timestamp.ToShortTimeString()}\n", ref currentTop, ref maxLabelWidth);
+            allLabelHeight += AddLabel(orderPanel, $"Megrendelő: {order.customer_name}\n", ref currentTop, ref maxLabelWidth);
+            allLabelHeight += AddLabel(orderPanel, $"Ár: {order.price} Ft\n", ref currentTop, ref maxLabelWidth);
+            allLabelHeight += AddLabel(orderPanel, $"Kifizetve: {(order.paid ? "Igen" : "Nem")}\n", ref currentTop, ref maxLabelWidth);
+            allLabelHeight += AddLabel(orderPanel, $"Elvitelre: {(order.takeAway ? "Igen" : "Nem")}\n", ref currentTop, ref maxLabelWidth);
+            allLabelHeight += AddLabel(orderPanel, $"Megjegyzés: {order.message}\n", ref currentTop, ref maxLabelWidth);
 
             AddSeparator(orderPanel, ref currentTop);
+            allLabelHeight += 5;
 
             string orderContent = GenerateOrderContent(order);
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Tartalom:\n{orderContent}", ref currentTop));
+            allLabelHeight += AddLabel(orderPanel, $"Tartalom:\n{orderContent}", ref currentTop, ref maxLabelWidth);
 
-            AddDoneButton(orderPanel, order, currentTop + 50, maxLabelWidth);
+            AddDoneButton(orderPanel, order, currentTop, maxLabelWidth, allLabelHeight);
 
             ColorOrderPanel(ref orderPanel, ref order);
+
+            orderPanel.Width = maxLabelWidth;
+            orderPanel.Height = allLabelHeight;
         }
 
         private void ColorOrderPanel(ref Panel orderPanel, ref Order order)
@@ -488,20 +487,27 @@ namespace EtteremSideApp
             }
         }
 
-        private int AddLabel(Panel panel, string text, ref int top)
-        {
+        private int AddLabel(Panel panel, string text, ref int top, ref int maxWidth)
+        { 
+
             Label label = new Label
             {
                 Text = text,
                 AutoSize = true,
                 Location = new Point(10, top),
-
+                Margin = new Padding(0, 5, 0, 5),
             };
+
             panel.Controls.Add(label);
 
-            top += label.Height + 5;
-            return label.Width;
+            int labelHeight = label.Height + 5;
+            top += labelHeight; 
+
+            maxWidth = Math.Max(maxWidth, label.Width);
+
+            return labelHeight;
         }
+
 
         private void AddSeparator(Panel panel, ref int currentTop)
         {
@@ -537,14 +543,18 @@ namespace EtteremSideApp
 
             foreach (var categoryGroup in groupedByCategory)
             {
-                displayContent.Add($"\n----{categoryGroup.Key}----\n");
+                displayContent.Add($"\n---- {categoryGroup.Key} ----\n");
 
                 var groupedItems = categoryGroup
                     .GroupBy(item =>
                     {
-                        string modificationsKey = item.modifications.Count == 0
-                            ? null
-                            : string.Join(",", item.modifications.OrderBy(m => m));
+                        string modificationsKey = "";
+
+                        if (item.modifications.Count > 0)
+                        {
+                            var orderedMods = item.modifications.OrderBy(m => m).ToList();
+                            modificationsKey = string.Join(", ", orderedMods);
+                        }
 
                         return new
                         {
@@ -554,11 +564,23 @@ namespace EtteremSideApp
                     })
                     .Select(group =>
                     {
-                        string mods = string.IsNullOrEmpty(group.Key.ModificationsKey)
-                            ? ""
-                            : $"Módosítások: {group.Key.ModificationsKey}";
+                        var result = new List<string>();
 
-                        return $"{group.Count()} X {group.Key.name} {mods}";
+                        result.Add($"{group.Count()} X {group.Key.name}");
+
+                        if (!string.IsNullOrEmpty(group.Key.ModificationsKey))
+                        {
+                            var modifications = group.Key.ModificationsKey.Split(',').ToList();
+
+                            result.Add($"\n\t  Szósz: \"{modifications[0]}\"");
+
+                            if (modifications.Count > 1)
+                            {
+                                result.Add($"\n\t  Módosítások: {string.Join(", ", modifications.Skip(1))}");
+                            }
+                        }
+
+                        return string.Join("", result);
                     })
                     .ToList();
 
@@ -568,17 +590,21 @@ namespace EtteremSideApp
             return string.Join("\n", displayContent);
         }
 
-        private void AddDoneButton(Panel panel, Order order, int currentTop, int width)
+
+
+
+        private void AddDoneButton(Panel panel, Order order, int currentTop, int width, int allLabelHeight)
         {
             Button doneButton = new Button
             {
                 Text = "Kész",
-                Width = width + 200,
+                Width = width + 250,
                 Height = 30,
-                Location = new Point(10, currentTop),
+                
+                Location = new Point(10,allLabelHeight+currentTop/3),
                 BackColor = Color.LightGreen,
                 FlatStyle = FlatStyle.Flat,
-                Margin = new Padding(0, 0, 10, 20),
+                Margin = new Padding(0, 10, 10, 20),
 
             };
 
@@ -646,7 +672,7 @@ namespace EtteremSideApp
             TextBox passwordTextBox = new TextBox() { Left = 100, Top = 60, Width = 150, PasswordChar = '*' };
 
             Button showPasswordButton = new Button() { Text = "Show", Left = 260, Top = 60, Width = 50 };
-            showPasswordButton.MouseDown += (s, ev) => { passwordTextBox.PasswordChar = '\0'; }; //üres
+            showPasswordButton.MouseDown += (s, ev) => { passwordTextBox.PasswordChar = '\0'; };
             showPasswordButton.MouseUp += (s, ev) => { passwordTextBox.PasswordChar = '*'; };
             showPasswordButton.BackColor = Color.White;
 
@@ -664,8 +690,7 @@ namespace EtteremSideApp
                     }
                     else
                     {
-                        //sikeres bejelentkezés |
-                        //                      V
+                        // sikeres bejelentkezés
                         adminLoggedIn = true;
                         adminName = check;
                         ShowAdminButtons();
@@ -680,6 +705,14 @@ namespace EtteremSideApp
             };
             okButton.BackColor = Color.White;
 
+            loginForm.KeyDown += (s, ev) =>
+            {
+                if (ev.KeyCode == Keys.Enter)
+                {
+                    okButton.PerformClick();
+                }
+            };
+
             loginForm.Controls.Add(emailLabel);
             loginForm.Controls.Add(emailTextBox);
             loginForm.Controls.Add(passwordLabel);
@@ -687,8 +720,11 @@ namespace EtteremSideApp
             loginForm.Controls.Add(showPasswordButton);
             loginForm.Controls.Add(okButton);
 
+            loginForm.KeyPreview = true;
+
             loginForm.ShowDialog();
         }
+
 
 
 
@@ -1070,7 +1106,7 @@ namespace EtteremSideApp
             CreateUserControl(0, null, null, null, 0, false, false);
         }
 
-        private async void postUserModifications(string givenUsername, string givenFullname, string givenEmail, int givenPoints, bool givenisAdmin,bool givenisActive)
+        private /*async*/ void postUserModifications(string givenUsername, string givenFullname, string givenEmail, int givenPoints, bool givenisAdmin,bool givenisActive)
         {
 
             MessageBox.Show(givenUsername + " " + givenFullname + " " + givenEmail + " " + Convert.ToString(givenPoints) + " " + Convert.ToString(givenisAdmin) + " " + Convert.ToString(givenisActive));
@@ -1411,23 +1447,21 @@ namespace EtteremSideApp
 
             var modifications = new List<(string, int, bool)>
             {
-                ("Extra Cheese", 200, false),
-                ("Spicy Sauce", 100, true)
+                ("", 0, false),
             };
 
             //Image image = Image.FromFile("C:\\Users\\xboxh\\Pictures\\2024-04-29\\001.jpg");
 
             var menuItem = new MenuItem(
-                name: "Kebab Wrap",
-                price: 1500,
-                available: true,
+                id:0,
+                name: "",
+                price: 0,
+                available: false,
                 modifications: modifications,
-                description: "A delicious kebab wrap with fresh ingredients.",
-                category: "Kebab wrap",
+                description: "",
+                category: "",
                 img: null
             );
-
-
 
             panel4.Visible = true;
             panel4.Dock = DockStyle.Fill;
@@ -1440,7 +1474,6 @@ namespace EtteremSideApp
             panel4.BringToFront();
 
             CreateProductEdit(menuItem);
-
         }
 
         private void CreateProductEdit(MenuItem item)
@@ -1693,7 +1726,7 @@ namespace EtteremSideApp
                 if (resultsListBoxDish.SelectedItem != null)
                 {
                     string selectedItemname = resultsListBoxDish.SelectedItem.ToString();
-
+                    optionsDataGridView.Rows.Clear();
                     selectedMenuItem = selectedMenuItems.FirstOrDefault(menu_item => menu_item.name == selectedItemname);
                     if (selectedMenuItem != null)
                     {
@@ -1705,19 +1738,24 @@ namespace EtteremSideApp
                         availableRadioButton.Checked = selectedMenuItem.available;
                         notAvailableRadioButton.Checked = !selectedMenuItem.available;
 
-                        //optionsDataGridView.Rows.Clear();
-                        //foreach (var mod in selectedMenuItem.modifications)
-                        //{
-                        //    optionsDataGridView.Rows.Add(mod.Item1, mod.Item2, new CheckBox().Checked = mod.Item3); //kérdéses hogy adja vissza a menu itemeket
-                        //}
+                        if (selectedMenuItem.modifications != null)
+                        {
+                            foreach (var mod in selectedMenuItem.modifications)
+                            {
+                                int rowIndex = optionsDataGridView.Rows.Add();
+                                DataGridViewRow row = optionsDataGridView.Rows[rowIndex];
+
+                                row.Cells[0].Value = mod.Item1;
+                                row.Cells[1].Value = mod.Item2;
+                                row.Cells[2].Value = mod.Item3;
+                            }
+                        }
                     }
                 }
             };
 
-            // Add the results list box and label to the results panel
             resultsPanel.Controls.Add(resultsLabel);
             resultsPanel.Controls.Add(resultsListBoxDish);
-
 
             centralPanel.Controls.Add(searchTextBoxDish);
             centralPanel.Controls.Add(searchButton);
@@ -1747,50 +1785,87 @@ namespace EtteremSideApp
         private async void SearchButton_Dish_Click(object sender, EventArgs e)
         {
             //dish keresés gomb
-            try 
-            { 
-                selectedMenuItems.Clear();
-                selectedMenuItems = await getAllMenuItems();
 
-                UpdateResoultsDish(selectedMenuItems);
-            }
-            catch 
-            {
-                MessageBox.Show("Hiba az ételek lekérdezése során 3");
-            }
+            selectedMenuItems.Clear();
+            selectedMenuItems = await getAllMenuItems();
+
+            UpdateResoultsDish(selectedMenuItems);
         }
 
         public async Task<List<MenuItem>> getAllMenuItems()
         {
             string url = "http://localhost:3000/api/v1/get-dishes";
 
-            try
+            HttpResponseMessage response = await sharedClient.GetAsync(url).ConfigureAwait(false);
+            List<MenuItem> items = new List<MenuItem>();
+            if (response.IsSuccessStatusCode)
             {
-                HttpResponseMessage response = await sharedClient.GetAsync(url).ConfigureAwait(false);
+                string jsonResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                if (response.IsSuccessStatusCode)
+                using (var jsonDoc = JsonDocument.Parse(jsonResponse))
                 {
-                    string jsonResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
-                    List<MenuItem> items = JsonSerializer.Deserialize<List<MenuItem>>(jsonResponse, options);
-                    if (items != null)
+                    string organizedJson = JsonSerializer.Serialize(jsonDoc.RootElement, new JsonSerializerOptions
                     {
-                        return items;
+                        WriteIndented = true,
+                        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                    });
+
+                    JsonElement finalJsonElement = JsonDocument.Parse(organizedJson).RootElement;
+                    int jsonArrayLength = finalJsonElement.GetArrayLength();
+
+                    for (int i = 0; i < jsonArrayLength; i++)
+                    {
+
+                        int id = finalJsonElement[i].GetProperty("id").GetInt32();
+                        string name = finalJsonElement[i].GetProperty("name").GetString();
+                        int price = finalJsonElement[i].GetProperty("price").GetInt32();
+                        bool available = finalJsonElement[i].GetProperty("available").GetBoolean();
+                        string description = finalJsonElement[i].GetProperty("description").GetString();
+                        string type = finalJsonElement[i].GetProperty("type").GetString();
+                        Image img = null;
+
+                        List<(string, int, bool)> modifications = new List<(string, int, bool)>(); // név, ár, sauce e?
+
+                        if (finalJsonElement[i].GetProperty("sauceOptions").GetString() != null && finalJsonElement[i].GetProperty("customizationOptions").GetString() != null)
+                        {
+
+                            JsonElement temp_sauce = JsonDocument.Parse(finalJsonElement[i].GetProperty("sauceOptions").GetString()).RootElement;
+                            int lengthtemp2 = temp_sauce.GetArrayLength();
+                            for (int j = 0; j < lengthtemp2; j++)
+                            {
+                                modifications.Add((temp_sauce[j].GetProperty("name").GetString(), 0, true));
+                            }
+
+                            JsonElement temp_customisation = JsonDocument.Parse(finalJsonElement[i].GetProperty("customizationOptions").GetString()).RootElement;
+                            int lengthtemp = temp_customisation.GetArrayLength();
+                            for (int j = 0; j < lengthtemp; j++)
+                            {
+                                modifications.Add((temp_customisation[j].GetProperty("name").GetString(), temp_customisation[j].GetProperty("price").GetInt32(), false));
+                            }
+                        }
+                        else 
+                        {
+                            modifications = null;
+                        }
+
+                        MenuItem item = new MenuItem(id,name,price,available,modifications,description, type, img);
+                        items.Add(item);
                     }
+
+
                 }
-                else
-                {
-                    Console.WriteLine("HIBA az ételek lekérdezése során 1");
-                }
+                return items;
             }
-            catch
+            else
             {
-                Console.WriteLine("HIBA az ételek lekérdezése során 2");
+                MessageBox.Show("HIBA1");
             }
+            
+
 
             return new List<MenuItem>();
         }
+
 
         private void UpdateResoultsDish(List<MenuItem> menuitems)
         { 
@@ -1806,9 +1881,9 @@ namespace EtteremSideApp
             }
         }
 
-        private async void postDishModifications(string givenItemName, int givenPrice, bool givenAvailable, List<(string, int, bool)> givenModifications, string givenDescription, string givenCategory /*ide kerül majd a blob*/)
+        private async void postDishModifications(string givenItemName, int givenPrice, bool givenAvailable, List<(string, int, bool)> givenModifications, string givenDescription, string givenCategory, Image img)
         {
-
+            //var blob = Convert.To
             MessageBox.Show(givenItemName + " " + Convert.ToString(givenPrice) + " " + Convert.ToString(givenAvailable) + " " + givenDescription + " " + givenCategory);
 
             //string url = "http://localhost:3000/api/v1/post-updated-user";
@@ -1921,16 +1996,18 @@ namespace EtteremSideApp
 
         public class MenuItem
         {
+            public int id { get; set; }
             public string name { get; set; }
             public int price { get; set; }
             public bool available { get; set; }
-            public List<(string, int, bool)> modifications { get; set; } //név, ár, sauce e?
+            public List<(string, int, bool)> modifications { get; set; } // név, ár, sauce e?
             public string description { get; set; }
             public string category { get; set; }
             public Image img { get; set; }
 
-            public MenuItem(string name, int price, bool available, List<(string, int, bool)> modifications, string description, string category, Image img)
+            public MenuItem(int id, string name, int price, bool available, List<(string, int, bool)> modifications, string description, string category, Image img)
             {
+                this.id = id;
                 this.name = name;
                 this.price = price;
                 this.available = available;
@@ -1939,6 +2016,27 @@ namespace EtteremSideApp
                 this.category = category;
                 this.img = img;
             }
+
+            public override string ToString()
+            {
+                var modificationsString = modifications != null && modifications.Count > 0
+                    ? string.Join(", ", modifications.Select(m => $"{m.Item1} Price: {m.Item2}, Sauce: {(m.Item3 ? "Yes" : "No")}"))
+                    : "No modifications";
+
+                return $"Id: {id}\n"+
+                       $"Name: {name}\n" +
+                       $"Price: {price}Ft\n" +
+                       $"Available: {available}\n" +
+                       $"Category: {category}\n" +
+                       $"Description: {description}\n" +
+                       $"Modifications: {modificationsString}\n" +
+                       $"Image: {img?.ToString() ?? "No Image"}";
+            }
+        }
+
+        private void toolStripLabel4_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
