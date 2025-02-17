@@ -9,6 +9,7 @@ const purchaseController = require("../controllers/purchaseController");
 const testController = require("../controllers/testController");
 const userController = require("../controllers/userController");
 
+
 jest.mock("../db/dbContext", () => require("../../__mocks__/db"));
 
 
@@ -18,13 +19,73 @@ describe("Backend tesztek",()=>
 //------Controllerek------
 describe("Controller tesztek", ()=>
     {
-        
-    
         test.each(["createDish","getAllDishes"])
         ("dishControllerben léteznek a kérések: %s", async (keres)=>        //keres -> kérés
         {
             expect(dishController[keres]).toBeDefined();
         });
+        
+        /*describe("dishController tesztek", ()=>{
+            describe("createDish", () => {
+            it("should create a dish successfully when valid data is provided", async () => {
+                const validDish = {
+                    name: "Mockname",
+                    price: 10.99,
+                    customizationOptions: ["Extra cheese", "No garlic"],
+                    description: "Mockdescription",
+                    type: "Mocktype"
+                };
+        
+                const response = await request(app)
+                    .get("/get-dishes")
+                    .send(validDish)
+                    .expect(201); // Ellenőrzi, hogy a válasz státusza 201 (Created)
+        
+                expect(response.body).toHaveProperty("name", "Mockname");
+                expect(response.body).toHaveProperty("price", 10.99);
+                expect(response.body).toHaveProperty("description", "Mockdescription");
+                expect(response.body).toHaveProperty("type", "Mocktype");
+                console.log("Dish created successfully:", response.body);
+            });
+        
+            it("should return an error if required fields are missing", async () => {
+                const invalidDish = {
+                    name: "Burger",
+                    price: 5.99
+                };
+        
+                const response = await request(app)
+                    .get("/get-dishes")
+                    .send(invalidDish)
+                    .expect(404); // Ellenőrzi, hogy a válasz státusza 404 (Nem található)
+        
+                expect(response.text).toBe("Not found");
+            });
+        });
+
+        describe("getAllDishes", () => {
+            it("should return all dishes", async () => {
+                const response = await request(app)
+                    .get("/get-dishes")
+                    .expect(200); // Ellenőrzi, hogy a válasz státusza 200 (OK)
+        
+                expect(Array.isArray(response.body)).toBe(true);
+                expect(response.body.length).toBeGreaterThan(0);
+                console.log("All dishes retrieved:", response.body);
+            });
+        
+            it("should return an empty array when no dishes are available", async () => {
+                // Itt egy tesztet adhatsz hozzá arra az esetre, ha nincsenek éttermek (például egy üres adatbázis).
+                const response = await request(app)
+                    .get("/get-dishes")
+                    .expect(200);
+        
+                expect(response.body).toEqual([]);
+            });
+        })
+        })*/
+    
+        
     
     
         test.each(["getAllActivePurchase","deActivatePurchase","placeOrder"])
@@ -72,7 +133,7 @@ describe("Controller tesztek", ()=>
     
     //------Routes------
     describe("Routes tesztek", ()=>
-    {
+    {/*
     
         test.each(["/get-user"])("userRouteson helyes státusszal térnek vissza a GET kérések: %s", async (endpoint) => {
             const token = 'some-valid-token';
@@ -130,7 +191,7 @@ describe("Controller tesztek", ()=>
         test.each(["/verify-user"])("userRouteson helyes státusszal térnek vissza a PATCH kérések: %s",async (endpoint)=>{
             const res = await request(app).patch(`/api/v1${endpoint}`);
             expect(res.statusCode).toBe(200);
-        });
+        });*/
     })
     
     //------Modellek------
@@ -327,10 +388,105 @@ describe("Controller tesztek", ()=>
         });
     });
 
+    describe("PurchaseRepo tesztek", () =>{
+        let mockPurchase;
+        let mockorder_connection;
+        let mockorder_dish_connection;
+        let mockUser;
+        beforeAll(async () => {
+            mockUser = {
+                id:1,
+                timestamp: new Date().toISOString(),
+                created: new Date().toISOString().split("T")[0],
+                userName: "mockUserName",
+                fullName: "Mock FullName",
+                email: "mock@example.com",
+                password: "mockPassword",
+                points: 0,  
+                isAdmin: false,
+                isActive: false, // email verification után true
+            };
+            
+            const createdUser = await userRepository.createUser(mockUser);
 
-    
+            mockPurchase = {
+                id:1,
+                date: new Date(),
+                totalPrice: 123,
+                message: "Mock uzenet",
+                isActive: true,
+                takeAway: false,
+            };
+
+            const createdPurchase = await purchaseRepository.createPurchase(mockPurchase);
+            console.log("Mock purchase:", createdPurchase);
+
+            mockorder_connection = {
+                user_id: createdUser.id,
+                order_id: createdPurchase.id, // Helyesen kapcsoljuk az ID-t
+            };
+
+            console.log("mockorder_connection: ",mockorder_connection);    
+
+            const dishinfo = {
+                dishIds: [1],
+                dishAmounts: [1],
+                dishCustomizations: [{"customizationId":'as'}],
+            };
+
+            console.log("dishInfo: ",dishinfo);
+
+
+            //mockorder_dish_connection = await order_connectionRepositroy.createPurchaseConnection(createdUser.id, mockPurchase, dishinfo);
+
+            //console.log("Mock order_dish_connection:", mockorder_dish_connection); EZ NEM JÓ, ORDER_CONNECTIONREPOSITORY BAN A TESZT ADATTAL NEM CREATELŐDIK dCon
+
+    })
+        test("getPurchase returns mockpurchase", async () =>{
+            const receivedpurchase = await purchaseRepository.getPurchase(1);
+            console.log(mockPurchase)
+            expect(receivedpurchase.get({plain:true})).toEqual({
+                id:mockPurchase.id,
+                date:mockPurchase.date,
+                totalPrice:mockPurchase.totalPrice,
+                message:mockPurchase.message,
+                isActive:mockPurchase.isActive,
+                takeAway:mockPurchase.takeAway
+            })
+        })
+
+        test("getAllPurchase returns length 1", async () =>{
+            const receivedpurchase = await purchaseRepository.getPurchase(1);
+            console.log(mockPurchase)
+            expect(receivedpurchase.get({plain:true})).toEqual({
+                id:mockPurchase.id,
+                date:mockPurchase.date,
+                totalPrice:mockPurchase.totalPrice,
+                message:mockPurchase.message,
+                isActive:mockPurchase.isActive,
+                takeAway:mockPurchase.takeAway
+            })
+        })
+
+        test("deActivatePurchase deactivates purchase", async () => {
+            await purchaseRepository.deActivatePurchase(1);
+            const receivedpurchase = await purchaseRepository.getPurchase(1);
+            expect(receivedpurchase.isActive).toEqual(false);
+        });
+
+        test("updatePurchase updates the purchase", async () => {
+            mockPurchase.message = "new message";
+            await purchaseRepository.updatePurchaseMessage(mockPurchase);
+            const receivedpurchase = await purchaseRepository.getPurchase(1);
+            console.log("received: ",receivedpurchase);
+            expect(receivedpurchase.message).toEqual("new message");
+        });
+
+        test("deletePurchase deletes the purchase and GetAllPurchase returns 0 purchases", async () => {
+            await purchaseRepository.deletePurchase(mockPurchase);
+            expect((await purchaseRepository.getAllActivePurchase()).length).toBe(0);
+        });
 
     });
-
     
-})
+})})

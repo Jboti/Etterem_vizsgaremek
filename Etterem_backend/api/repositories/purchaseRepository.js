@@ -119,7 +119,7 @@ class purchaseRepository
 
     async createPurchase(purchase)
     {
-        await this.Purchase.create(purchase)
+        return await this.Purchase.create(purchase)
     }
 
     async deletePurchase(purchase)

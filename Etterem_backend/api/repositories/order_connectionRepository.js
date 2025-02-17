@@ -21,6 +21,7 @@ class order_connectionRepository
             order_id: Purchase.id,
         }
         await this.OrderConnection.create(con)
+        //console.log("con create ITT---------",con)
         for(let i = 0;i<dishInfo.dishIds.length;i++)
         {            
             const dCon = {
@@ -30,7 +31,9 @@ class order_connectionRepository
                 amount: dishInfo.dishAmounts[i],
                 customizations: dishInfo.dishCustomizations[i]
             }
-            await this.OrderDishConnection.create(dCon)
+            //console.log("dcon ITT---------: ",dCon);
+            await this.OrderDishConnection.create(dCon);
+            //console.log("dcon create ITT---------",this.orderDishConnection.create(dCon));
         }
         return Purchase
     }
