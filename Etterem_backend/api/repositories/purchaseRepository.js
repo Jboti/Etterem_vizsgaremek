@@ -24,30 +24,6 @@ class purchaseRepository
             })
     }
 
-    async getPurchaseUser(purchase)
-    {
-        return await this.User.findOne(
-        {
-            where: {
-                id: this.OrderConnection.findOne(
-                    {
-                        where: {
-                            order_id: purchase.id,
-                        }
-                    }).user_id
-            }
-        })
-    }
-
-    // async getAllActivePurchase()
-    // {
-    //     return await this.Purchase.findAll({
-    //         where:
-    //         {
-    //             isActive: true
-    //         }
-    //     })
-    // }
 
     async getAllPurchaseUserInfo(uid) {
         return await this.OrderConnection.findAll({

@@ -66,6 +66,14 @@ const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
   }
 }
 
+const reOrderHandler = (purchase : any) =>{
+  console.log(purchase)
+}
+
+const handleDeleteUser = () =>{
+  console.log("delete user")
+}
+
 
 
 onMounted(() => {
@@ -85,22 +93,28 @@ watch(isError, () => {})
     <div v-else class="page">
       
       <v-card class="user-info-box">
-        <div class="user-info" v-if="useGetUserInfodata">
+        <v-card class="user-info" v-if="useGetUserInfodata">
           <v-card-title><b>Felhasználó:</b> {{useGetUserInfodata.userName }}</v-card-title>
           <v-card-title><b>Teljes név:</b> {{useGetUserInfodata.fullName}}</v-card-title>
           <v-card-title><b>Email:</b> {{useGetUserInfodata.email}}</v-card-title>
           <v-card-title><b>Fiók készítése:</b> {{useGetUserInfodata.created}}</v-card-title>
-          <v-card-title><b>Pontok:</b> {{useGetUserInfodata.points}}
+          <v-card-title style="display: flex;"><b>Pontok:</b>&nbsp;{{useGetUserInfodata.points}}
           <v-tooltip text="Pontok a weboldalon lévő vásárlással érhetőek el">
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" style="background-color: transparent; box-shadow: none; border-radius: 100%;"><v-icon>mdi-help</v-icon></v-btn>
+              <v-btn
+                v-bind="props"
+                style="background-color: transparent; box-shadow: none; border-radius: 100%; height: auto;"
+              >
+                <v-icon>mdi-help</v-icon>
+              </v-btn>
             </template>
           </v-tooltip>
+
           </v-card-title>
           
-        </div>
+        </v-card>
       
-        <div class="order-info">
+        <v-card class="order-info">
           <v-card-title><b>Rendelési előzmények:</b></v-card-title>
           <v-dialog>
             <!-- RENDELÉSI ELŐZMÉNY GOMB -->
@@ -122,7 +136,7 @@ watch(isError, () => {})
                 <v-card-text>
                   <v-row>
                     <v-col 
-                      v-for="purchase in purchases" 
+                      v-for="purchase in [...purchases].reverse()" 
                       :key="purchase.id"  
                       cols="12" sm="12" md="12" xl="12">
                       <v-card color="#B71C1C" style="box-shadow: 0 0 20px 8px black inset, 0 0 5px 2px black; color: whitesmoke; max-width: 1000px; margin: auto;">
@@ -134,20 +148,20 @@ watch(isError, () => {})
                             v-for="dish in purchase.purchase.order_dishes" 
                             :key="dish.dish_id"  
                             cols="12" sm="12" md="12" xl="12">
-                            <v-card>
+                            <v-card class="ml-4 mr-4">
                               <v-card-title v-if="dish.amount > 1">{{ dish.dish.name }} x {{ dish.amount }}</v-card-title>
                               <v-card-title v-else>{{ dish.dish.name }}</v-card-title>
                               <div v-if="dish.dish.type != 'Drink'">
-                                <v-card-title>Szósz: {{ String(dish.customizations).split(',')[0] }}</v-card-title>
+                                <v-card-title>Szósz: {{ String(dish.customizations).split(',')[0].substring(1) }}</v-card-title>
                                 <div v-if="String(dish.customizations).split(',').length > 1">
-                                  <v-card-title>Módosítás: {{ String(dish.customizations).split(',').splice(1,String(dish.customizations).split(',').length).join(', ') }}</v-card-title>
+                                  <v-card-title>Módosítás: {{ String(dish.customizations).split(',').splice(1,String(dish.customizations).split(',').length-1).join(',').slice(0,-1) }}</v-card-title>
                                 </div>
                               </div>
                             </v-card>
                           </v-col>
                         </v-row>
 
-                        <v-btn>Újra rendelés</v-btn>
+                        <v-btn @click="reOrderHandler(purchase)" class="mx-4 my-4">Újra rendelés</v-btn>
                       </v-card>
                     </v-col>
                   </v-row>
@@ -165,7 +179,7 @@ watch(isError, () => {})
               </v-card>
             </template>
           </v-dialog>
-        </div>
+        </v-card>
       </v-card>
 
 
@@ -183,7 +197,7 @@ watch(isError, () => {})
                 <v-btn
                 v-bind="activatorProps"
                 text="Felhasználónév megváltoztatása"
-                class="button mb-6 mt-4"
+                class="button mb-4 mt-4"
                 ></v-btn>
               </div>
             </template>
@@ -213,33 +227,75 @@ watch(isError, () => {})
             </template>
           </v-dialog>
 
+          
+          
           <div style="width: 100%; text-align: center;">
             <v-btn
-              class="button"
-              @click="handlePwResetEmailSent()">
+            class="button"
+            @click="handlePwResetEmailSent()">
             Jelszó megváltoztatása</v-btn>
           </div>
-               
+          
+
+          <v-dialog>
+            <!-- USER TÖRLÉS GOMB -->
+            <template v-slot:activator="{ props: activatorProps }">
+              <div style="width: 100%; text-align: center;">
+                <v-btn
+                v-bind="activatorProps"
+                text="Fiók törlése"
+                class="button mb-6 mt-8"
+                color="red"
+                ></v-btn>
+              </div>
+            </template>
+            <!-- USER TÖRLÉS MODAL -->
+            <template v-slot:default="{ isActive }">
+              <v-card>
+                <v-card-title>Biztos törölni akarod a felhasználódat? A művelet nem visszafordítható!</v-card-title>
+                
+                <v-card-actions class="justify-end" style="height: auto; background: linear-gradient(to right, black, rgb(183, 28, 28), black);">
+                  <v-btn
+                  text="MEGERŐSÍTÉS"
+                  @click="handleDeleteUser()"
+                  style="color: whitesmoke; font-size: 1vw;"
+                  ></v-btn>
+                  <v-btn
+                  text="Bezárás"
+                  @click="isActive.value = false"
+                  style="color: whitesmoke; font-size: 1vw; text-align: end;"
+                  ></v-btn>
+                  
+                </v-card-actions>
+              </v-card>
+            </template>
+          </v-dialog>
+
         </v-card>
                 
-          <div class="allergy-box">
-            <v-card-title><b>Allergén beállítás:</b></v-card-title>
-            <v-card style="padding: 1%; background-color: transparent; box-shadow: none;">
-              <v-row>
-                <v-checkbox label="Glutén érzékenység" color="success" style="width: 50%; margin: auto;" @change=""></v-checkbox>
-                <v-checkbox label="Laktóz érzékenység" color="success" style="width: 50%; margin: auto;" @change=""></v-checkbox>
-                <v-checkbox label="x érzékenység" color="success" style="width: 50%; margin: auto;" @change=""></v-checkbox>
-                <v-checkbox label="y érzékenység" color="success" style="width: 50%; margin: auto;" @change=""></v-checkbox>
-                <v-checkbox label="z érzékenység" color="success" style="width: 50%; margin: auto;" @change=""></v-checkbox>
-                <v-checkbox label="dz érzékenység" color="success" style="width: 50%; margin: auto;" @change=""></v-checkbox>
-                <div style="text-align: center; width: 100%; margin: 1%;">
-                  <v-btn color="success">Mentés</v-btn>
-                </div>
-             
-                
-              </v-row>
+        <v-card class="allergy-box">
+          <div style="display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%;">
+            <v-card-title><b>Allergiák beállítása:</b></v-card-title>
+            <v-card style="background-color: transparent; box-shadow: none; width: 100%; display: flex; flex-direction: column;">
+              
+              <div class="allergy-grid">
+                <v-checkbox label="Glutén érzékenység" color="success"></v-checkbox>
+                <v-checkbox label="Laktóz érzékenység" color="success"></v-checkbox>
+                <v-checkbox label="Tojás érzékenység" color="success"></v-checkbox>
+                <v-checkbox label="Földimogyoró érzékenység" color="success"></v-checkbox>
+              </div>
+
+              <div style="text-align: center; margin-top: 10px;">
+                <v-btn color="success">Mentés</v-btn>
+              </div>
+
+              <v-card-subtitle class="multiline-text mt-6" style="display: flex; align-items: center;">
+                <v-icon class="mr-2" color="error">mdi-bottle-tonic-skull</v-icon> Ez az icon fogja jelölni az ételeket, amikre allergiás lehetsz!
+              </v-card-subtitle>
             </v-card>
-          </div>  
+          </div>
+        </v-card>
+
         
       </v-card>
   </div>
@@ -275,41 +331,54 @@ watch(isError, () => {})
   width: 96%;
   margin: 2%;
   display: flex;
-  background-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 10px .5px #B71C1C;
+
+  background-color: transparent;
+  box-shadow: none;
 }
 
 .user-info, .order-info, .user-info-change, .allergy-box{
-  width: 50%;
-  height: 100%;
+  width: 46%;
+  height: 96%;
+  margin: 2%;
+  margin: auto;
+  box-shadow: 0 0 5px .5px #B71C1C inset,0 0 2.5px 5px #B71C1C;
 }
 .user-info{
+  background-color: rgba(255, 255, 255, 0.8);
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 .order-info{
+  background-color: rgba(255, 255, 255, 0.8);
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 .user-info-change{
-  background-color: transparent;
-  box-shadow: none;
+  background-color: rgba(255, 255, 255, 0.8);
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+}
+.allergy-box{
+  background-color: rgba(255, 255, 255, 0.8);
 }
 
-.allergy-box{
+.allergy-grid{
+  display: grid;
+  justify-items: center;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 80%;
   margin: auto;
-  width: 46%;
-  height: 96%;
 }
 
 .button{
   width: 75%;
-  font-size: clamp(.6rem, 1.5dvw, 1.5rem);
+  font-size: clamp(.6rem, 1.4dvw, 1.5rem);
   text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);
   
 }
@@ -318,8 +387,12 @@ watch(isError, () => {})
   transform: scale(1.2);
 }
 
-.justify-end {
-    justify-content: space-around !important;
+.multiline-text{
+  margin: auto;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow: visible;
+  opacity: 1;
 }
 
 
@@ -337,26 +410,30 @@ watch(isError, () => {})
   }
   .user-info-box, .user-info-change-box{
     flex-direction: column;
-    margin-bottom:  5dvh;
-  }
-  .user-info-box{
-    height: 35%;
-  }
-  .user-info-change-box{
-    height: 47.5%;
-    margin-bottom: 35%;
+    height: auto;
+    margin-bottom:  4dvh;
   }
   .user-info, .order-info, .user-info-change, .allergy-box{
-    width: 98%;
-    height: 100%;
+    width: 96%;
+    height: auto;
+    padding-bottom: 2dvh;
+    margin-top: 1dvh;
+    margin-bottom: 2dvh;
   }
-  .user-info, .user-info-change{
-    margin: auto;
-    border-bottom: solid black 2px;
-    border-radius: 0;
-  }
+  
   .user-info-change,.order-info{
     justify-content: flex-start;
+  }
+
+  .allergy-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .allergy-grid .v-checkbox {
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
 }
 

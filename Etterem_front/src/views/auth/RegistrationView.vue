@@ -81,10 +81,17 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
                 </div>
                 <div style="width: 50%;">
                     <div class="field" style="text-align: center; margin-bottom: 1%;">
-                        <div tabindex="-1" class="Tooltip">
-                            <v-icon class="TooltipIcon">mdi-help-circle-outline</v-icon>
-                            <span class="TooltipText">Minimum 8 karakter hosszú,</br> Minimum 1 kis és nagy betű,</br> Minimum 1 szám</span>
-                        </div>
+                    <v-tooltip text="Minimum 8 karakter hosszú, Minimum 1 kis és nagy betű, Minimum 1 szám"  location="top">
+                        <template v-slot:activator="{ props }">
+                        <v-btn
+                            v-bind="props"
+                            class="mb-4"
+                            style="background-color: transparent; box-shadow: none; border-radius: 100%; height: auto; color: whitesmoke;"
+                        >
+                            <v-icon>mdi-help</v-icon>
+                        </v-btn>
+                        </template>
+                    </v-tooltip>
                     </div>
                     <v-text-field class="field"
                     v-model="registrationDataRef.password"
@@ -117,36 +124,6 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
 </template>
 
 <style scoped>
-
-.Tooltip {
-    position: relative;
-    display: inline-block;
-    width: 100%;
-    color: white;
-    animation: 2s ease fade;
-}
-
-.TooltipIcon:hover{
-    cursor: pointer;
-}
-
-.Tooltip .TooltipText {
-    visibility: hidden;
-    font-size: medium;
-    background-color: rgba(255, 255, 255, .9);
-    color: black;
-    text-align: center;
-    padding: 5%;
-    border-radius: 6px;
-    position: absolute;
-    top: 100%;
-    left: 0em;
-    
-}
-  
-.Tooltip:hover .TooltipText {
-    visibility: visible;
-}
 
 .title{
     animation: 1s ease-in slideInFromTop;
