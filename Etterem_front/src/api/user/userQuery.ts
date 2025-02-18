@@ -5,6 +5,7 @@ import type { ChangeUserName } from "../auth/auth"
 import { useRouter } from "vue-router"
 import type { placeOrderData } from "../menuItems/items"
 import queryClient from "@/lib/queryClient"
+import type { allergies } from "./user"
 
 
 const getToken = () =>{
@@ -106,7 +107,31 @@ export const usePlaceOrder = () => {
     return useMutation({
         mutationFn:PlaceOrder,
         onSuccess(){
-            queryClient.removeQueries({ queryKey: [QUERY_KEYS.userPurchases] })
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.userPurchases] })
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.user] })
+        }
+    })
+}
+
+const updateAllergies = async ( data:allergies ) => {
+    const token = getToken()
+    let config = {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+    }
+    const response = await axiosClient.patch("http://localhost:3000/api/v1/update-allergies", data, config)
+    return response.data
+}
+
+export const useUpdateAllergies = () => {
+    return useMutation({
+        mutationFn:updateAllergies,
+        onSuccess(){
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.user] })
+        },
+        onError(err){
+            console.log(err)
         }
     })
 }

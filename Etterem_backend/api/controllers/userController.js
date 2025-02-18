@@ -422,3 +422,31 @@ exports.getAdminUser = async (req,res,next) =>
 exports.authenticateToken = (req,res,next) =>{
     res.status(200).json({status:'success'})
 }
+
+exports.updateAllregies = async (req,res,next) =>
+{
+    try
+    {
+        let {gluten,lactose,egg,nuts} = req.body
+        const id = Number(req.uid)
+
+        if(!String(gluten) || !String(lactose) || !String(egg) || !String(nuts) || !id || isNaN(id)){
+            const error = new Error("Missing or wrong form of data!")
+            error.status = 404
+            throw error
+        }
+
+        const allergies = {
+            gluten:gluten,
+            lactose:lactose,
+            egg:egg,
+            nuts:nuts
+        }
+
+        await userService.updateAllregies(id,allergies)
+        
+        res.status(200).send("Allergies updated!")
+    }catch(error){
+        next(error)
+    }
+}

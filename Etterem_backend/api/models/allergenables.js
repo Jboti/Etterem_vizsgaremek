@@ -7,15 +7,15 @@ module.exports = (sequelize, DataTypes) => {
           primaryKey: true,
           autoIncrement: true,
         },
-        allergenableType: {
+        allergenable_type: {
           type: DataTypes.STRING(255),
           allowNull: false,
         },
-        allergenableId: {
+        allergenable_id: {
           type: DataTypes.INTEGER,
           allowNull: false,
         },
-        allergenId: {
+        allergen_id: {
           type: DataTypes.INTEGER,
           allowNull: false,
         },

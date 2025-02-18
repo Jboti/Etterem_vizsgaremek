@@ -55,6 +55,11 @@ class UserService
     {
         return await userRepository.getUserPwById(id)
     }
+
+    async updateAllregies(id,allergies)
+    {
+        await userRepository.updateAllregies(id,allergies)
+    }
 }
 
 module.exports = new UserService()

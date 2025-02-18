@@ -9,7 +9,13 @@ export const useCartStore = defineStore('cart', () => {
   let cartId = ref(0)
   
   function addItem(item:cartItem) {
-    const index = items.value.findIndex((Eitem) => Eitem.dishId === item.dishId && Eitem.sause === item.sause && Eitem.options === item.options)
+    const index = items.value.findIndex((Eitem) => {
+      
+      const sortedEitemOptions = Eitem.options.split(',').map(opt => opt.trim()).sort().join(',')
+      const sortedItemOptions = item.options.split(',').map(opt => opt.trim()).sort().join(',')
+      
+      return Eitem.dishId === item.dishId && Eitem.sause === item.sause && sortedEitemOptions === sortedItemOptions
+    })
     if(index !== -1) {
       totalPrice.value += item.price*item.quantity
       items.value[index].quantity += item.quantity
