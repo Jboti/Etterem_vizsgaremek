@@ -1,7 +1,7 @@
 import axiosClient from "@/lib/axios"
-import type { emailVerifyData, LoginData, LoginResponse, RegistrationData,SetPasswordData , ResetPasswordData, ChangeUserName} from "./auth"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query"
-import { useRoute, useRouter } from "vue-router"
+import type { emailVerifyData, LoginData, LoginResponse, RegistrationData,SetPasswordData , ResetPasswordData} from "./auth"
+import { useMutation, useQueryClient } from "@tanstack/vue-query"
+import { useRouter } from "vue-router"
 import { QUERY_KEYS } from "@/utils/queryKeys"
 
 
@@ -62,7 +62,7 @@ export const useLogout = () => {
         onSuccess(){
             document.cookie = "token=; path=/;"
             queryClient.removeQueries({ queryKey: [QUERY_KEYS.user] })
-            push({name:'Főoldal'})
+            push({name:'Main'})
             window.location.reload()
         },
     })
@@ -70,18 +70,18 @@ export const useLogout = () => {
 
 
 const PasswordReset = async (token: string, data: SetPasswordData) => {
-    const response = await axiosClient.post(`http://localhost:3000/api/v1/password-reset/${token}`, data) // erre endpointra (passwprd-reset) userroute, meg controllerbe megírni, hogy ha valid a token akkor módosítsa a jelszót
-    console.log(response.data.token)
+    let config = {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+    }
+    const response = await axiosClient.post(`http://localhost:3000/api/v1/password-reset/`, data, config) 
     return response.data
 }
 
 export const usePasswordReset = () => {
-    const {push} = useRouter()
     return useMutation({
-        mutationFn:({token,data} : {token:string, data: SetPasswordData }) => PasswordReset(token,data),
-        onSuccess(){
-            push({name:'login'})
-        },
+        mutationFn:({token,data} : {token:string, data: SetPasswordData }) => PasswordReset(token,data)
     })
 }
 
@@ -97,13 +97,25 @@ export const usePasswordResetEmail = () => {
     })
 }
 
-const UserNameChange = async (data: ChangeUserName) => {
-    const response = await axiosClient.patch('http://localhost:3000/api/v1/user-name-change', data, {withCredentials: true})
+const getToken = () =>{
+    const cookies = document.cookie.split('; ')
+    const tokenCookie = cookies.find(row => row.startsWith('token='))
+    return tokenCookie ? tokenCookie.split('=')[1] : null
+}
+
+const validateToken = async () =>{
+    const token = getToken()
+    let config = {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+    }
+    const response = await axiosClient.post("http://localhost:3000/api/v1/authenticateToken",{} ,config)
     return response.data
 }
 
-export const useUserNameChange = () => {
+export const useValidateToken = () =>{
     return useMutation({
-        mutationFn:UserNameChange,
+        mutationFn:validateToken
     })
 }

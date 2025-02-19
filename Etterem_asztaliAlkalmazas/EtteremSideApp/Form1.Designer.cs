@@ -43,9 +43,9 @@
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel8 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripLabel6 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripLabel9 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripLabel6 = new System.Windows.Forms.ToolStripLabel();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -115,6 +115,7 @@
             this.toolStripLabel4.Name = "toolStripLabel4";
             this.toolStripLabel4.Size = new System.Drawing.Size(84, 22);
             this.toolStripLabel4.Text = "Bejelentkezve: ";
+            this.toolStripLabel4.Click += new System.EventHandler(this.toolStripLabel4_Click);
             // 
             // toolStripLabel5
             // 
@@ -153,14 +154,6 @@
             this.toolStripSeparator5.Name = "toolStripSeparator5";
             this.toolStripSeparator5.Size = new System.Drawing.Size(6, 25);
             // 
-            // toolStripLabel6
-            // 
-            this.toolStripLabel6.ForeColor = System.Drawing.Color.Red;
-            this.toolStripLabel6.Name = "toolStripLabel6";
-            this.toolStripLabel6.Size = new System.Drawing.Size(74, 22);
-            this.toolStripLabel6.Text = "Kijelentkezés";
-            this.toolStripLabel6.Click += new System.EventHandler(this.toolStripLabel6_Click);
-            // 
             // toolStripLabel9
             // 
             this.toolStripLabel9.ForeColor = System.Drawing.Color.Blue;
@@ -173,6 +166,14 @@
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
             this.toolStripSeparator7.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripLabel6
+            // 
+            this.toolStripLabel6.ForeColor = System.Drawing.Color.Red;
+            this.toolStripLabel6.Name = "toolStripLabel6";
+            this.toolStripLabel6.Size = new System.Drawing.Size(74, 22);
+            this.toolStripLabel6.Text = "Kijelentkezés";
+            this.toolStripLabel6.Click += new System.EventHandler(this.toolStripLabel6_Click);
             // 
             // Form1
             // 

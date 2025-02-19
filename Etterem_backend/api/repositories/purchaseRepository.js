@@ -24,30 +24,34 @@ class purchaseRepository
             })
     }
 
-    async getPurchaseUser(purchase)
-    {
-        return await this.User.findOne(
-        {
-            where: {
-                id: this.OrderConnection.findOne(
+
+    async getAllPurchaseUserInfo(uid) {
+        return await this.OrderConnection.findAll({
+            where:{
+                user_id: uid
+            },
+            include:[{
+                model: this.Purchase,
+                as: "purchase",
+                include: [
                     {
-                        where: {
-                            order_id: purchase.id,
-                        }
-                    }).user_id
-            }
+                        model: this.OrderDishConnection,
+                        as: "order_dishes",
+                        include: [
+                            {
+                                model: this.Dish,
+                                as: "dish",
+                                attributes: ["name", "type"]
+                            }
+                        ],
+                        attributes: ["dish_id", "amount","customizations"]
+                    }
+                ],
+                attributes: ["date", "totalPrice", "message", "takeAway"]
+            }],
+            attributes:[]
         })
     }
-
-    // async getAllActivePurchase()
-    // {
-    //     return await this.Purchase.findAll({
-    //         where:
-    //         {
-    //             isActive: true
-    //         }
-    //     })
-    // }
 
     async getAllActivePurchase() {
         return await this.Purchase.findAll({
@@ -115,7 +119,7 @@ class purchaseRepository
 
     async createPurchase(purchase)
     {
-        await this.Purchase.create(purchase)
+        return await this.Purchase.create(purchase)
     }
 
     async deletePurchase(purchase)

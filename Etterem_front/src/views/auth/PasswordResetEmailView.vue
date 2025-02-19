@@ -9,7 +9,6 @@ const ResetPasswordDataRef = ref<ResetPasswordData>({
     email: '',
 })
 
-
 const { push } = useRouter()
 const { mutate, isPending} = usePasswordResetEmail()
 

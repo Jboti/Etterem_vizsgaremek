@@ -80,7 +80,7 @@ exports.createUser = async (req, res, next) => {
 
                 const result = await userService.createUser(user)
                 if(result){
-                    const token = jwt.sign({ id: result.id }, process.env.JWT_KEY, { expiresIn: "1d" })
+                    const token = jwt.sign({ id: result.id, validLogin:false }, process.env.JWT_KEY)
                     const verificationLink = `http://localhost:5173/email-verify?token=${token}`
 
                     async function sendMail() {
@@ -207,7 +207,7 @@ exports.loginUser = async (req,res,next) =>
             res.status(404).json({errmessage:"A felhasználó nincs aktiválva, ha még nem aktiválta email címét tegye meg az azon kapott üzeneten keresztül! Más hiba esetén vegye fel velünk a kapcsolatot a: donercegled@gmail.com címen!"})
         }
         else if(await bcrypt.compare(password, user.password)){
-            const token = jwt.sign({ id:user.id }, process.env.JWT_KEY, { expiresIn: "1h" })
+            const token = jwt.sign({ id:user.id, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" })   
             res.status(200).json({token:token})
         }
         else
@@ -249,21 +249,10 @@ exports.deleteUser = async (req,res,next) =>
 
 exports.changePassword = async (req, res, next) => {
     try {
-        const { password, token } = req.body
-        if (!token) {
-            const error = new Error("No token provided!")
-            error.status = 403
-            throw error 
-        }
-        let id = null
+        let { password } = req.body
+        const id = Number(req.uid)
         
-        jwt.verify(token, process.env.JWT_KEY,(err,decoded) =>{
-            if(err){
-                res.status(500).json({ errmessage:"Érvénytelen vagy lejárt munkamenet!"})
-            }
-            id = decoded.id
-        })
-        id = Number(id)
+
         if (!id || isNaN(id)) {
             const error = new Error("User id not found or id is not a number!")
             error.status = 404
@@ -274,7 +263,7 @@ exports.changePassword = async (req, res, next) => {
             error.status = 404
             throw error
         }
-
+        password= await bcrypt.hash(password, salt);
         const result = await userService.changePassword(password, id)
         if (!result) {
             const error = new Error("Password change went wrong!")
@@ -291,10 +280,15 @@ exports.changeUserName = async(req,res,next) =>{
     try{
         const { userName, password } = req.body
         let id = req.uid
-        //username helyes
+       
         id = Number(id)
         if (!id || isNaN(id)) {
             const error = new Error("User id not found or id is not a number!")
+            error.status = 404
+            throw error
+        }
+        if(!userName){
+            const error = new Error("UserName not found!")
             error.status = 404
             throw error
         }
@@ -303,8 +297,8 @@ exports.changeUserName = async(req,res,next) =>{
             error.status = 404
             throw error
         }
-        //
-        const user = await userService.getUser(id)
+        
+        const user = await userService.getUserPwById(id)
         if (!(await bcrypt.compare(password, user.password))) {
             res.status(400).json({errmessage:"Helytelen jelszó!"})
         }
@@ -329,7 +323,7 @@ exports.sendEmail = async(req,res,next) =>{
         const result = await userService.checkForExistingEmail(email)
     
         if(result){
-            const token = jwt.sign({ id: result.id }, process.env.JWT_KEY, { expiresIn: "30m" })
+            const token = jwt.sign({ id: result.id, validLogin:false }, process.env.JWT_KEY, { expiresIn: "30m" })
             const verificationLink = `http://localhost:5173/password-reset?token=${token}`
 
             async function sendMail() {
@@ -387,4 +381,72 @@ exports.sendEmail = async(req,res,next) =>{
         next(error)
     }
     
+}
+
+exports.getAdminUser = async (req,res,next) =>
+{
+    try
+    {
+        const {email, password} = req.body
+        if(!email){
+            or = new Error("Email not found!")
+            error.status = 404
+            throw error
+        }
+        if (!password) {
+            const error = new Error("Password not found!")
+            error.status = 404
+            throw error
+        }
+        const user = await userService.getUserByEmail(email)
+        if(!user){
+            res.status(404).json({errmessage:"Az email címmel nincs regisztálva felhasználó!"})
+        }
+        else if(user.isActive == false){
+            res.status(404).json({errmessage:"A felhasználó nincs aktiválva, ha még nem aktiválta email címét tegye meg az azon kapott üzeneten keresztül! Más hiba esetén vegye fel velünk a kapcsolatot a: donercegled@gmail.com címen!"})
+        }
+        else if(await bcrypt.compare(password, user.password)){
+            if(user.isAdmin)
+                res.status(200).json({email:user.email,userName:user.userName})
+            else
+                res.status(500).json({errmessage:"Nem admin fiók!"}) 
+        }
+        else
+            res.status(400).json({errmessage:"Helytelen email cím vagy jelszó!"})
+
+    }catch(error){
+        next(error)
+    }
+}
+
+exports.authenticateToken = (req,res,next) =>{
+    res.status(200).json({status:'success'})
+}
+
+exports.updateAllregies = async (req,res,next) =>
+{
+    try
+    {
+        let {gluten,lactose,egg,nuts} = req.body
+        const id = Number(req.uid)
+
+        if(!String(gluten) || !String(lactose) || !String(egg) || !String(nuts) || !id || isNaN(id)){
+            const error = new Error("Missing or wrong form of data!")
+            error.status = 404
+            throw error
+        }
+
+        const allergies = {
+            gluten:gluten,
+            lactose:lactose,
+            egg:egg,
+            nuts:nuts
+        }
+
+        await userService.updateAllregies(id,allergies)
+        
+        res.status(200).send("Allergies updated!")
+    }catch(error){
+        next(error)
+    }
 }

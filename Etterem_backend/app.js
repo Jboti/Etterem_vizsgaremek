@@ -13,7 +13,7 @@ app.use(
     cors({
         origin: 'http://localhost:5173', 
         methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'], 
-        allowedHeaders: ['Content-Type', 'Authorization'], 
+        allowedHeaders: ['Content-Type', 'Authorization','Cookie'], 
         credentials: true,
     })
 )
@@ -24,7 +24,6 @@ const userRoutes = require('./api/routes/userRoutes')
 const purchaseRoutes = require('./api/routes/purchaseRoutes')
 const dishRoutes = require('./api/routes/dishRoutes')
 const testRouter = require('./api/routes/testRouter')
-
 
 //ROUTES
 

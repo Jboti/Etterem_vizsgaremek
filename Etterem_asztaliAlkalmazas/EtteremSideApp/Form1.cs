@@ -7,6 +7,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static EtteremSideApp.Form1;
 
 //csak C:-n lehet futtatni!!
 
@@ -26,9 +27,24 @@ namespace EtteremSideApp
         public static int fontSize = 12;
         public static Color backGroundColor = Color.Black;
         public static bool adminLoggedIn = false;
+        public static string adminName = "---";
+        public string[] allCategories = new string[] { "Kebab wrap", "Kebab box", "Kebab tál", "Köret", "Üdítő" }; // ehhez kell majd egy get-all-categories endpoint
+
+        public static List<FullUser> selectedUsers = new List<FullUser>(); // user edit keresési részéhez tartozik
+        public static FullUser selectedUser;
+
+        public static List<MenuItem> selectedMenuItems = new List<MenuItem>();
+        public static MenuItem selectedMenuItem;
+
         public FlowLayoutPanel panel2 = new FlowLayoutPanel();
         public FlowLayoutPanel panel3 = new FlowLayoutPanel();
         public FlowLayoutPanel panel4 = new FlowLayoutPanel();
+
+        public ListBox resultsListBoxUser;
+        public TextBox searchTextBoxUser;
+
+        public ListBox resultsListBoxDish;
+        public TextBox searchTextBoxDish;
 
 
 
@@ -185,7 +201,7 @@ namespace EtteremSideApp
 
         private void InitializeClock()
         {
-            clockTimer = new System.Windows.Forms.Timer
+            clockTimer = new Timer
             {
                 Interval = 1000
             };
@@ -200,7 +216,7 @@ namespace EtteremSideApp
 
         private void InitializeElementUpdater()
         {
-            System.Windows.Forms.Timer updateTimer = new System.Windows.Forms.Timer
+            Timer updateTimer = new Timer
             {
                 Interval = refetchIntervall
             };
@@ -341,8 +357,6 @@ namespace EtteremSideApp
 
             this.Controls.Add(flowLayoutPanel);
 
-            //a name a flowLayoutPanel
-
             foreach (var order in all_orders)
             {
                 Panel orderPanel = CreateOrderPanel();
@@ -358,7 +372,7 @@ namespace EtteremSideApp
                 Dock = DockStyle.Fill,
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents = true,
-                Padding = new Padding(20, 20, 20, 200),
+                Padding = new Padding(20, 20, 20, 20),
                 AutoScroll = true,
             };
         }
@@ -368,10 +382,11 @@ namespace EtteremSideApp
             Panel panel = new Panel
             {
                 AutoSize = true,
-                Margin = new Padding(10, 20, 20, 20),
+                Margin = new Padding(10, 20, 20, 60),
                 BackColor = Color.White,
             };
-
+            
+            //hogy mindig szépen igazodjanak a cakkok a "blokk" alján//
             panel.SizeChanged += (s, e) =>
             {
                 if (panel.Width % 15 != 0)
@@ -380,6 +395,7 @@ namespace EtteremSideApp
                     panel.Width = newWidth;
                 }
             };
+            //-------------------------------------------------------//
 
             panel.Paint += (s, e) => PaintPanel(e.Graphics, panel);
 
@@ -431,33 +447,32 @@ namespace EtteremSideApp
                 g.DrawLines(rightBottomPen, zigzagPoints);
             }
         }
-
-
-
-
-
-
         private void PopulateOrderPanel(Panel orderPanel, Order order)
         {
             int currentTop = 10;
             int maxLabelWidth = 0;
+            int allLabelHeight = 0;
 
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Rendelés ID: {order.Id}\n", ref currentTop));
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Dátum: {order.timestamp.ToShortDateString()} {order.timestamp.ToShortTimeString()}\n", ref currentTop));
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Megrendelő: {order.customer_name}\n", ref currentTop));
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Ár: {order.price} Ft\n", ref currentTop));
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Kifizetve: {(order.paid ? "Igen" : "Nem")}\n", ref currentTop));
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Elvitelre: {(order.takeAway ? "Igen" : "Nem")}\n", ref currentTop));
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Megjegyzés: {order.message}\n", ref currentTop));
+            allLabelHeight += AddLabel(orderPanel, $"Rendelés ID: {order.Id}\n", ref currentTop, ref maxLabelWidth);
+            allLabelHeight += AddLabel(orderPanel, $"Dátum: {order.timestamp.ToShortDateString()} {order.timestamp.ToShortTimeString()}\n", ref currentTop, ref maxLabelWidth);
+            allLabelHeight += AddLabel(orderPanel, $"Megrendelő: {order.customer_name}\n", ref currentTop, ref maxLabelWidth);
+            allLabelHeight += AddLabel(orderPanel, $"Ár: {order.price} Ft\n", ref currentTop, ref maxLabelWidth);
+            allLabelHeight += AddLabel(orderPanel, $"Kifizetve: {(order.paid ? "Igen" : "Nem")}\n", ref currentTop, ref maxLabelWidth);
+            allLabelHeight += AddLabel(orderPanel, $"Elvitelre: {(order.takeAway ? "Igen" : "Nem")}\n", ref currentTop, ref maxLabelWidth);
+            allLabelHeight += AddLabel(orderPanel, $"Megjegyzés: {order.message}\n", ref currentTop, ref maxLabelWidth);
 
             AddSeparator(orderPanel, ref currentTop);
+            allLabelHeight += 5;
 
             string orderContent = GenerateOrderContent(order);
-            maxLabelWidth = Math.Max(maxLabelWidth, AddLabel(orderPanel, $"Tartalom:\n{orderContent}", ref currentTop));
+            allLabelHeight += AddLabel(orderPanel, $"Tartalom:\n{orderContent}", ref currentTop, ref maxLabelWidth);
 
-            AddDoneButton(orderPanel, order, currentTop + 50, maxLabelWidth);
+            AddDoneButton(orderPanel, order, currentTop, maxLabelWidth, allLabelHeight);
 
             ColorOrderPanel(ref orderPanel, ref order);
+
+            orderPanel.Width = maxLabelWidth;
+            orderPanel.Height = allLabelHeight;
         }
 
         private void ColorOrderPanel(ref Panel orderPanel, ref Order order)
@@ -472,20 +487,27 @@ namespace EtteremSideApp
             }
         }
 
-        private int AddLabel(Panel panel, string text, ref int top)
-        {
+        private int AddLabel(Panel panel, string text, ref int top, ref int maxWidth)
+        { 
+
             Label label = new Label
             {
                 Text = text,
                 AutoSize = true,
                 Location = new Point(10, top),
-
+                Margin = new Padding(0, 5, 0, 5),
             };
+
             panel.Controls.Add(label);
 
-            top += label.Height + 5;
-            return label.Width;
+            int labelHeight = label.Height + 5;
+            top += labelHeight; 
+
+            maxWidth = Math.Max(maxWidth, label.Width);
+
+            return labelHeight;
         }
+
 
         private void AddSeparator(Panel panel, ref int currentTop)
         {
@@ -521,14 +543,18 @@ namespace EtteremSideApp
 
             foreach (var categoryGroup in groupedByCategory)
             {
-                displayContent.Add($"\n----{categoryGroup.Key}----\n");
+                displayContent.Add($"\n---- {categoryGroup.Key} ----\n");
 
                 var groupedItems = categoryGroup
                     .GroupBy(item =>
                     {
-                        string modificationsKey = item.modifications.Count == 0
-                            ? null
-                            : string.Join(",", item.modifications.OrderBy(m => m));
+                        string modificationsKey = "";
+
+                        if (item.modifications.Count > 0)
+                        {
+                            var orderedMods = item.modifications.OrderBy(m => m).ToList();
+                            modificationsKey = string.Join(", ", orderedMods);
+                        }
 
                         return new
                         {
@@ -538,11 +564,23 @@ namespace EtteremSideApp
                     })
                     .Select(group =>
                     {
-                        string mods = string.IsNullOrEmpty(group.Key.ModificationsKey)
-                            ? ""
-                            : $"Módosítások: {group.Key.ModificationsKey}";
+                        var result = new List<string>();
 
-                        return $"{group.Count()} X {group.Key.name} {mods}";
+                        result.Add($"{group.Count()} X {group.Key.name}");
+
+                        if (!string.IsNullOrEmpty(group.Key.ModificationsKey))
+                        {
+                            var modifications = group.Key.ModificationsKey.Split(',').ToList();
+
+                            result.Add($"\n\t  Szósz: \"{modifications[0]}\"");
+
+                            if (modifications.Count > 1)
+                            {
+                                result.Add($"\n\t  Módosítások: {string.Join(", ", modifications.Skip(1))}");
+                            }
+                        }
+
+                        return string.Join("", result);
                     })
                     .ToList();
 
@@ -552,17 +590,21 @@ namespace EtteremSideApp
             return string.Join("\n", displayContent);
         }
 
-        private void AddDoneButton(Panel panel, Order order, int currentTop, int width)
+
+
+
+        private void AddDoneButton(Panel panel, Order order, int currentTop, int width, int allLabelHeight)
         {
             Button doneButton = new Button
             {
                 Text = "Kész",
-                Width = width + 200,
+                Width = width + 250,
                 Height = 30,
-                Location = new Point(10, currentTop),
+                
+                Location = new Point(10,allLabelHeight+currentTop/3),
                 BackColor = Color.LightGreen,
                 FlatStyle = FlatStyle.Flat,
-                Margin = new Padding(0, 0, 10, 20),
+                Margin = new Padding(0, 10, 10, 20),
 
             };
 
@@ -630,29 +672,28 @@ namespace EtteremSideApp
             TextBox passwordTextBox = new TextBox() { Left = 100, Top = 60, Width = 150, PasswordChar = '*' };
 
             Button showPasswordButton = new Button() { Text = "Show", Left = 260, Top = 60, Width = 50 };
-            showPasswordButton.MouseDown += (s, ev) => { passwordTextBox.PasswordChar = '\0'; }; //üres
+            showPasswordButton.MouseDown += (s, ev) => { passwordTextBox.PasswordChar = '\0'; };
             showPasswordButton.MouseUp += (s, ev) => { passwordTextBox.PasswordChar = '*'; };
             showPasswordButton.BackColor = Color.White;
 
             Button okButton = new Button() { Text = "OK", Left = 100, Top = 100, Width = 80 };
-            okButton.Click += (s, ev) =>
+            okButton.Click += async (s, ev) =>
             {
                 string email = emailTextBox.Text;
                 string password = passwordTextBox.Text;
                 if (email != "" && password != "")
                 {
-                    string check = getLogin(email, password);
+                    string check = await getLogin(email, password);
                     if (check == "")
                     {
                         MessageBox.Show("Hibás jelszó/e-mail cím vagy nincs jogosultsága itt bejelentkezni!");
                     }
                     else
                     {
-                        //sikeres bejelentkezés |
-                        //                      V
+                        // sikeres bejelentkezés
                         adminLoggedIn = true;
+                        adminName = check;
                         ShowAdminButtons();
-
 
                         loginForm.Close();
                     }
@@ -664,6 +705,14 @@ namespace EtteremSideApp
             };
             okButton.BackColor = Color.White;
 
+            loginForm.KeyDown += (s, ev) =>
+            {
+                if (ev.KeyCode == Keys.Enter)
+                {
+                    okButton.PerformClick();
+                }
+            };
+
             loginForm.Controls.Add(emailLabel);
             loginForm.Controls.Add(emailTextBox);
             loginForm.Controls.Add(passwordLabel);
@@ -671,8 +720,11 @@ namespace EtteremSideApp
             loginForm.Controls.Add(showPasswordButton);
             loginForm.Controls.Add(okButton);
 
+            loginForm.KeyPreview = true;
+
             loginForm.ShowDialog();
         }
+
 
 
 
@@ -690,6 +742,8 @@ namespace EtteremSideApp
                 toolStripLabel7.Visible = true;
                 toolStripLabel8.Visible = true;
                 toolStripLabel9.Visible = true;
+
+                toolStripLabel5.Text = adminName;
             }
             else
             {
@@ -702,17 +756,48 @@ namespace EtteremSideApp
                 toolStripLabel7.Visible = false;
                 toolStripLabel8.Visible = false;
                 toolStripLabel9.Visible = false;
+
+                adminName = "---";
+                toolStripLabel5.Text = adminName;
+
             }
         }
 
-        private string getLogin(string givenEmail, string givenPw)
+
+
+        public async Task<string> getLogin(string givenEmail, string givenPw)
         {
-            string username = "awdawd";
+            string url = "http://localhost:3000/api/v1/get-admin-user";
+            var credentials = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("email", givenEmail),
+                new KeyValuePair<string, string>("password", givenPw)
+            };
 
-            //MessageBox.Show(givenEmail, givenPw);
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var content = new FormUrlEncodedContent(credentials);
 
-            return username;
+                    HttpResponseMessage response = await client.PostAsync(url, content);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        return responseBody.Replace("{","").Replace("}","").Replace(",","").Replace("\":\"", ": ").Replace("\"","").Replace("email","e-mail").Replace("userName"," Név");
+                    }
+                    else
+                    {
+                        return "";
+                    }
+                }
+            }
+            catch
+            {
+                return "";
+            }
         }
+
 
 
 
@@ -745,11 +830,17 @@ namespace EtteremSideApp
 
 
 
-            CreateUserControl(1, "xXx_TesztMatyi_xXx", "Tesztelő Mátyás", "matyizom@gmail.com", 6969, true, false);
+            CreateUserControl(0,null,null,null,0, false, false);
 
             this.Controls.Add(panel2);
             panel2.BringToFront();
         }
+
+
+
+
+
+
         private void CreateUserControl(int id, string username, string fullname, string email, int points, bool admin, bool active)
         {
             panel2.Controls.Clear();
@@ -758,10 +849,10 @@ namespace EtteremSideApp
             {
                 Size = new Size(400, 400),
                 BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.Gray,
+                BackColor = Color.LightGray,
             };
 
-            TextBox searchTextBox = new TextBox
+            searchTextBoxUser = new TextBox
             {
                 Location = new Point(20, 20),
                 Width = 250
@@ -849,13 +940,12 @@ namespace EtteremSideApp
                 Text = "Admin:",
                 Location = new Point(20, 260),
                 AutoSize = true,
-                //Checked = admin
             };
 
             Panel AdminRadioButtonPanel = new Panel
             {
-                Location = new Point(150,260),
-                Size = new Size(150,20),
+                Location = new Point(150, 260),
+                Size = new Size(150, 20),
             };
 
             RadioButton adminYesRadioButton = new RadioButton
@@ -875,14 +965,14 @@ namespace EtteremSideApp
             };
 
             AdminRadioButtonPanel.Controls.Add(adminYesRadioButton);
-            AdminRadioButtonPanel.Controls.Add (adminNoRadioButton);
+            AdminRadioButtonPanel.Controls.Add(adminNoRadioButton);
 
             Label ActiveLabel = new Label
             {
                 Text = "Aktív:",
                 Location = new Point(20, 285),
                 AutoSize = true,
-                
+
             };
 
             Panel ActiveRadioButtonPanel = new Panel
@@ -927,7 +1017,57 @@ namespace EtteremSideApp
             };
             deleteButton.Click += DeleteButton_Click;
 
-            centralPanel.Controls.Add(searchTextBox);
+            // Találatok
+            Panel resultsPanel = new Panel
+            {
+                Location = new Point(410, 0),
+                Size = new Size(250, 400),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.LightGray,
+            };
+
+            Label resultsLabel = new Label
+            {
+                Text = "Találatok",
+                Location = new Point(10, 10),
+                AutoSize = true,
+                Font = new Font("Arial", 10, FontStyle.Bold),
+            };
+
+            resultsListBoxUser = new ListBox
+            {
+                Location = new Point(10, 40),
+                Size = new Size(230, 350),
+            };
+
+            resultsListBoxUser.SelectedIndexChanged += (sender, e) =>
+            {
+                if (resultsListBoxUser.SelectedItem != null)
+                {
+                    string selectedUsername = resultsListBoxUser.SelectedItem.ToString();
+
+                    selectedUser = selectedUsers.FirstOrDefault(user => user.Email == selectedUsername);
+
+                    if (selectedUser != null)
+                    {
+                        idTextBox.Text = selectedUser.Id.ToString();
+                        usernameTextBox.Text = selectedUser.Username;
+                        fullNameTextBox.Text = selectedUser.FullName;
+                        emailTextBox.Text = selectedUser.Email;
+                        pointsNumericUpDown.Value = selectedUser.points;
+                        adminYesRadioButton.Checked = selectedUser.isAdmin;
+                        adminNoRadioButton.Checked = !selectedUser.isAdmin;
+                        ActiveYesRadioButton.Checked = selectedUser.isActive;
+                        ActiveNoRadioButton.Checked = !selectedUser.isActive;
+                    }
+                }
+            };
+
+            resultsPanel.Controls.Add(resultsLabel);
+            resultsPanel.Controls.Add(resultsListBoxUser);
+
+
+            centralPanel.Controls.Add(searchTextBoxUser);
             centralPanel.Controls.Add(searchButton);
             centralPanel.Controls.Add(idLabel);
             centralPanel.Controls.Add(idTextBox);
@@ -947,16 +1087,14 @@ namespace EtteremSideApp
             centralPanel.Controls.Add(deleteButton);
 
             panel2.Controls.Add(centralPanel);
+            panel2.Controls.Add(resultsPanel);
         }
 
 
         private void DeleteButton_Click(object sender, EventArgs e)
         {
             //kiüríti a mezőket
-
             CreateUserControl(0, null, null, null, 0, false, false);
-
-
         }
 
         private void SaveButton_Click(object sender, EventArgs e)
@@ -964,19 +1102,110 @@ namespace EtteremSideApp
             //menti a módosításokat
 
             //ide kell megírni azt hogy feltöltse az új adatokat
-
+            postUserModifications(selectedUser.Username, selectedUser.FullName, selectedUser.Email, selectedUser.points, selectedUser.isAdmin, selectedUser.isActive);
             CreateUserControl(0, null, null, null, 0, false, false);
-
         }
 
-        private void SearchButton_Click(object sender, EventArgs e)
+        private /*async*/ void postUserModifications(string givenUsername, string givenFullname, string givenEmail, int givenPoints, bool givenisAdmin,bool givenisActive)
         {
-            //itt kell keresni email cím alapján
 
+            MessageBox.Show(givenUsername + " " + givenFullname + " " + givenEmail + " " + Convert.ToString(givenPoints) + " " + Convert.ToString(givenisAdmin) + " " + Convert.ToString(givenisActive));
 
+            //string url = "http://localhost:3000/api/v1/post-updated-user";
+            //var credentials = new List<KeyValuePair<string, string>>
+            //{
+            //    new KeyValuePair<string, string>("id", null),
+            //    new KeyValuePair<string, string>("username", givenUsername),
+            //    new KeyValuePair<string, string>("fullname", givenFullname),
+            //    new KeyValuePair<string, string>("email", givenEmail),
+            //    new KeyValuePair<string, string>("points", Convert.ToString(givenPoints)),
+            //    new KeyValuePair<string, string>("isAdmin", Convert.ToString(givenisAdmin)),
+            //    new KeyValuePair<string, string>("isActive", Convert.ToString(givenisActive)),
+            //};
 
-            //CreateUserControl(0, null, null, null, 0, false, false);
+            //try
+            //{
+            //    using (var client = new HttpClient())
+            //    {
+            //        var content = new FormUrlEncodedContent(credentials);
+
+            //        HttpResponseMessage response = await client.PostAsync(url, content);
+            //        if (response.IsSuccessStatusCode)
+            //        {
+            //            string responseBody = await response.Content.ReadAsStringAsync();
+            //        }
+            //        else
+            //        {
+            //        }
+            //    }
+            //}
+            //catch
+            //{
+            //}
         }
+
+        private async void SearchButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                selectedUsers.Clear();
+                selectedUsers = await getAllUsers();
+
+                UpdateSearchResults(selectedUsers);
+            }
+            catch
+            {
+                MessageBox.Show("Hiba a keresés során 3");
+            }
+        }
+
+        private void UpdateSearchResults(List<FullUser> users)
+        {
+            resultsListBoxUser.Items.Clear();
+            string searchString = searchTextBoxUser.Text.ToLower();
+
+            foreach (var user in users)
+            {
+                if (user.Email.ToLower().Contains(searchString))
+                {
+                    resultsListBoxUser.Items.Add(user.Email);
+                }
+            }
+        }
+
+
+        public async Task<List<FullUser>> getAllUsers()
+        {
+            string url = "http://localhost:3000/api/v1/get-users";
+
+            try
+            {
+                HttpResponseMessage response = await sharedClient.GetAsync(url).ConfigureAwait(false);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+                    List<FullUser> users = JsonSerializer.Deserialize<List<FullUser>>(jsonResponse, options);
+                    if (users != null)
+                    {
+                        return users;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("HIBA a felhasználók lekérdezése során 1");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("HIBA a felhasználók lekérdezése során 2");
+            }
+
+            return new List<FullUser>(); 
+        }
+    
 
         private void toolStripLabel8_Click(object sender, EventArgs e)
         {
@@ -1046,12 +1275,38 @@ namespace EtteremSideApp
                 Location = new Point(150, 98),
                 Width = 300,
                 Height = 150,
-                ColumnCount = 2,
-                Columns = { [0] = { Name = "Opció" }, [1] = { Name = "Felár" } },
                 AllowUserToAddRows = false
             };
-            optionsDataGridView.Rows.Add();
+            optionsDataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Opció", HeaderText = "Opció" });
+            optionsDataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Felár", HeaderText = "Felár" });
+            optionsDataGridView.Columns.Add(new DataGridViewCheckBoxColumn { Name = "Szósz", HeaderText = "Szósz" });
 
+            optionsDataGridView.CellValueChanged += (sender, e) =>
+            {
+                if (e.ColumnIndex == optionsDataGridView.Columns["Szósz"].Index && e.RowIndex >= 0)
+                {
+                    var checkBoxCell = (DataGridViewCheckBoxCell)optionsDataGridView.Rows[e.RowIndex].Cells["Szósz"];
+                    var priceCell = (DataGridViewTextBoxCell)optionsDataGridView.Rows[e.RowIndex].Cells["Felár"];
+
+                    if ((bool)checkBoxCell.Value)
+                    {
+                        priceCell.Value = 0;
+                        priceCell.ReadOnly = true;
+                    }
+                    else
+                    {
+                        priceCell.ReadOnly = false;
+                    }
+                }
+            };
+
+            optionsDataGridView.CurrentCellDirtyStateChanged += (sender, e) =>
+            {
+                if (optionsDataGridView.IsCurrentCellDirty && optionsDataGridView.CurrentCell is DataGridViewCheckBoxCell)
+                {
+                    optionsDataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                }
+            };
             Button addOptionButton = new Button
             {
                 Text = "+",
@@ -1189,9 +1444,25 @@ namespace EtteremSideApp
 
         private void toolStripLabel9_Click(object sender, EventArgs e)
         {
-            //meglévő termék módosítása
 
-            
+            var modifications = new List<(string, int, bool)>
+            {
+                ("", 0, false),
+            };
+
+            //Image image = Image.FromFile("C:\\Users\\xboxh\\Pictures\\2024-04-29\\001.jpg");
+
+            var menuItem = new MenuItem(
+                id:0,
+                name: "",
+                price: 0,
+                available: false,
+                modifications: modifications,
+                description: "",
+                category: "",
+                img: null
+            );
+
             panel4.Visible = true;
             panel4.Dock = DockStyle.Fill;
             panel4.FlowDirection = FlowDirection.LeftToRight;
@@ -1201,48 +1472,571 @@ namespace EtteremSideApp
             panel4.BackColor = Color.Green;
             this.Controls.Add(panel4);
             panel4.BringToFront();
-        }
-    }
 
-    public class Order
-    {
-        public List<OrderItem> Items { get; set; }
-        public int Id { get; set; }
-        public int price { get; set; }
-        public bool paid { get; set; }
-        public DateTime timestamp { get; set; }
-        public string customer_name { get; set; }
-        public string message { get; set; }
-        public bool takeAway { get; set; }
-        public Order(List<OrderItem> items, int id, int price, bool paid, DateTime timestamp, string customer_name, string message, bool takeAway)
-        {
-            Items = items;
-            Id = id;
-            this.price = price;
-            this.paid = paid;
-            this.timestamp = timestamp;
-            this.customer_name = customer_name;
-            this.message = message;
-            this.takeAway = takeAway;
-        }
-    }
-
-    public class OrderItem
-    {
-        public string name { get; set; }
-        public List<string> modifications { get; set; }
-        public string category { get; set; }
-
-        public OrderItem(string name, List<string> modifications, string category)
-        {
-            this.name = name;
-            this.modifications = modifications;
-            this.category = category;
+            CreateProductEdit(menuItem);
         }
 
-        public override string ToString()
+        private void CreateProductEdit(MenuItem item)
         {
-            return $"{name} - {category}";
+            panel4.Controls.Clear();
+
+            Panel centralPanel = new Panel
+            {
+                Size = new Size(600, 700),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.LightGray,
+                Location = new Point(20, 60)
+            };
+
+            searchTextBoxDish = new TextBox
+            {
+                Location = new Point(20, 20),
+                Width = 300
+            };
+            Button searchButton = new Button
+            {
+                Text = "Keresés",
+                Location = new Point(330, 18),
+                Width = 80,
+                Height = 25
+            };
+            searchButton.Click += SearchButton_Dish_Click;
+
+            Label nameLabel = new Label
+            {
+                Text = "Név:",
+                Location = new Point(20, 60),
+                AutoSize = true
+            };
+            TextBox nameTextBox = new TextBox
+            {
+                Location = new Point(150, 58),
+                Width = 300,
+                Text = item.name
+            };
+
+            Label priceLabel = new Label
+            {
+                Text = "Ár:",
+                Location = new Point(20, 100),
+                AutoSize = true
+            };
+            NumericUpDown priceNumericUpDown = new NumericUpDown
+            {
+                Location = new Point(150, 98),
+                Width = 100,
+                Minimum = 0,
+                Maximum = 1000000,
+                DecimalPlaces = 2,
+                Value = item.price
+            };
+
+            Label optionsLabel = new Label
+            {
+                Text = "Opciók:",
+                Location = new Point(20, 140),
+                AutoSize = true
+            };
+            DataGridView optionsDataGridView = new DataGridView
+            {
+                Location = new Point(150, 138),
+                Width = 400,
+                Height = 150,
+                AllowUserToAddRows = false
+            };
+
+            optionsDataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Opció", HeaderText = "Opció" });
+            optionsDataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Felár", HeaderText = "Felár" });
+            optionsDataGridView.Columns.Add(new DataGridViewCheckBoxColumn { Name = "Szósz", HeaderText = "Szósz" });
+
+            foreach (var mod in item.modifications)
+            {
+                optionsDataGridView.Rows.Add(mod.Item1, mod.Item2, mod.Item3);
+            }
+
+            optionsDataGridView.CellValueChanged += (sender, e) =>
+            {
+                if (e.ColumnIndex == optionsDataGridView.Columns["Szósz"].Index && e.RowIndex >= 0)
+                {
+                    var checkBoxCell = (DataGridViewCheckBoxCell)optionsDataGridView.Rows[e.RowIndex].Cells["Szósz"];
+                    var priceCell = (DataGridViewTextBoxCell)optionsDataGridView.Rows[e.RowIndex].Cells["Felár"];
+
+                    if ((bool)checkBoxCell.Value)
+                    {
+                        priceCell.Value = 0;
+                        priceCell.ReadOnly = true;
+                    }
+                    else
+                    {
+                        priceCell.ReadOnly = false;
+                    }
+                }
+            };
+
+            optionsDataGridView.CurrentCellDirtyStateChanged += (sender, e) =>
+            {
+                if (optionsDataGridView.IsCurrentCellDirty && optionsDataGridView.CurrentCell is DataGridViewCheckBoxCell)
+                {
+                    optionsDataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                }
+            };
+
+            Button addOptionButton = new Button
+            {
+                Text = "+",
+                Location = new Point(560, 138),
+                Width = 30,
+                Height = 30
+            };
+            addOptionButton.Click += (sender, e) =>
+            {
+                optionsDataGridView.Rows.Add();
+            };
+
+            Button removeOptionButton = new Button
+            {
+                Text = "-",
+                Location = new Point(560, 178),
+                Width = 30,
+                Height = 30
+            };
+            removeOptionButton.Click += (sender, e) =>
+            {
+                foreach (DataGridViewRow row in optionsDataGridView.SelectedRows)
+                {
+                    optionsDataGridView.Rows.Remove(row);
+                }
+            };
+
+            ToolTip toolTip = new ToolTip();
+            toolTip.SetToolTip(addOptionButton, "Sor hozzáadása");
+            toolTip.SetToolTip(removeOptionButton, "Kijelölt sor törlése");
+
+            Label descriptionLabel = new Label
+            {
+                Text = "Leírás:",
+                Location = new Point(20, 300),
+                AutoSize = true
+            };
+            TextBox descriptionTextBox = new TextBox
+            {
+                Location = new Point(150, 298),
+                Width = 300,
+                Height = 80,
+                Multiline = true,
+                Text = item.description
+            };
+
+            Label typeLabel = new Label
+            {
+                Text = "Típus:",
+                Location = new Point(20, 390),
+                AutoSize = true
+            };
+            ComboBox typeComboBox = new ComboBox
+            {
+                Location = new Point(150, 388),
+                Width = 300,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            typeComboBox.Items.AddRange(allCategories);
+            typeComboBox.SelectedItem = item.category;
+
+            Label imageLabel = new Label
+            {
+                Text = "Kép:",
+                Location = new Point(20, 420),
+                AutoSize = true
+            };
+            PictureBox pictureBox = new PictureBox
+            {
+                Location = new Point(150, 418),
+                Size = new Size(150, 150),
+                BorderStyle = BorderStyle.FixedSingle,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Image = item.img
+            };
+
+            Button imageButton = new Button
+            {
+                Text = "Új kép kiválasztása",
+                Location = new Point(310, 548),
+                Width = 150,
+                Height = 30
+            };
+            imageButton.Click += (sender, e) =>
+            {
+                using (OpenFileDialog openFileDialog = new OpenFileDialog())
+                {
+                    openFileDialog.Filter = "PNG fájlok (*.png)|*.png";
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        Image selectedImage = Image.FromFile(openFileDialog.FileName);
+                        pictureBox.Image = selectedImage;
+                        item.img = selectedImage;
+                    }
+                }
+            };
+
+            Label availabilityLabel = new Label
+            {
+                Text = "Elérhetőség:",
+                Location = new Point(20, 590),
+                AutoSize = true
+            };
+            RadioButton availableRadioButton = new RadioButton
+            {
+                Text = "Elérhető",
+                Location = new Point(150, 588),
+                AutoSize = true,
+                Checked = item.available
+            };
+            RadioButton notAvailableRadioButton = new RadioButton
+            {
+                Text = "Nem elérhető",
+                Location = new Point(250, 588),
+                AutoSize = true,
+                Checked = !item.available
+            };
+
+            Panel resultsPanel = new Panel
+            {
+                Location = new Point(640, 60),
+                Size = new Size(250, 700),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.LightGray
+            };
+
+            Label resultsLabel = new Label
+            {
+                Text = "Keresési találatok",
+                Location = new Point(10, 10),
+                AutoSize = true,
+                Font = new Font("Arial", 10, FontStyle.Bold),
+            };
+
+            resultsListBoxDish = new ListBox
+            {
+                Location = new Point(10, 40),
+                Size = new Size(230, 650),
+            };
+
+            resultsListBoxDish.SelectedIndexChanged += (sender, e) =>
+            {
+                if (resultsListBoxDish.SelectedItem != null)
+                {
+                    string selectedItemname = resultsListBoxDish.SelectedItem.ToString();
+                    optionsDataGridView.Rows.Clear();
+                    selectedMenuItem = selectedMenuItems.FirstOrDefault(menu_item => menu_item.name == selectedItemname);
+                    if (selectedMenuItem != null)
+                    {
+                        nameTextBox.Text = selectedMenuItem.name;
+                        priceNumericUpDown.Value = selectedMenuItem.price;
+                        descriptionTextBox.Text = selectedMenuItem.description;
+                        typeComboBox.SelectedItem = selectedMenuItem.category;
+                        pictureBox.Image = selectedMenuItem.img;
+                        availableRadioButton.Checked = selectedMenuItem.available;
+                        notAvailableRadioButton.Checked = !selectedMenuItem.available;
+
+                        if (selectedMenuItem.modifications != null)
+                        {
+                            foreach (var mod in selectedMenuItem.modifications)
+                            {
+                                int rowIndex = optionsDataGridView.Rows.Add();
+                                DataGridViewRow row = optionsDataGridView.Rows[rowIndex];
+
+                                row.Cells[0].Value = mod.Item1;
+                                row.Cells[1].Value = mod.Item2;
+                                row.Cells[2].Value = mod.Item3;
+                            }
+                        }
+                    }
+                }
+            };
+
+            resultsPanel.Controls.Add(resultsLabel);
+            resultsPanel.Controls.Add(resultsListBoxDish);
+
+            centralPanel.Controls.Add(searchTextBoxDish);
+            centralPanel.Controls.Add(searchButton);
+            centralPanel.Controls.Add(nameLabel);
+            centralPanel.Controls.Add(nameTextBox);
+            centralPanel.Controls.Add(priceLabel);
+            centralPanel.Controls.Add(priceNumericUpDown);
+            centralPanel.Controls.Add(optionsLabel);
+            centralPanel.Controls.Add(optionsDataGridView);
+            centralPanel.Controls.Add(addOptionButton);
+            centralPanel.Controls.Add(removeOptionButton);
+            centralPanel.Controls.Add(descriptionLabel);
+            centralPanel.Controls.Add(descriptionTextBox);
+            centralPanel.Controls.Add(typeLabel);
+            centralPanel.Controls.Add(typeComboBox);
+            centralPanel.Controls.Add(imageLabel);
+            centralPanel.Controls.Add(pictureBox);
+            centralPanel.Controls.Add(imageButton);
+            centralPanel.Controls.Add(availabilityLabel);
+            centralPanel.Controls.Add(availableRadioButton);
+            centralPanel.Controls.Add(notAvailableRadioButton);
+
+            panel4.Controls.Add(centralPanel);
+            panel4.Controls.Add(resultsPanel);
+        }
+
+        private async void SearchButton_Dish_Click(object sender, EventArgs e)
+        {
+            //dish keresés gomb
+
+            selectedMenuItems.Clear();
+            selectedMenuItems = await getAllMenuItems();
+
+            UpdateResoultsDish(selectedMenuItems);
+        }
+
+        public async Task<List<MenuItem>> getAllMenuItems()
+        {
+            string url = "http://localhost:3000/api/v1/get-dishes";
+
+            HttpResponseMessage response = await sharedClient.GetAsync(url).ConfigureAwait(false);
+            List<MenuItem> items = new List<MenuItem>();
+            if (response.IsSuccessStatusCode)
+            {
+                string jsonResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                using (var jsonDoc = JsonDocument.Parse(jsonResponse))
+                {
+                    string organizedJson = JsonSerializer.Serialize(jsonDoc.RootElement, new JsonSerializerOptions
+                    {
+                        WriteIndented = true,
+                        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                    });
+
+                    JsonElement finalJsonElement = JsonDocument.Parse(organizedJson).RootElement;
+                    int jsonArrayLength = finalJsonElement.GetArrayLength();
+
+                    for (int i = 0; i < jsonArrayLength; i++)
+                    {
+
+                        int id = finalJsonElement[i].GetProperty("id").GetInt32();
+                        string name = finalJsonElement[i].GetProperty("name").GetString();
+                        int price = finalJsonElement[i].GetProperty("price").GetInt32();
+                        bool available = finalJsonElement[i].GetProperty("available").GetBoolean();
+                        string description = finalJsonElement[i].GetProperty("description").GetString();
+                        string type = finalJsonElement[i].GetProperty("type").GetString();
+                        Image img = null;
+
+                        List<(string, int, bool)> modifications = new List<(string, int, bool)>(); // név, ár, sauce e?
+
+                        if (finalJsonElement[i].GetProperty("sauceOptions").GetString() != null && finalJsonElement[i].GetProperty("customizationOptions").GetString() != null)
+                        {
+
+                            JsonElement temp_sauce = JsonDocument.Parse(finalJsonElement[i].GetProperty("sauceOptions").GetString()).RootElement;
+                            int lengthtemp2 = temp_sauce.GetArrayLength();
+                            for (int j = 0; j < lengthtemp2; j++)
+                            {
+                                modifications.Add((temp_sauce[j].GetProperty("name").GetString(), 0, true));
+                            }
+
+                            JsonElement temp_customisation = JsonDocument.Parse(finalJsonElement[i].GetProperty("customizationOptions").GetString()).RootElement;
+                            int lengthtemp = temp_customisation.GetArrayLength();
+                            for (int j = 0; j < lengthtemp; j++)
+                            {
+                                modifications.Add((temp_customisation[j].GetProperty("name").GetString(), temp_customisation[j].GetProperty("price").GetInt32(), false));
+                            }
+                        }
+                        else 
+                        {
+                            modifications = null;
+                        }
+
+                        MenuItem item = new MenuItem(id,name,price,available,modifications,description, type, img);
+                        items.Add(item);
+                    }
+
+
+                }
+                return items;
+            }
+            else
+            {
+                MessageBox.Show("HIBA1");
+            }
+            
+
+
+            return new List<MenuItem>();
+        }
+
+
+        private void UpdateResoultsDish(List<MenuItem> menuitems)
+        { 
+            resultsListBoxDish.Items.Clear();
+            string searchString = searchTextBoxDish.Text.ToLower();
+
+            foreach (MenuItem menuitem in menuitems) 
+            {
+                if (menuitem.name.ToLower().Contains(searchString))
+                { 
+                    resultsListBoxDish.Items.Add(menuitem.name);
+                }
+            }
+        }
+
+        private async void postDishModifications(string givenItemName, int givenPrice, bool givenAvailable, List<(string, int, bool)> givenModifications, string givenDescription, string givenCategory, Image img)
+        {
+            //var blob = Convert.To
+            MessageBox.Show(givenItemName + " " + Convert.ToString(givenPrice) + " " + Convert.ToString(givenAvailable) + " " + givenDescription + " " + givenCategory);
+
+            //string url = "http://localhost:3000/api/v1/post-updated-user";
+            //var credentials = new List<KeyValuePair<string, string>>
+            //{
+            //    new KeyValuePair<string, string>("name", givenItemName),
+            //    new KeyValuePair<string, string>("price", Convert.ToString(givenPrice)),
+            //    new KeyValuePair<string, string>("available", Convert.ToString(givenAvailable)),
+            //    new KeyValuePair<string, string>("lista", null), //ez kérdéses hogy oldom meg
+            //    new KeyValuePair<string, string>("description", givenDescription),
+            //    new KeyValuePair<string, string>("category", givenCategory),
+            //};
+
+            //try
+            //{
+            //    using (var client = new HttpClient())
+            //    {
+            //        var content = new FormUrlEncodedContent(credentials);
+
+            //        HttpResponseMessage response = await client.PostAsync(url, content);
+            //        if (response.IsSuccessStatusCode)
+            //        {
+            //            string responseBody = await response.Content.ReadAsStringAsync();
+            //        }
+            //        else
+            //        {
+            //        }
+            //    }
+            //}
+            //catch
+            //{
+            //}
+        }
+
+        public class User
+        {
+            public string Email { get; set; }
+            public string Username { get; set; }
+
+            public User(string email, string username)
+            {
+                Email = email;
+                Username = username;
+            }
+        }
+
+        public class FullUser
+        { 
+            public int Id { get; set; }
+            public string Email { get; set; }
+            public string Username { get; set; }
+            public string FullName { get; set; }
+            public int points { get; set; }
+            public bool isAdmin { get; set; }
+            public bool isActive { get; set; }
+
+            public FullUser(int id, string email, string username, string fullName, int points, bool isAdmin, bool isActive)
+            {
+                Id = id;
+                Email = email;
+                Username = username;
+                FullName = fullName;
+                this.points = points;
+                this.isAdmin = isAdmin;
+                this.isActive = isActive;
+            }
+        }
+
+        public class Order
+        {
+            public List<OrderItem> Items { get; set; }
+            public int Id { get; set; }
+            public int price { get; set; }
+            public bool paid { get; set; }
+            public DateTime timestamp { get; set; }
+            public string customer_name { get; set; }
+            public string message { get; set; }
+            public bool takeAway { get; set; }
+            public Order(List<OrderItem> items, int id, int price, bool paid, DateTime timestamp, string customer_name, string message, bool takeAway)
+            {
+                Items = items;
+                Id = id;
+                this.price = price;
+                this.paid = paid;
+                this.timestamp = timestamp;
+                this.customer_name = customer_name;
+                this.message = message;
+                this.takeAway = takeAway;
+            }
+        }
+
+        public class OrderItem
+        {
+            public string name { get; set; }
+            public List<string> modifications { get; set; }
+            public string category { get; set; }
+
+            public OrderItem(string name, List<string> modifications, string category)
+            {
+                this.name = name;
+                this.modifications = modifications;
+                this.category = category;
+            }
+
+            public override string ToString()
+            {
+                return $"{name} - {category}";
+            }
+        }
+
+        public class MenuItem
+        {
+            public int id { get; set; }
+            public string name { get; set; }
+            public int price { get; set; }
+            public bool available { get; set; }
+            public List<(string, int, bool)> modifications { get; set; } // név, ár, sauce e?
+            public string description { get; set; }
+            public string category { get; set; }
+            public Image img { get; set; }
+
+            public MenuItem(int id, string name, int price, bool available, List<(string, int, bool)> modifications, string description, string category, Image img)
+            {
+                this.id = id;
+                this.name = name;
+                this.price = price;
+                this.available = available;
+                this.modifications = modifications;
+                this.description = description;
+                this.category = category;
+                this.img = img;
+            }
+
+            public override string ToString()
+            {
+                var modificationsString = modifications != null && modifications.Count > 0
+                    ? string.Join(", ", modifications.Select(m => $"{m.Item1} Price: {m.Item2}, Sauce: {(m.Item3 ? "Yes" : "No")}"))
+                    : "No modifications";
+
+                return $"Id: {id}\n"+
+                       $"Name: {name}\n" +
+                       $"Price: {price}Ft\n" +
+                       $"Available: {available}\n" +
+                       $"Category: {category}\n" +
+                       $"Description: {description}\n" +
+                       $"Modifications: {modificationsString}\n" +
+                       $"Image: {img?.ToString() ?? "No Image"}";
+            }
+        }
+
+        private void toolStripLabel4_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

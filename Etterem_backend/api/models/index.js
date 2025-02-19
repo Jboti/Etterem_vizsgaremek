@@ -52,42 +52,50 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',  // Ha törlöm a dish-t, törlődjenek az order dish connection rekordok
     })
 
-    Dish.hasMany(Allergenable, {
-        foreignKey: "allergenable_id",
-        constraints: false,
-        scope: {
-        allergenable_type: "dish",
-        },
-        as: "allergens",
-    })
-
     Allergenable.belongsTo(Allergy, {
         foreignKey: "allergen_id",
         as: "allergy",
     })
 
-    User.hasMany(Allergenable, {
-        foreignKey: "allergenable_id",
+    //a polimorf tábla (allergenables)
+
+    Dish.hasMany(Allergenable, {
+        foreignKey: 'allergenable_id',
         constraints: false,
+        as: 'allergenables',
         scope: {
-        allergenable_type: "user",
-        },
-        as: "user_allergens",
-    })
+          allergenable_type: 'dish'
+        }
+      })
+      
+      User.hasMany(Allergenable, {
+        foreignKey: 'allergenable_id',
+        constraints: false,
+        as: 'allergenables',
+        scope: {
+          allergenable_type: 'user'
+        }
+      })
+      
 
     Allergenable.belongsTo(Dish, {
-        foreignKey: "allergenable_id",
+        foreignKey: 'allergenable_id',
         constraints: false,
-        as: "dish",
-        onDelete: 'CASCADE',  // Ha törlöm a dish-t, törlődjenek a dish-hez kapcsolódó allergenek is
-    })
-
-    Allergenable.belongsTo(User, {
-        foreignKey: "allergenable_id",
+        as: 'dish',
+        scope: {
+          allergenable_type: 'dish'
+        }
+      })
+      
+      Allergenable.belongsTo(User, {
+        foreignKey: 'allergenable_id',
         constraints: false,
-        as: "user",
-        onDelete: 'CASCADE',  // Ha törlöm a user-t, törlődjenek a user-hez kapcsolódó allergenek is
-    })
+        as: 'user',
+        scope: {
+          allergenable_type: 'user'
+        }
+      })
+      
 
     return { User, Allergenable, Allergy, Dish, OrderConnection, OrderDishConnection, Purchase }
 }

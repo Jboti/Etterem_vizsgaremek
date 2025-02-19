@@ -27,9 +27,9 @@ const handleLogin = (LoginDataRef: LoginData) => {
     }else{
         mutate(LoginDataRef,{
             onSuccess(){
-                push({name:'Főoldal'})
+                push({name:'Main'})
                 setTimeout(() => {
-                        toast.success("Sikeres bejelentkezés!")
+                    toast.success("Sikeres bejelentkezés!")
                 }, 100)
             },
             onError(error: any){

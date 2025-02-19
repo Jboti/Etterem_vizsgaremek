@@ -1,55 +1,66 @@
 <script lang="ts" setup>
+import { useValidateToken } from '@/api/auth/authQuery';
+import type { cartItem, dishData } from '@/api/menuItems/items';
 import { useGetDishes } from '@/api/menuItems/itemsQuery'
-import { useGetUserInfo } from '@/api/user/userQuery';
-import { ref } from 'vue';
+import { useCartStore } from '@/stores/cartStore';
+import { onMounted, ref, watch } from 'vue';
 import { toast } from 'vue3-toastify';
 
-const { data } = useGetDishes()
-const { isError } = useGetUserInfo()
+const notify = () => {}
 
+const { data } = useGetDishes()
+const { isError, mutate: validateToken } = useValidateToken()
+
+const cartStore = useCartStore()
 const selectedDish = ref<any>(null)
 const sauceSelected = ref<boolean>(false)
 const selectedSauce = ref<any>(null)
 const selectedOptions = ref<any[]>([])
 const isModalOpen = ref(false)
-const totalVal = ref<number>(0)
+const amount = ref(1)
+const selectedCategory = ref<string | null>(null);
+const selectedData = ref<any>(null);
 
-const notify = () => {
-    toast.success("A termék a kosárba került!")
-}
 
-const handleAddToCart = (dish:any) => {
-  if(isError.value)
-    toast.error("Ahoz hogy a terméket a kosárba rakd be kell jelentkezned!")
-  else{
-    sauceSelected.value = false
-    openModal(dish)
-  }
-}
 
 const addToCart = (dish:any) =>{
   if(isError.value)
     toast.error("Ahoz hogy a terméket a kosárba rakd be kell jelentkezz!")
   else{
+    const item = ref<cartItem>()
     if(dish.type == 'Drink'){
-      console.log('-----Kosárba----')
-      console.log(dish.name +" "+ dish.price)
-      totalVal.value += dish.price
-      console.log(totalVal.value+' Ft')
-      console.log('----------------')
+      item.value = {
+        cartId: -1,
+        dishId: dish.id,
+        name: dish.name,
+        price: dish.price+50,
+        sause: selectedSauce.value,
+        options: selectedOptions.value.map(o => o.name).join(', '),
+        type: dish.type,
+        quantity: 1
+      }
+      cartStore.addItem(item.value)
     }else{
       if(JSON.parse(dish.sauceOptions).length == 1)
         selectedSauce.value = JSON.parse(dish.sauceOptions)[0].name
       if(selectedSauce.value){
+        let value = 0
+        value += dish.price
+        selectedOptions.value.forEach(o => { value += o.price})
+
+        item.value = {
+          cartId: -1,
+          dishId: dish.id,
+          name: dish.name,
+          price: value,
+          sause: selectedSauce.value,
+          options: selectedOptions.value.map(o => o.name).join(', '),
+          type: dish.type,
+          quantity : amount.value
+        }
+        cartStore.addItem(item.value)
         toast.success("A termék a kosárba került!")
-        console.log('-----Kosárba----')
-        console.log(dish.name + " " + dish.price+" Ft")
-        totalVal.value += dish.price
-        console.log("szósz: "+selectedSauce.value)
-        selectedOptions.value.forEach(o => {"Módosítás: " +console.log(o.name + " " + o.price); totalVal.value += o.price})
-        console.log(totalVal.value+' Ft')
-        console.log('----------------')
-        
+        amount.value = 1  
         closeModal()
       }else
         toast.error("Nincs kiválasztva szósz!")
@@ -57,6 +68,15 @@ const addToCart = (dish:any) =>{
   }
 }
 
+
+const handleAddToCartClicked = (dish:any) => {
+  if(isError.value)
+    toast.error("Ahoz hogy a terméket a kosárba rakd be kell jelentkezned!")
+  else{
+    sauceSelected.value = false
+    openModal(dish)
+  }
+}
 
 const openModal = (dish:any) => {
   if(dish.type == 'Drink'){
@@ -72,6 +92,7 @@ const closeModal = () => {
   isModalOpen.value = false
   selectedSauce.value = null
   selectedOptions.value = []
+  amount.value = 1
 }
 
 const handleOptionSelected = (option: any) => {
@@ -100,8 +121,26 @@ const handleSauceSelected = (sauce: any) => {
     }
 
   }
-    
 }
+
+function selectedCategoryHandle(category:string){
+  if(selectedCategory.value === category)
+    selectedCategory.value = null
+  else
+  {
+    selectedCategory.value = category
+    selectedData.value = data.value?.filter((item: dishData) => item.type === category)
+  }
+
+}
+
+onMounted(() => {
+  window.scrollTo(0, 0);
+  validateToken()
+})
+watch(isError, () => {})
+
+
 
 </script>
 
@@ -110,23 +149,23 @@ const handleSauceSelected = (sauce: any) => {
     <h1 class="pb-2 pt-2" style="font-weight: bold; color: whitesmoke;">Étlap</h1>
     <v-row style="width: 100%; margin: auto;">
       <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Menük</b></v-btn>
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl" @click="selectedCategoryHandle('Wrap')" :class="{ 'selected-category': selectedCategory == 'Wrap'}"><b>Wrappek</b></v-btn>
       </v-col>
       <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Kebabok</b></v-btn>  
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl" @click="selectedCategoryHandle('Kebab')" :class="{ 'selected-category': selectedCategory == 'Kebab'}"><b>Kebabok</b></v-btn>  
       </v-col>
       <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Köretek</b></v-btn>  
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl" @click="selectedCategoryHandle('SideDish')" :class="{ 'selected-category': selectedCategory == 'SideDish'}"><b>Köretek</b></v-btn>  
       </v-col>
       <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl"><b>Üdítők</b></v-btn>
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl" @click="selectedCategoryHandle('Drink')" :class="{ 'selected-category': selectedCategory == 'Drink'}"><b>Üdítők</b></v-btn>
       </v-col>
     </v-row>
   </div>
   <v-container style="margin-bottom: 150px;">
     <v-row>
       <v-col 
-        v-for="(dish, index) in data" 
+        v-for="(dish, index) in selectedCategory == null ? data : selectedData"
         :key="index" 
         cols="12" sm="6" md="4" xl="3"
       >
@@ -139,7 +178,7 @@ const handleSauceSelected = (sauce: any) => {
                 <div v-if="dish.type == 'Drink'">{{ dish.price }}+50 Ft</div>
                 <div v-else>{{ dish.price }} Ft</div>
               </div>
-              <v-btn class="pl-4 pr-4 pt-2 pb-2 cartButtons" @click="handleAddToCart(dish)">
+              <v-btn class="pl-4 pr-4 pt-2 pb-2 cartButtons" @click="handleAddToCartClicked(dish)">
                 <b>Kosárba</b>
               </v-btn>
             </div>
@@ -155,7 +194,7 @@ const handleSauceSelected = (sauce: any) => {
   
   <!-- Modal -->
    <v-dialog v-model="isModalOpen" max-width="800px" @click:outside="closeModal" style="background-color: rgba(0, 0, 0, 0.7);">
-    <v-card>
+    <v-card style="background-color:  rgba(255, 255, 255, .95); box-shadow: 0 0 10px 5px white;">
       <div class="modalHeader">
         <div class="modalImg">
           <v-img v-if="selectedDish" :src="selectedDish.image" style="background-image: url(background.jpg); background-size: cover; width: 96%; height: 96%; border: 2px solid black; border-radius: 40px; border-top-right-radius: 4px; margin: 2%; box-shadow: 0 0 5px .5px black;"></v-img>
@@ -174,7 +213,7 @@ const handleSauceSelected = (sauce: any) => {
           <v-col v-if="selectedDish.sauceOptions" v-for="(sauce,index) in JSON.parse(selectedDish.sauceOptions)" :key="index" cols="12" sm="6" md="6" lg="6" xl="4">
             <div style="display: flex; border: 2px solid rgba(0, 0, 0, 0.4); box-shadow: 0 0 5px .5px rgba(0, 0, 0, 0.4); border-radius: 10px; width: 100%; align-items: center; padding: 3%;">
               <p style="width: 80%;"><b>{{ sauce.name }}: </b></p>
-              <v-btn style="width: 20%; padding: 0; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleSauceSelected(sauce)" :class="{ 'selected-button': selectedSauce == sauce.name || JSON.parse(selectedDish.sauceOptions).length == 1}"><v-icon>mdi-check</v-icon></v-btn>
+              <v-btn style="width: 20%; padding: 0; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleSauceSelected(sauce)" :class="{ 'selected-button': selectedSauce == sauce.name || JSON.parse(selectedDish.sauceOptions).length == 1}"><v-icon>mdi-plus</v-icon></v-btn>
             </div>
           </v-col>
         </v-row>
@@ -185,21 +224,35 @@ const handleSauceSelected = (sauce: any) => {
               <p style="width: 96%; padding: 2%;"><b>{{ dishOption.name }}: </b></p>
               <div style="display: flex; justify-content: space-evenly; align-items: center;width: 96%; padding: 2%;">
                 <p style="width: 50%; ">{{ dishOption.price }} Ft</p>
-                <v-btn style="width: 25%; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleOptionSelected(dishOption)" :class="{'selected-button': selectedOptions.some(o => o.name == dishOption.name) }"><v-icon>mdi-check</v-icon></v-btn>
+                <v-btn style="width: 25%; border: 1px solid black; box-shadow: 0 0 5px .25px black" @click="handleOptionSelected(dishOption)" :class="{'selected-button': selectedOptions.some(o => o.name == dishOption.name) }"><v-icon>mdi-plus</v-icon></v-btn>
               </div>
             </div>
           </v-col>
         </v-row>
       </v-card-text>
-      <v-card-actions>
-        <v-btn color="red" @click="closeModal" style="float: left;">Vissza</v-btn>
-        <v-btn color="green" @click="addToCart(selectedDish)">Kosárba</v-btn>
+      <v-card-actions style="display: flex;">
+        <v-btn color="red" @click="closeModal" style="width: 25%;"><b>Vissza</b></v-btn>
+        <div style="width: 50%; display: flex; margin: auto;">
+          <div style="width: 33%;">
+            <v-btn @click="amount > 1 ? amount-- : amount" style="width: 100%;" v-if="amount > 1" ><v-icon>mdi-minus</v-icon></v-btn>
+          </div>
+          <p color="black" style="width: 33%; margin: auto; text-align: center; font-weight: bolder;">{{amount}}</p>
+          <v-btn @click="amount++" style="width: 33%;"><v-icon>mdi-plus</v-icon></v-btn>
+        </div>
+        <v-btn color="green" @click="addToCart(selectedDish)"  style="width: 25%;"><b>Kosárba</b></v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <style scoped>
+
+.selected-category{
+  background-image: linear-gradient(320deg, black, #B71C1C, black);
+  border-color: black;
+  box-shadow: 0 0 2px .5px black inset, 0 0 10px 2px black !important;
+}
+
 
 .dish-card{
   background-size: cover;
@@ -241,12 +294,13 @@ const handleSauceSelected = (sauce: any) => {
 
 .cartButtons{
   background-color: rgb(22, 139, 22);
-  box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black; 
+  box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black !important; 
+  transition: .7s ease-in-out;
 }
 .cartButtons:hover{
   box-shadow: 0 0 2px 0.25px black inset, 0 0 5px .5px black;
+  transform: scale(1.2);
 }
-
 .topMenu{
   animation: 1s ease-in fade;
 }
@@ -254,7 +308,7 @@ const handleSauceSelected = (sauce: any) => {
 .buttons{
   border-radius: 8px !important;
   width: 75%;
-  box-shadow: 0 0 5px .5px whitesmoke;
+  box-shadow: 0 0 5px .5px whitesmoke !important;
   transition: all .7s ease-in-out, box-shadow .7s ease-in-out;
   animation: 1s ease-in slideInFromTop;
 }

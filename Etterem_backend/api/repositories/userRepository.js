@@ -5,6 +5,8 @@ class userRepository
     constructor(db)
     {
         this.User = db.user
+        this.Allergenable = db.allergenables
+        this.Allergy = db.allergy
     }
 
 
@@ -16,7 +18,21 @@ class userRepository
                 {
                     id: id,
                 },
-                attributes: ['id','created','userName','fullName','email','points']
+                attributes: ['id','created','userName','fullName','email','points'],
+                include: [
+                    {
+                        model: this.Allergenable,
+                        as: 'allergenables',
+                        attributes: ['allergenable_type'],
+                        include:[
+                            {
+                                model:this.Allergy,
+                                as: 'allergy',
+                                attributes: ['name']
+                            }
+                        ]
+                    }
+                ]
             })
     }
 
@@ -73,11 +89,13 @@ class userRepository
     
     async checkForExistinguserName(userName)
     {
-        return await this.User.findOne({
-            where:{
-                userName: userName
-            }
-        })
+        return await this.User.findOne(
+            {
+                where:
+                {
+                    userName: userName
+                }
+            })
     }
 
     async getUserByEmail(email)
@@ -117,6 +135,56 @@ class userRepository
                 }
             }
         )
+    }
+
+    async getUserPwById(id)
+    {
+        return await this.User.findOne({
+            where:
+            {
+                id:id
+            },
+            attributes: ['password']
+        })
+    }
+
+    async updateAllregies(id,allergies)
+    {
+        for (const allergyName in allergies) {
+            const allergy = await this.Allergy.findOne({
+                where: { name: allergyName }
+            })
+    
+            if (allergy) {
+                if (allergies[allergyName]) {
+                    const existingAllergen = await this.Allergenable.findOne({
+                        where: {
+                            allergenable_type: 'user',
+                            allergenable_id: id,
+                            allergen_id: allergy.id
+                        }
+                    })
+                    // Ha az allergia 'true' és nem létezik már a kapcsolat, hozzáadjuk az allergént a User-hez
+                    if(!existingAllergen){
+                        await this.Allergenable.create({
+                            allergenable_type: 'user',
+                            allergenable_id: id,
+                            allergen_id: allergy.id
+                        })
+                    }
+                } else {
+                    // Ha az allergia 'false', töröljük az allergént a User-től
+                    await this.Allergenable.destroy({
+                        where: {
+                            allergenable_type: 'user',
+                            allergenable_id: id,
+                            allergen_id: allergy.id
+                        }
+                    })
+                }
+            }
+        }
+
     }
 
 }
