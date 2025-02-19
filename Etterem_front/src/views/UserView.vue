@@ -65,7 +65,7 @@ const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
       </div>
       <div style="width: 50%; flex: none; justify-items: center;">
 
-      Rudolf<br>
+      Lorem Ipsum<br>
       <v-container style="height: 100%;">
         <v-row style="display: flex;flex-direction: row-reverse; align-items: center;">
           <v-col cols="12" md="12" >
@@ -125,12 +125,13 @@ const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
       style="text-align: center; display: block; width: 55%; font-size: 2vw">
       <p><b>Fiókbeállítások:</b></p><br>
       <v-container style="height: auto;">
-        <v-row style="display: flex;flex-direction: row-reverse; align-items: center;">
-          <v-col cols="12" md="12" >
-            <v-dialog
-              transition="dialog-top-transition"
-              width="auto"
-            >
+      <v-row style="display: flex;flex-direction: row-reverse; align-items: center;">
+        <v-col cols="12" md="12" >
+          <v-dialog
+            transition="dialog-top-transition"
+            width="auto"
+          >
+
               <template v-slot:activator="{ props: activatorProps }">
                 <v-btn
                 v-bind="activatorProps"
@@ -178,6 +179,8 @@ const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
     </div>
   </div>
 </template>
+
+
 
 <style scoped>
 .spinner {
