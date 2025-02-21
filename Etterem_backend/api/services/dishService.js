@@ -11,6 +11,11 @@ class DishService
     {
         return await dishRepository.getAllDishes()
     }
+
+    async modifyDish(dish)
+    {
+        return await dishRepository.modifyDish()
+    }
 }
 
 module.exports = new DishService()

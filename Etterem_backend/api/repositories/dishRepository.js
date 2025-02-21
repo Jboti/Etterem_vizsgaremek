@@ -31,15 +31,21 @@ class dishRepository
         return await this.Dish.create(dish)
     }
 
-    async deleteDish(dish)
+    async modifyDish(dish)
     {
-        await this.Dish.destroy(
+        return await this.Dish.update(
             {
-                where:
-                {
-                    id: dish.id
-                }
-            })
+                name: dish.name,
+                price: dish.price,
+                available: dish.available,
+                sauceOptions: dish.sauceOptions,
+                customizationOptions: dish.customizationOptions,
+                description: dish.description,
+                type: dish.type,
+                img: dish.img
+            },
+            {where:{id:dish.id}}
+        )
     }
 }
 

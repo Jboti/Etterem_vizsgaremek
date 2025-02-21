@@ -187,6 +187,23 @@ class userRepository
 
     }
 
+    async adminUserModify(user)
+    {
+        return await this.User.update(
+            {
+                userName: user.userName,
+                fullName: user.fullName,
+                email: user.email,
+                points: user.points,
+                isAdmin: user.isAdmin,
+                isActive: user.isActive,
+            },
+            {
+                where: { id: user.id },
+            }
+        )
+    }
+
 }
 
 

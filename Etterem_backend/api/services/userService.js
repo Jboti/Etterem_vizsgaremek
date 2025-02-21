@@ -60,6 +60,11 @@ class UserService
     {
         await userRepository.updateAllregies(id,allergies)
     }
+
+    async adminUserModify(user)
+    {
+        return await userRepository.adminUserModify(user)
+    }
 }
 
 module.exports = new UserService()

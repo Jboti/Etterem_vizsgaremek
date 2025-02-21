@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt")
 const salt = 10
 const jwt = require("jsonwebtoken")
 const nodemailer = require('nodemailer')
+const userRepository = require('../repositories/userRepository')
 
 
 exports.getUser = async (req,res,next) =>
@@ -449,4 +450,41 @@ exports.updateAllregies = async (req,res,next) =>
     }catch(error){
         next(error)
     }
+}
+
+exports.adminUserModify = async (req,res,next) =>
+{
+    try
+    {
+        let { id, username, fullname, email, points, isAdmin, isActive} = req.body
+        id = Number(id)
+        points = Number(points)
+        if(!id || isNaN(id) || !username || !fullname || !email || !points || isNaN(points) || !String(isAdmin) || !String(isActive))
+        {
+            const error = new Error("Missing or wrong type of data!")
+            error.status = 400
+            throw error
+        }
+        const newUserData = 
+        {
+            id: id,
+            userName: username,
+            fullName: fullname,
+            email: email,
+            points: points,
+            isAdmin: isAdmin,
+            isActive:isActive,
+        }
+        const result = await userService.adminUserModify(newUserData)
+        if(!result)
+        {
+            const error = new Error("Admin user modify went wrong!")
+            error.status = 404
+            throw error
+        }
+        res.status(201).send("Successfully modified!")
+    }catch(err){
+        next(err)
+    }
+
 }

@@ -23,5 +23,6 @@ router.patch("/user-name-change",userAuth.authenticateToken, userController.chan
 router.post("/password-reset",userAuth.authenticateTokenforEmail ,userController.changePassword)
 router.patch("/update-allergies",userAuth.authenticateToken,userController.updateAllregies)
 router.delete("/delete-user/:id",userController.deleteUser)
+router.put("/admin-user-modify",userController.adminUserModify)
 
 module.exports = router
