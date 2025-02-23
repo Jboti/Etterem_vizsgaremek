@@ -1,9 +1,10 @@
 const db = require('../db/dbContext')
-const { Op, where } = require('sequelize')
+
 class userRepository
 {
     constructor(db)
     {
+        this.sequelize = db.Sequelize
         this.User = db.user
         this.Allergenable = db.allergenables
         this.Allergy = db.allergy
@@ -200,6 +201,21 @@ class userRepository
             },
             {
                 where: { id: user.id },
+            }
+        )
+    }
+
+    async usePoints(id,pointsUsed)
+    {
+        await this.User.update(
+            {
+                points: this.sequelize.literal(`points - ${pointsUsed}`)
+            },
+            {
+                where:
+                {
+                    id : id
+                }
             }
         )
     }

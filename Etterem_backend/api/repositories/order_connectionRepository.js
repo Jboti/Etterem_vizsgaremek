@@ -14,7 +14,7 @@ class order_connectionRepository
 
 
 
-    async createPurchaseConnection(uid,purchase,dishInfo)
+    async createPurchaseConnection(uid,purchase,dishInfo,pointsUsed)
     {
         const Purchase = await this.Purchase.create(purchase)
         const con = {
@@ -39,7 +39,7 @@ class order_connectionRepository
         }
         await this.User.update(
             {
-                points: this.sequelize.literal(`points + ${Math.floor(Purchase.totalPrice / 100)}`)
+                points: this.sequelize.literal(`points + ${Math.floor((Purchase.totalPrice-pointsUsed) / 100)}`)
             },
             {
                 where:

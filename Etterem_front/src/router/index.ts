@@ -72,7 +72,7 @@ const router = createRouter({
       component: PasswordResetView,
     },
     {
-      path: '/order-placed/:id',
+      path: '/order-placed/:id/:price',
       name: 'order-placed',
       component: OrderPlacedView,
     },

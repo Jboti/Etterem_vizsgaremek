@@ -41,7 +41,7 @@ class purchaseRepository
                             {
                                 model: this.Dish,
                                 as: "dish",
-                                attributes: ["name", "type"]
+                                attributes: ["name", "type","price","customizationOptions"]
                             }
                         ],
                         attributes: ["dish_id", "amount","customizations"]

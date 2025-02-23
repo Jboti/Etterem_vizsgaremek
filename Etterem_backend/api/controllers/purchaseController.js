@@ -1,6 +1,6 @@
 const purchaseService = require('../services/purchaseService')
 const orderConnectionService = require('../services/orderConnectionService')
-const dish = require('../models/dish')
+const userService = require('../services/userService')
 
 exports.getAllPurchaseUserInfo = async (req,res,next) =>
 {
@@ -54,18 +54,19 @@ exports.placeOrder = async (req,res,next) =>
         const currentDate = new Date()
 
         const id = Number(req.uid)
-        let {totalPrice, message, takeAway, dishIds, dishAmounts, dishCustomizations} = req.body
+        let {totalPrice, message, takeAway, dishIds, dishAmounts, dishCustomizations, pointsUsed} = req.body
         
         totalPrice = Number(totalPrice)
         dishIds = dishIds.map(id => Number(id))
         dishAmounts = dishAmounts.map(amount => Number(amount))
+        pointsUsed = Number(pointsUsed)
 
-        if(!id || !totalPrice || !message || !String(takeAway) || !dishIds || !dishAmounts || !dishCustomizations){
+        if(!id || !totalPrice || !message || !String(takeAway) || !dishIds || !dishAmounts || !dishCustomizations || !pointsUsed){
             const error = new Error("Missing data in placeOrder")
             error.status = 404
             throw error
         }
-        if(isNaN(id) || isNaN(totalPrice) || dishIds.some(id => isNaN(id)) || dishAmounts.some(amount => isNaN(amount)))
+        if(isNaN(id) || isNaN(totalPrice) || dishIds.some(id => isNaN(id)) || dishAmounts.some(amount => isNaN(amount)) || isNaN(pointsUsed))
         {
             const error = new Error("Wrong type of data in placeOrder!")
             error.status = 404
@@ -87,9 +88,10 @@ exports.placeOrder = async (req,res,next) =>
         }
 
 
-        const result = await orderConnectionService.createPurchaseConnection(id,purchase,dishInfo)
+        const result = await orderConnectionService.createPurchaseConnection(id,purchase,dishInfo,pointsUsed)
         if(result)
         {
+            await userService.usePoints(id,pointsUsed)
             res.status(201).json({data:result})
             console.log("Purchase created successfully!")
         }

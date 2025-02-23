@@ -8,6 +8,7 @@ import type { ChangeUserName } from '@/api/auth/auth';
 import { onMounted, ref, watch} from 'vue';
 import { toast } from 'vue3-toastify';
 import type { allergies } from '@/api/user/user';
+import { useCartStore } from '@/stores/cartStore';
 
 const notify = () => {}
 
@@ -23,6 +24,8 @@ const { data: purchaseData } = useGetAllPurchaseUserInfo()
 const { mutate: logout} = useLogout()
 const { mutate: updateAllergies } = useUpdateAllergies()
 const { push } = useRouter()
+
+const cartStore = useCartStore()
 
 
 const ChangeUserNameRef = ref<ChangeUserName>({
@@ -77,7 +80,11 @@ const handleUserNameChange = (ChangeUserNameRef: ChangeUserName) => {
 }
 
 const reOrderHandler = (purchase : any) =>{
-  console.log(purchase)
+  cartStore.reOrder(purchase.purchase)
+  push({name:'Order'})
+  setTimeout(() => {
+    toast.success("Sikeresen a kosárba rakta az előzőleg is megrendelt termekeket!")
+  },100)
 }
 
 const handleDeleteUser = () =>{
@@ -161,7 +168,7 @@ watch(() => userInfoData.value, (newUserData) => {
             </template>
             <!-- RENDELÉSI ELŐZMÉNY MODAL -->
             <template v-slot:default="{ isActive }">
-              <v-card style="width: 100%; margin: auto;max-width:1250px; background-color: rgba(255, 255, 255, .9);">
+              <v-card style="width: 100%; margin: auto;max-width:1250px; background-color: rgba(255, 255, 255, .7);">
                 <v-toolbar title="Rendelések" color="#B71C1C" style="height: auto; text-align: center; color: black; position: sticky; top: 0; z-index: 10; box-shadow: 0 5px 15px -3px black,  0 5px 15px -3px  black inset; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
                   <v-btn
                   @click="isActive.value = false"
@@ -177,7 +184,12 @@ watch(() => userInfoData.value, (newUserData) => {
                       cols="12" sm="12" md="12" xl="12">
                       <v-card color="#B71C1C" style="box-shadow: 0 0 8px 4px black inset, 0 0 5px 2px black; color: whitesmoke; max-width: 1000px; margin: auto; padding: 1%;">
                         <v-card-title class="multiline-text">Dátum: {{ new Date(purchase.purchase.date).toLocaleString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}}</v-card-title>
-                        <v-card-title class="multiline-text mb-4">Összeg: {{ purchase.purchase.totalPrice }} Ft</v-card-title>
+                        <div v-if="purchase.purchase.takeAway">
+                          <v-card-title class="multiline-text">Összeg: {{ purchase.purchase.totalPrice-100 }} + 100 Ft</v-card-title>
+                          <v-card-subtitle class="multiline-text mb-4">Elvitel</v-card-subtitle>
+                        </div>
+                        
+                        <v-card-title class="multiline-text mb-4" v-else>Összeg: {{ purchase.purchase.totalPrice }} Ft</v-card-title>
                         <v-row>
                           <v-col 
                             v-for="dish in purchase.purchase.order_dishes" 

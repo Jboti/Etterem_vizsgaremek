@@ -65,6 +65,11 @@ class UserService
     {
         return await userRepository.adminUserModify(user)
     }
+    
+    async usePoints(id,pointsUsed)
+    {
+        return await userRepository.usePoints(id,pointsUsed)
+    }
 }
 
 module.exports = new UserService()

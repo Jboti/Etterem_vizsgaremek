@@ -15,6 +15,9 @@ const { params } = useRoute()
           <h2 class="headline white--text" style="text-shadow: 2px 2px 2px black;">Rendelésed száma: {{params.id}}</h2>
     </v-card-text>
     <v-card-text class="text-center">
+          <h2 class="headline white--text" style="text-shadow: 2px 2px 2px black;">Fizetendő: {{params.price || 0}} Ft</h2>
+    </v-card-text>
+    <v-card-text class="text-center">
           <h3 class="white--text" style="text-shadow: 2px 2px 2px black;">Köszönjük rendelésed, az étel elkészítéséhez már neki is álltunk!</h3>
       </v-card-text>
     </v-card>
