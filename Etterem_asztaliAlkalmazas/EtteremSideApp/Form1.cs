@@ -7,7 +7,6 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static EtteremSideApp.Form1;
 
 //csak C:-n lehet futtatni!!
 
@@ -39,14 +38,27 @@ namespace EtteremSideApp
         public FlowLayoutPanel panel2 = new FlowLayoutPanel();
         public FlowLayoutPanel panel3 = new FlowLayoutPanel();
         public FlowLayoutPanel panel4 = new FlowLayoutPanel();
+        public FlowLayoutPanel panel5 = new FlowLayoutPanel();
+
 
         public ListBox resultsListBoxUser;
         public TextBox searchTextBoxUser;
 
+        //user edit felület részei
         public ListBox resultsListBoxDish;
         public TextBox searchTextBoxDish;
+        public TextBox idTextBox;
+        public TextBox usernameTextBox;
+        public TextBox fullNameTextBox;
+        public TextBox emailTextBox;
+        public NumericUpDown pointsNumericUpDown;
+        public RadioButton adminYesRadioButton;
+        public RadioButton adminNoRadioButton;
+        public RadioButton ActiveYesRadioButton;
+        public RadioButton ActiveNoRadioButton;
 
-
+        //allergy felvitel felület részei
+        public TextBox allergyTextBox;
 
         //------Global values------\\
 
@@ -733,29 +745,38 @@ namespace EtteremSideApp
         {
             if (adminLoggedIn)
             {
+                toolStripSeparator3.Visible = false;
                 toolStripSeparator4.Visible = true;
                 toolStripSeparator5.Visible = true;
                 toolStripSeparator6.Visible = true;
                 toolStripSeparator7.Visible = true;
+                toolStripSeparator8.Visible = true;
 
+
+                toolStripLabel3.Visible = false; //ne legyen bejelentkezés gomb amíg be van jelentkezve valaki
                 toolStripLabel6.Visible = true;
                 toolStripLabel7.Visible = true;
                 toolStripLabel8.Visible = true;
                 toolStripLabel9.Visible = true;
+                toolStripLabel10.Visible = true;
 
                 toolStripLabel5.Text = adminName;
             }
             else
             {
+                toolStripSeparator3.Visible = true;
                 toolStripSeparator4.Visible = false;
                 toolStripSeparator5.Visible = false;
                 toolStripSeparator6.Visible = false;
                 toolStripSeparator7.Visible = false;
+                toolStripSeparator8.Visible = false;
 
+                toolStripLabel3.Visible = true;
                 toolStripLabel6.Visible = false;
                 toolStripLabel7.Visible = false;
                 toolStripLabel8.Visible = false;
                 toolStripLabel9.Visible = false;
+                toolStripLabel10.Visible = false;
 
                 adminName = "---";
                 toolStripLabel5.Text = adminName;
@@ -873,7 +894,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 60),
                 AutoSize = true
             };
-            TextBox idTextBox = new TextBox
+            idTextBox = new TextBox
             {
                 Location = new Point(150, 58),
                 Width = 210,
@@ -887,7 +908,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 100),
                 AutoSize = true
             };
-            TextBox usernameTextBox = new TextBox
+            usernameTextBox = new TextBox
             {
                 Location = new Point(150, 98),
                 Width = 210,
@@ -900,7 +921,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 140),
                 AutoSize = true
             };
-            TextBox fullNameTextBox = new TextBox
+            fullNameTextBox = new TextBox
             {
                 Location = new Point(150, 138),
                 Width = 210,
@@ -913,7 +934,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 180),
                 AutoSize = true
             };
-            TextBox emailTextBox = new TextBox
+            emailTextBox = new TextBox
             {
                 Location = new Point(150, 178),
                 Width = 210,
@@ -926,7 +947,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 220),
                 AutoSize = true
             };
-            NumericUpDown pointsNumericUpDown = new NumericUpDown
+            pointsNumericUpDown = new NumericUpDown
             {
                 Location = new Point(150, 218),
                 Width = 100,
@@ -948,7 +969,7 @@ namespace EtteremSideApp
                 Size = new Size(150, 20),
             };
 
-            RadioButton adminYesRadioButton = new RadioButton
+            adminYesRadioButton = new RadioButton
             {
                 Text = "Igen",
                 Location = new Point(0, 0),
@@ -956,7 +977,7 @@ namespace EtteremSideApp
                 Checked = admin,
             };
 
-            RadioButton adminNoRadioButton = new RadioButton
+            adminNoRadioButton = new RadioButton
             {
                 Text = "Nem",
                 Location = new Point(70, 0),
@@ -981,7 +1002,7 @@ namespace EtteremSideApp
                 Size = new Size(150, 20),
             };
 
-            RadioButton ActiveYesRadioButton = new RadioButton
+            ActiveYesRadioButton = new RadioButton
             {
                 Text = "Igen",
                 Location = new Point(0, 0),
@@ -989,7 +1010,7 @@ namespace EtteremSideApp
                 Checked = active,
             };
 
-            RadioButton ActiveNoRadioButton = new RadioButton
+            ActiveNoRadioButton = new RadioButton
             {
                 Text = "Nem",
                 Location = new Point(70, 0),
@@ -1090,59 +1111,105 @@ namespace EtteremSideApp
             panel2.Controls.Add(resultsPanel);
         }
 
-
         private void DeleteButton_Click(object sender, EventArgs e)
         {
             //kiüríti a mezőket
             CreateUserControl(0, null, null, null, 0, false, false);
         }
 
-        private void SaveButton_Click(object sender, EventArgs e)
+        private async void SaveButton_Click(object sender, EventArgs e)
         {
-            //menti a módosításokat
+            // Extract username from adminName using the "Név:" keyword.
+            string input = adminName;
+            string keyword = "Név: ";
+            int startIndex = input.IndexOf(keyword);
+            string username = "";
 
-            //ide kell megírni azt hogy feltöltse az új adatokat
-            postUserModifications(selectedUser.Username, selectedUser.FullName, selectedUser.Email, selectedUser.points, selectedUser.isAdmin, selectedUser.isActive);
+            if (startIndex != -1)
+            {
+                username = input.Substring(startIndex + keyword.Length).Trim();
+            }
+
+            // Flag to determine if logout should occur.
+            bool logoutAfterUpdate = false;
+
+            // If the admin is modifying their own account.
+            if (selectedUser.Username == username)
+            {
+                DialogResult result = MessageBox.Show(
+                    "Ön magát fogja módosítani, a módosítások után újra be kell jelentkezzen!",
+                    "Megerősítés",
+                    MessageBoxButtons.OKCancel,
+                    MessageBoxIcon.Warning
+                );
+
+                if (result != DialogResult.OK)
+                {
+                    return; // Kilépünk, ha a felhasználó a "Mégse" gombot választja.
+                }
+                // Set flag to logout after modifications.
+                logoutAfterUpdate = true;
+            }
+
+
+            // Execute modifications.
+
+            postUserModifications(Convert.ToInt32(idTextBox.Text.Trim()), usernameTextBox.Text.Trim(), fullNameTextBox.Text.Trim(), emailTextBox.Text.Trim(), Convert.ToInt32(pointsNumericUpDown.Value), adminYesRadioButton.Checked, ActiveYesRadioButton.Checked);
             CreateUserControl(0, null, null, null, 0, false, false);
+
+            if (logoutAfterUpdate)
+            {
+                panel2.SendToBack();
+                panel3.SendToBack();
+                panel4.SendToBack();
+
+                adminLoggedIn = false;
+                ShowAdminButtons();
+            }
         }
 
-        private /*async*/ void postUserModifications(string givenUsername, string givenFullname, string givenEmail, int givenPoints, bool givenisAdmin,bool givenisActive)
+
+
+        private async void postUserModifications(int givenID, string givenUsername, string givenFullname, string givenEmail, int givenPoints, bool givenisAdmin, bool givenisActive)
         {
+            //MessageBox.Show(givenUsername + " " + givenFullname + " " + givenEmail + " " + givenPoints.ToString() + " " + givenisAdmin.ToString() + " " + givenisActive.ToString());
 
-            MessageBox.Show(givenUsername + " " + givenFullname + " " + givenEmail + " " + Convert.ToString(givenPoints) + " " + Convert.ToString(givenisAdmin) + " " + Convert.ToString(givenisActive));
+            string url = "http://localhost:3000/api/v1/admin-user-modify";
+            var credentials = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("id", givenID.ToString()),
+                new KeyValuePair<string, string>("username", givenUsername),
+                new KeyValuePair<string, string>("fullname", givenFullname),
+                new KeyValuePair<string, string>("email", givenEmail),
+                new KeyValuePair<string, string>("points", givenPoints.ToString()),
+                new KeyValuePair<string, string>("isAdmin", givenisAdmin.ToString().ToLower()),
+                new KeyValuePair<string, string>("isActive", givenisActive.ToString().ToLower())
+            };
 
-            //string url = "http://localhost:3000/api/v1/post-updated-user";
-            //var credentials = new List<KeyValuePair<string, string>>
-            //{
-            //    new KeyValuePair<string, string>("id", null),
-            //    new KeyValuePair<string, string>("username", givenUsername),
-            //    new KeyValuePair<string, string>("fullname", givenFullname),
-            //    new KeyValuePair<string, string>("email", givenEmail),
-            //    new KeyValuePair<string, string>("points", Convert.ToString(givenPoints)),
-            //    new KeyValuePair<string, string>("isAdmin", Convert.ToString(givenisAdmin)),
-            //    new KeyValuePair<string, string>("isActive", Convert.ToString(givenisActive)),
-            //};
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var content = new FormUrlEncodedContent(credentials);
+                    HttpResponseMessage response = await client.PutAsync(url, content);
 
-            //try
-            //{
-            //    using (var client = new HttpClient())
-            //    {
-            //        var content = new FormUrlEncodedContent(credentials);
-
-            //        HttpResponseMessage response = await client.PostAsync(url, content);
-            //        if (response.IsSuccessStatusCode)
-            //        {
-            //            string responseBody = await response.Content.ReadAsStringAsync();
-            //        }
-            //        else
-            //        {
-            //        }
-            //    }
-            //}
-            //catch
-            //{
-            //}
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show("Sikeres mentés.");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Hiba történt a mentés során 1: " + response.StatusCode);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hiba történt a mentés során 2: " + ex.Message);
+            }
         }
+
 
         private async void SearchButton_Click(object sender, EventArgs e)
         {
@@ -1218,7 +1285,7 @@ namespace EtteremSideApp
             panel3.WrapContents = true;
             panel3.Padding = new Padding(20, 20, 20, 200);
             panel3.AutoScroll = true;
-            panel3.BackColor = Color.Blue;
+            panel3.BackColor = backGroundColor;
 
             CreateProductControl();
 
@@ -1469,7 +1536,7 @@ namespace EtteremSideApp
             panel4.WrapContents = true;
             panel4.Padding = new Padding(20, 20, 20, 200);
             panel4.AutoScroll = true;
-            panel4.BackColor = Color.Green;
+            panel4.BackColor = backGroundColor;
             this.Controls.Add(panel4);
             panel4.BringToFront();
 
@@ -1886,7 +1953,7 @@ namespace EtteremSideApp
             //var blob = Convert.To
             MessageBox.Show(givenItemName + " " + Convert.ToString(givenPrice) + " " + Convert.ToString(givenAvailable) + " " + givenDescription + " " + givenCategory);
 
-            //string url = "http://localhost:3000/api/v1/post-updated-user";
+            //string url = "http://localhost:3000/api/v1/";
             //var credentials = new List<KeyValuePair<string, string>>
             //{
             //    new KeyValuePair<string, string>("name", givenItemName),
@@ -1916,6 +1983,109 @@ namespace EtteremSideApp
             //catch
             //{
             //}
+        }
+
+
+        private void toolStripLabel10_Click(object sender, EventArgs e)
+        {
+            //új allergia felvitel click
+
+            panel5.Visible = true;
+            panel5.Dock = DockStyle.Fill;
+            panel5.Padding = new Padding(20, 20, 20, 200);
+            panel5.AutoScroll = true;
+            panel5.BackColor = backGroundColor;
+
+            //CreateUserControl(0, null, null, null, 0, false, false);
+            CreateAllergyControll();
+
+            this.Controls.Add(panel5);
+            panel5.BringToFront();
+        }
+
+        private void CreateAllergyControll()
+        {
+            panel5.Controls.Clear();
+
+            Panel centralPanel = new Panel
+            {
+                Size = new Size(400, 150),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.LightGray,
+                Location = new Point(20, 60)
+            };
+
+            Label titleLabel = new Label
+            {
+                Text = "Új allergén felvitele",
+                Location = new Point(20, 20),
+                AutoSize = true,
+                Font = new Font("Segoe UI", 12, FontStyle.Bold)
+            };
+
+            allergyTextBox = new TextBox
+            {
+                Location = new Point(20, 60),
+                Width = 300
+            };
+
+            Button saveButton = new Button
+            {
+                Text = "Mentés",
+                Location = new Point(20, 100),
+                AutoSize = true
+            };
+            saveButton.Click += SaveAllergyButton_Click;
+
+            centralPanel.Controls.Add(titleLabel);
+            centralPanel.Controls.Add(allergyTextBox);
+            centralPanel.Controls.Add(saveButton);
+
+            panel5.Controls.Add(centralPanel);
+        }
+
+        private void SaveAllergyButton_Click(object sender, EventArgs e)
+        {
+            if (allergyTextBox.Text.Length == 0)
+            {
+                MessageBox.Show("Adjon meg egy allergén elnevezést!");
+            }
+            else 
+            {
+                postNewAllergy(allergyTextBox.Text);
+            }
+        }
+
+        private async void postNewAllergy(string givenAllergyName)
+        {
+            string url = "http://localhost:3000/api/v1/create-new-allergy";
+            var data = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("name",givenAllergyName),
+            };
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var content = new FormUrlEncodedContent(data);
+                    HttpResponseMessage response = await client.PostAsync(url, content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show("Sikeres allergén felvitel.");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Hiba történt a felvitel során 1: " + response.StatusCode);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hiba történt a felvitel során 2: " + ex.Message);
+            }
         }
 
         public class User
@@ -2038,5 +2208,11 @@ namespace EtteremSideApp
         {
 
         }
+
+        private void toolStripLabel5_Click(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }
