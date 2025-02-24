@@ -7,7 +7,7 @@ exports.createDish = async (req,res,next) =>
         const currentDate = new Date()
         let {name, price, sauceOptions ,customizationOptions, description, type, image, gluten, lactose, egg, nuts} = req.body
         price = Number(price)
-        if(!name || !price ||isNaN(price) || !sauceOptions || !customizationOptions || !description || !type || !image ||!String(gluten) || !String(lactose) || !String(egg) || !String(nuts))
+        if(!name || !price ||isNaN(price) || !type || !image ||!String(gluten) || !String(lactose) || !String(egg) || !String(nuts))
         {
             const error = new Error("Missing or wrong tpye of data!")
             error.status = 404

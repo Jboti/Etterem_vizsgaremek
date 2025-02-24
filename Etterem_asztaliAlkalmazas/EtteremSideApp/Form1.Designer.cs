@@ -46,8 +46,6 @@
             this.toolStripLabel9 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel6 = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripLabel10 = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -69,8 +67,6 @@
             this.toolStripSeparator5,
             this.toolStripLabel9,
             this.toolStripSeparator7,
-            this.toolStripLabel10,
-            this.toolStripSeparator8,
             this.toolStripLabel6});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
@@ -180,19 +176,6 @@
             this.toolStripLabel6.Text = "Kijelentkezés";
             this.toolStripLabel6.Click += new System.EventHandler(this.toolStripLabel6_Click);
             // 
-            // toolStripLabel10
-            // 
-            this.toolStripLabel10.ForeColor = System.Drawing.Color.Blue;
-            this.toolStripLabel10.Name = "toolStripLabel10";
-            this.toolStripLabel10.Size = new System.Drawing.Size(59, 22);
-            this.toolStripLabel10.Text = "Új allergia";
-            this.toolStripLabel10.Click += new System.EventHandler(this.toolStripLabel10_Click);
-            // 
-            // toolStripSeparator8
-            // 
-            this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(6, 25);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -231,7 +214,5 @@
         private System.Windows.Forms.ToolStripLabel toolStripLabel8;
         private System.Windows.Forms.ToolStripLabel toolStripLabel9;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel10;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
     }
 }

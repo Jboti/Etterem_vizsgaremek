@@ -2,9 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
+using System.Security.Policy;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -28,6 +32,7 @@ namespace EtteremSideApp
         public static bool adminLoggedIn = false;
         public static string adminName = "---";
         public string[] allCategories = new string[] { "Kebab wrap", "Kebab box", "Kebab tál", "Köret", "Üdítő" }; // ehhez kell majd egy get-all-categories endpoint
+        public string currentIMGBlob = "empty";
 
         public static List<FullUser> selectedUsers = new List<FullUser>(); // user edit keresési részéhez tartozik
         public static FullUser selectedUser;
@@ -38,7 +43,6 @@ namespace EtteremSideApp
         public FlowLayoutPanel panel2 = new FlowLayoutPanel();
         public FlowLayoutPanel panel3 = new FlowLayoutPanel();
         public FlowLayoutPanel panel4 = new FlowLayoutPanel();
-        public FlowLayoutPanel panel5 = new FlowLayoutPanel();
 
 
         public ListBox resultsListBoxUser;
@@ -57,12 +61,22 @@ namespace EtteremSideApp
         public RadioButton ActiveYesRadioButton;
         public RadioButton ActiveNoRadioButton;
 
-        //allergy felvitel felület részei
-        public TextBox allergyTextBox;
+        //uj termek mododsítása
+        public TextBox nameTextBox;
+        public NumericUpDown priceNumericUpDown;
+        public DataGridView optionsDataGridView;
+        public CheckBox glutenCheckBox;
+        public CheckBox lactoseCheckBox;
+        public CheckBox eggCheckBox;
+        public CheckBox nutsCheckBox;
+        public TextBox descriptionTextBox;
+        public ComboBox typeComboBox;
+        public Button imageButton;
 
-        //------Global values------\\
 
-        public Form1()
+//------Global values------\\
+
+public Form1()
         {
             InitializeComponent();
         }
@@ -750,7 +764,6 @@ namespace EtteremSideApp
                 toolStripSeparator5.Visible = true;
                 toolStripSeparator6.Visible = true;
                 toolStripSeparator7.Visible = true;
-                toolStripSeparator8.Visible = true;
 
 
                 toolStripLabel3.Visible = false; //ne legyen bejelentkezés gomb amíg be van jelentkezve valaki
@@ -758,7 +771,6 @@ namespace EtteremSideApp
                 toolStripLabel7.Visible = true;
                 toolStripLabel8.Visible = true;
                 toolStripLabel9.Visible = true;
-                toolStripLabel10.Visible = true;
 
                 toolStripLabel5.Text = adminName;
             }
@@ -769,18 +781,15 @@ namespace EtteremSideApp
                 toolStripSeparator5.Visible = false;
                 toolStripSeparator6.Visible = false;
                 toolStripSeparator7.Visible = false;
-                toolStripSeparator8.Visible = false;
 
                 toolStripLabel3.Visible = true;
                 toolStripLabel6.Visible = false;
                 toolStripLabel7.Visible = false;
                 toolStripLabel8.Visible = false;
                 toolStripLabel9.Visible = false;
-                toolStripLabel10.Visible = false;
 
                 adminName = "---";
                 toolStripLabel5.Text = adminName;
-
             }
         }
 
@@ -1277,8 +1286,6 @@ namespace EtteremSideApp
         private void toolStripLabel8_Click(object sender, EventArgs e)
         {
             //Új termék
-
-
             panel3.Visible = true;
             panel3.Dock = DockStyle.Fill;
             panel3.FlowDirection = FlowDirection.LeftToRight;
@@ -1299,7 +1306,7 @@ namespace EtteremSideApp
 
             Panel centralPanel = new Panel
             {
-                Size = new Size(500, 600),
+                Size = new Size(520, 650), // increased height to accommodate new checkboxes
                 BorderStyle = BorderStyle.FixedSingle,
                 BackColor = Color.LightGray,
             };
@@ -1310,7 +1317,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 20),
                 AutoSize = true
             };
-            TextBox nameTextBox = new TextBox
+            nameTextBox = new TextBox
             {
                 Location = new Point(150, 18),
                 Width = 300
@@ -1322,7 +1329,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 60),
                 AutoSize = true
             };
-            NumericUpDown priceNumericUpDown = new NumericUpDown
+            priceNumericUpDown = new NumericUpDown
             {
                 Location = new Point(150, 58),
                 Width = 100,
@@ -1337,7 +1344,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 100),
                 AutoSize = true
             };
-            DataGridView optionsDataGridView = new DataGridView
+            optionsDataGridView = new DataGridView
             {
                 Location = new Point(150, 98),
                 Width = 300,
@@ -1374,6 +1381,7 @@ namespace EtteremSideApp
                     optionsDataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
                 }
             };
+
             Button addOptionButton = new Button
             {
                 Text = "+",
@@ -1405,15 +1413,43 @@ namespace EtteremSideApp
             toolTip.SetToolTip(addOptionButton, "Sor hozzáadása");
             toolTip.SetToolTip(removeOptionButton, "Kijelölt sor törlése");
 
+            // --- New Checkboxes below the DataGridView ---
+            // Positioning checkboxes in a row under the DataGridView.
+            glutenCheckBox = new CheckBox
+            {
+                Text = "Glutén",
+                Location = new Point(150, 260),
+                AutoSize = true
+            };
+            lactoseCheckBox = new CheckBox
+            {
+                Text = "Laktóz",
+                Location = new Point(240, 260),
+                AutoSize = true
+            };
+            eggCheckBox = new CheckBox
+            {
+                Text = "Tojás",
+                Location = new Point(330, 260),
+                AutoSize = true
+            };
+            nutsCheckBox = new CheckBox
+            {
+                Text = "Magvak",
+                Location = new Point(420, 260),
+                AutoSize = true
+            };
+
+            // Shift description controls downward to avoid overlapping the new checkboxes
             Label descriptionLabel = new Label
             {
                 Text = "Leírás:",
-                Location = new Point(20, 260),
+                Location = new Point(20, 300),
                 AutoSize = true
             };
-            TextBox descriptionTextBox = new TextBox
+            descriptionTextBox = new TextBox
             {
-                Location = new Point(150, 258),
+                Location = new Point(150, 298),
                 Width = 300,
                 Height = 80,
                 Multiline = true
@@ -1422,12 +1458,12 @@ namespace EtteremSideApp
             Label typeLabel = new Label
             {
                 Text = "Típus:",
-                Location = new Point(20, 350),
+                Location = new Point(20, 400),
                 AutoSize = true
             };
-            ComboBox typeComboBox = new ComboBox
+            typeComboBox = new ComboBox
             {
-                Location = new Point(150, 348),
+                Location = new Point(150, 398),
                 Width = 300,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
@@ -1436,13 +1472,13 @@ namespace EtteremSideApp
             Label imageLabel = new Label
             {
                 Text = "Kép:",
-                Location = new Point(20, 390),
+                Location = new Point(20, 440),
                 AutoSize = true
             };
-            Button imageButton = new Button
+            imageButton = new Button
             {
                 Text = "Kép kiválasztása",
-                Location = new Point(150, 388),
+                Location = new Point(150, 438),
                 Width = 150,
                 Height = 30
             };
@@ -1462,19 +1498,19 @@ namespace EtteremSideApp
             Button saveButton = new Button
             {
                 Text = "Mentés",
-                Location = new Point(150, 430),
+                Location = new Point(150, 480),
                 Width = 80,
                 Height = 30
             };
             saveButton.Click += (sender, e) =>
             {
-                // save cucc
+                NewProductSaveButton_Click();
             };
 
             Button deleteButton = new Button
             {
                 Text = "Törlés",
-                Location = new Point(240, 430),
+                Location = new Point(240, 480),
                 Width = 80,
                 Height = 30
             };
@@ -1496,6 +1532,10 @@ namespace EtteremSideApp
             centralPanel.Controls.Add(optionsDataGridView);
             centralPanel.Controls.Add(addOptionButton);
             centralPanel.Controls.Add(removeOptionButton);
+            centralPanel.Controls.Add(glutenCheckBox);
+            centralPanel.Controls.Add(lactoseCheckBox);
+            centralPanel.Controls.Add(eggCheckBox);
+            centralPanel.Controls.Add(nutsCheckBox);
             centralPanel.Controls.Add(descriptionLabel);
             centralPanel.Controls.Add(descriptionTextBox);
             centralPanel.Controls.Add(typeLabel);
@@ -1508,10 +1548,125 @@ namespace EtteremSideApp
             panel3.Controls.Add(centralPanel);
         }
 
+        private void NewProductSaveButton_Click()
+        {
+            currentIMGBlob = "wadwdawd";
+            if (EmptyCheckNewProduct())
+            {
+                List<(string, int)> cutomisations = new List<(string, int)>();
+                List<string> sauces = new List<string>();
+
+                ReadNewProductOptionsDataFromDataGridView(ref cutomisations, ref sauces);
+
+                CreateNewProductRequest(nameTextBox.Text, Convert.ToInt32(priceNumericUpDown.Value), cutomisations, sauces, descriptionTextBox.Text, typeComboBox.SelectedItem.ToString(), "img", glutenCheckBox.Checked, lactoseCheckBox.Checked, eggCheckBox.Checked, nutsCheckBox.Checked);
+            }
+            else
+            {
+                MessageBox.Show("Nem hagyhat üres mezőket");
+            }
+        }
+
+        private void ReadNewProductOptionsDataFromDataGridView(ref List<(string, int)> customisations, ref List<string> sauces)
+        {
+            foreach (DataGridViewRow row in optionsDataGridView.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                string optionName = row.Cells[0].Value?.ToString() ?? "";
+
+                int price = 0;
+                if (row.Cells[1].Value != null)
+                {
+                    int.TryParse(row.Cells[1].Value.ToString(), out price);
+                }
+
+                bool isSauce = false;
+                if (row.Cells[2].Value != null)
+                {
+                    bool.TryParse(row.Cells[2].Value.ToString(), out isSauce);
+                }
+
+                if (isSauce)
+                {
+                    sauces.Add(optionName);
+                }
+                else
+                {
+                    customisations.Add((optionName, price));
+                }
+            }
+        }
+        private bool EmptyCheckNewProduct()
+        {
+            if (nameTextBox.Text.Length == 0 || priceNumericUpDown.Value == null || typeComboBox.SelectedIndex == -1 || currentIMGBlob == "empty")
+            {
+                return false;
+            }
+            else 
+            {
+                return true;
+            }
+        }
+
+        private async void CreateNewProductRequest(string givenName, int givenPrice, List<(string,int)> givenCustomizationOptions, List<string> givenSauceOptions, string givenDescription, string givenType, string givenIMGblob, bool givenGluten, bool givenLactose, bool givenEgg, bool givenNuts)
+        {
+            MessageBox.Show(givenName + "\n" + givenPrice.ToString() + "\n" + givenCustomizationOptions.Count.ToString() + "\n" + givenSauceOptions.Count.ToString() + "\n" + givenDescription + "\n" + givenType + "\n" + givenIMGblob + " \n" + givenGluten.ToString() + " " + givenLactose.ToString() + " " + givenEgg.ToString() + " " + givenNuts.ToString());
+
+            var d1 = JsonSerializer.Serialize(
+                givenCustomizationOptions.Select(option => new { name = option.Item1, price = option.Item2 })
+            );
+
+            var d2 = JsonSerializer.Serialize(
+                givenSauceOptions.Select(sauce => new { name = sauce })
+            );
+
+            string url = "http://localhost:3000/api/v1/create-new-dish";
+
+
+            var data = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("name", givenName),
+                new KeyValuePair<string, string>("price", Convert.ToString(givenPrice)),
+                new KeyValuePair<string, string>("sauceOptions", d2),
+                new KeyValuePair<string, string>("customizationOptions", d1), 
+                new KeyValuePair<string, string>("description", givenDescription),
+                new KeyValuePair<string, string>("type", givenType),
+                new KeyValuePair<string, string>("image", givenIMGblob), //ide kell még cucc hehe
+                new KeyValuePair<string, string>("gluten",givenGluten.ToString().ToLower()),
+                new KeyValuePair<string, string>("lactose",givenLactose.ToString().ToLower()),
+                new KeyValuePair<string, string>("egg",givenEgg.ToString().ToLower()),
+                new KeyValuePair<string, string>("nuts",givenNuts.ToString().ToLower()),
+            };
+
+            MessageBox.Show(d1);
+            MessageBox.Show(d2);
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var content = new FormUrlEncodedContent(data);
+                    HttpResponseMessage response = await client.PostAsync(url, content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show("Sikeres mentés.");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Hiba történt a mentés során 1: " + response.StatusCode);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hiba történt a mentés során 2: " + ex.Message);
+            }
+        }
 
         private void toolStripLabel9_Click(object sender, EventArgs e)
         {
-
             var modifications = new List<(string, int, bool)>
             {
                 ("", 0, false),
@@ -1988,104 +2143,6 @@ namespace EtteremSideApp
 
         private void toolStripLabel10_Click(object sender, EventArgs e)
         {
-            //új allergia felvitel click
-
-            panel5.Visible = true;
-            panel5.Dock = DockStyle.Fill;
-            panel5.Padding = new Padding(20, 20, 20, 200);
-            panel5.AutoScroll = true;
-            panel5.BackColor = backGroundColor;
-
-            //CreateUserControl(0, null, null, null, 0, false, false);
-            CreateAllergyControll();
-
-            this.Controls.Add(panel5);
-            panel5.BringToFront();
-        }
-
-        private void CreateAllergyControll()
-        {
-            panel5.Controls.Clear();
-
-            Panel centralPanel = new Panel
-            {
-                Size = new Size(400, 150),
-                BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.LightGray,
-                Location = new Point(20, 60)
-            };
-
-            Label titleLabel = new Label
-            {
-                Text = "Új allergén felvitele",
-                Location = new Point(20, 20),
-                AutoSize = true,
-                Font = new Font("Segoe UI", 12, FontStyle.Bold)
-            };
-
-            allergyTextBox = new TextBox
-            {
-                Location = new Point(20, 60),
-                Width = 300
-            };
-
-            Button saveButton = new Button
-            {
-                Text = "Mentés",
-                Location = new Point(20, 100),
-                AutoSize = true
-            };
-            saveButton.Click += SaveAllergyButton_Click;
-
-            centralPanel.Controls.Add(titleLabel);
-            centralPanel.Controls.Add(allergyTextBox);
-            centralPanel.Controls.Add(saveButton);
-
-            panel5.Controls.Add(centralPanel);
-        }
-
-        private void SaveAllergyButton_Click(object sender, EventArgs e)
-        {
-            if (allergyTextBox.Text.Length == 0)
-            {
-                MessageBox.Show("Adjon meg egy allergén elnevezést!");
-            }
-            else 
-            {
-                postNewAllergy(allergyTextBox.Text);
-            }
-        }
-
-        private async void postNewAllergy(string givenAllergyName)
-        {
-            string url = "http://localhost:3000/api/v1/create-new-allergy";
-            var data = new List<KeyValuePair<string, string>>
-            {
-                new KeyValuePair<string, string>("name",givenAllergyName),
-            };
-
-            try
-            {
-                using (var client = new HttpClient())
-                {
-                    var content = new FormUrlEncodedContent(data);
-                    HttpResponseMessage response = await client.PostAsync(url, content);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string responseBody = await response.Content.ReadAsStringAsync();
-                        MessageBox.Show("Sikeres allergén felvitel.");
-                    }
-                    else
-                    {
-                        MessageBox.Show("Hiba történt a felvitel során 1: " + response.StatusCode);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hiba történt a felvitel során 2: " + ex.Message);
-            }
         }
 
         public class User

@@ -5,6 +5,8 @@ class dishRepository
     constructor(db)
     {
         this.Dish = db.dish
+        this.Allergy = db.allergy
+        this.Allergenables = db.allergenables
     }
 
 
@@ -30,15 +32,15 @@ class dishRepository
     {
         const newDish = await this.Dish.create(dish)
         for (const allergyName in allergies) {
-            const allergy = await this.Allergy.findOne({
+            const foundAllergy = await this.Allergy.findOne({
                 where: { name: allergyName }
             })
 
-            if (allergy) {
-                await this.Allergenable.create({
+            if (foundAllergy) {
+                await this.Allergenables.create({
                     allergenable_type: 'dish',
                     allergenable_id: newDish.id,
-                    allergen_id: allergy.id
+                    allergen_id: foundAllergy.id
                 })
             }
         }
