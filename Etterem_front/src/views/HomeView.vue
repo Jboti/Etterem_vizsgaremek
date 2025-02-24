@@ -72,8 +72,8 @@ watch(isError, () => {})
         <v-card class="info">
           <v-card  class="infoCard">
             <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Email:</b> donercegled@gmail.com</p>
-            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Tel szám.:</b> 06 xx xxx xxxx</p>
-            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Cím:</b> 2700 Cegléd, xy</p>
+            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Tel szám.:</b> 06 20 123 4567</p>
+            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Cím:</b> 2700 Cegléd, Szabadság tér</p>
           </v-card>
           <div class="terkepInfo">
             <div class="terkep">

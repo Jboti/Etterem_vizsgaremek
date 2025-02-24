@@ -64,7 +64,7 @@ const handlePasswordReset = (PasswordResetDataRef : SetPasswordData) => {
                 ></v-text-field>
                 <v-text-field class="ml-10 mr-10"
                         v-model="PasswordResetDataRef.password_confirmation"
-                        label="Jelszó"
+                        label="Jelszó újra"
                         variant="outlined"
                         :type="showPassword2 ? 'text' : 'password'"
                         :append-inner-icon="showPassword2 ? 'mdi-eye' : 'mdi-eye-off'"

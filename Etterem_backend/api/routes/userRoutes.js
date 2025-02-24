@@ -22,7 +22,8 @@ router.patch("/password-reset-email",userController.sendEmail)
 router.patch("/user-name-change",userAuth.authenticateToken, userController.changeUserName)
 router.post("/password-reset",userAuth.authenticateTokenforEmail ,userController.changePassword)
 router.patch("/update-allergies",userAuth.authenticateToken,userController.updateAllregies)
-router.delete("/delete-user/:id",userController.deleteUser)
+router.post("/delete-user-password-check",userAuth.authenticateToken,userController.deleteUserPasswordCheck)
+router.delete("/delete-user",userAuth.authenticateToken,userController.deleteUser)
 router.put("/admin-user-modify",userController.adminUserModify)
 
 module.exports = router
