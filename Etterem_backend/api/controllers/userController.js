@@ -458,7 +458,8 @@ exports.adminUserModify = async (req,res,next) =>
         let { id, username, fullname, email, points, isAdmin, isActive} = req.body
         id = Number(id)
         points = Number(points)
-        if(!id || isNaN(id) || !username || !fullname || !email || !points || isNaN(points) || !String(isAdmin) || !String(isActive))
+        console.log(id + username + fullname + email + points + isAdmin + isActive)
+        if(!id || isNaN(id) || !username || !fullname || !email || !String(isAdmin) || !String(isActive))
         {
             const error = new Error("Missing or wrong type of data!")
             error.status = 400
