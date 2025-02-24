@@ -4,3 +4,8 @@ export type allergies = {
     egg: boolean,
     nuts: boolean
 }
+
+export type DeleteUserData = {
+    email: string,
+    password: string
+}

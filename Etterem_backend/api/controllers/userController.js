@@ -232,8 +232,7 @@ exports.deleteUser = async (req,res,next) =>
 {
     try
     {
-        let {id} = req.params
-        id = Number(id)
+        const id = Number(req.uid)
         if(!id || isNaN(id)){
             const error = new Error("User id not found or id is not a number!")
             error.status = 404
@@ -241,8 +240,8 @@ exports.deleteUser = async (req,res,next) =>
         }
         
         await userService.deleteUser(id)
+
         res.status(200).send("User deleted successfully!")
-        console.log("User deleted successfully!")
     } catch (error) {
         next(error)
     }
@@ -459,7 +458,8 @@ exports.adminUserModify = async (req,res,next) =>
         let { id, username, fullname, email, points, isAdmin, isActive} = req.body
         id = Number(id)
         points = Number(points)
-        if(!id || isNaN(id) || !username || !fullname || !email || !points || isNaN(points) || !String(isAdmin) || !String(isActive))
+        console.log(id + username + fullname + email + points + isAdmin + isActive)
+        if(!id || isNaN(id) || !username || !fullname || !email || !String(isAdmin) || !String(isActive))
         {
             const error = new Error("Missing or wrong type of data!")
             error.status = 400
@@ -487,4 +487,31 @@ exports.adminUserModify = async (req,res,next) =>
         next(err)
     }
 
+}
+
+exports.deleteUserPasswordCheck = async (req,res,next) =>
+{
+    try
+    {
+        const { email, password } = req.body
+        if(!email || !password)
+        {
+            const error = new Error("Missing data!")
+            error.status = 404
+            throw error
+        }
+
+        const user = await userService.getUserByEmail(email)
+        if(!user){
+            res.status(404).json({errmessage:"Hiba a felhasználó törlésénel! User nem található!"})
+        }
+        else if(await bcrypt.compare(password, user.password)){
+            res.status(200).json({message:"Siker, a jelszó helyes!"})
+        }
+        else
+            res.status(400).json({errmessage:"Helytelen jelszó!"})
+
+    }catch(err){
+        next(err)
+    }
 }

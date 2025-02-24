@@ -87,6 +87,7 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
                             v-bind="props"
                             class="mb-4"
                             style="background-color: transparent; box-shadow: none; border-radius: 100%; height: auto; color: whitesmoke;"
+                            tabindex="-1"
                         >
                             <v-icon>mdi-help</v-icon>
                         </v-btn>

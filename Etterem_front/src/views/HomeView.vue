@@ -72,14 +72,14 @@ watch(isError, () => {})
         <v-card class="info">
           <v-card  class="infoCard">
             <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Email:</b> donercegled@gmail.com</p>
-            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Tel szám.:</b> 06 xx xxx xxxx</p>
-            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Cím:</b> 2700 Cegléd, xy</p>
+            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Tel szám.:</b> 06 20 123 4567</p>
+            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Cím:</b> 2700 Cegléd, Szabadság tér</p>
           </v-card>
           <div class="terkepInfo">
-            <v-card class="terkep">
+            <div class="terkep">
               <!-- Ez jó csak hogy ez error kódok ne zavarjanak azért van ki kommentezve -->
-              <!-- <div style="width: 100%"><iframe class="terkepMeret" width="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?width=100%25&amp;height=400&amp;hl=en&amp;q=2700%20Cegl%C3%A9d,%20szabads%C3%A1g%20t%C3%A9r+(D%C3%B6ner%20Cegl%C3%A9d)&amp;t=&amp;z=15&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"><a href="https://www.gps.ie/">gps handsets</a></iframe></div> -->
-            </v-card>
+              <div style="width: 100%"><iframe class="terkepMeret" width="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?width=100%25&amp;height=400&amp;hl=en&amp;q=2700%20Cegl%C3%A9d,%20szabads%C3%A1g%20t%C3%A9r+(D%C3%B6ner%20Cegl%C3%A9d)&amp;t=&amp;z=15&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"><a href="https://www.gps.ie/">gps handsets</a></iframe></div>
+            </div>
           </div>
         </v-card>
       </v-container>

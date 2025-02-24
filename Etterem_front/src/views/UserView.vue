@@ -1,32 +1,32 @@
 <script lang="ts" setup>
 import type { ResetPasswordData } from '@/api/auth/auth';
 import { useLogout, usePasswordResetEmail, useValidateToken } from '@/api/auth/authQuery';
-import { useGetUserInfo, useUpdateAllergies, useUserNameChange } from "@/api/user/userQuery"
+import { useDeleteUser, useDeleteUserPwConfirm, useGetUserInfo, useUpdateAllergies, useUserNameChange } from "@/api/user/userQuery"
 import {useGetAllPurchaseUserInfo} from "@/api/user/userQuery" 
 import { useRouter } from 'vue-router'
 import type { ChangeUserName } from '@/api/auth/auth';
 import { onMounted, ref, watch} from 'vue';
 import { toast } from 'vue3-toastify';
-import type { allergies } from '@/api/user/user';
+import type { allergies, DeleteUserData } from '@/api/user/user';
 import { useCartStore } from '@/stores/cartStore';
 
 const notify = () => {}
+const { push } = useRouter()
 
 const { isError, mutate: validateToken } = useValidateToken()
 
+const { data: purchaseData } = useGetAllPurchaseUserInfo()
+const { data: userInfoData, isLoading } = useGetUserInfo()
 const { mutate: changeUserNameMutate } = useUserNameChange()
 const { mutate: resetPasswordMutate } = usePasswordResetEmail()
-//majd még talán kell
-// const showPassword = ref<boolean>(false)
-// const showPasswordRe = ref<boolean>(false)
-const { data: userInfoData, isLoading } = useGetUserInfo()
-const { data: purchaseData } = useGetAllPurchaseUserInfo()
-const { mutate: logout} = useLogout()
+const { mutate: deleteUserMutate } = useDeleteUser()
+const { mutate: deleteUserPwConfirmMutate } = useDeleteUserPwConfirm()
 const { mutate: updateAllergies } = useUpdateAllergies()
-const { push } = useRouter()
+const { mutate: logout} = useLogout()
 
 const cartStore = useCartStore()
 
+const showPassword = ref<boolean>(false)
 
 const ChangeUserNameRef = ref<ChangeUserName>({
   userName:'',
@@ -36,6 +36,12 @@ const ChangeUserNameRef = ref<ChangeUserName>({
 const ResetPasswordDataRef = ref<ResetPasswordData>({
   email: '',
 })
+
+const DeleteUserDataRef = ref<DeleteUserData>({
+  email: '',
+  password: '',
+})
+
 
 const userAllergiesRef = ref<allergies>({
   gluten: false,
@@ -87,17 +93,40 @@ const reOrderHandler = (purchase : any) =>{
   },100)
 }
 
-const handleDeleteUser = () =>{
-  console.log("delete user")
+const handleDeleteUser = (data : DeleteUserData) =>{
+  if(data.password == '' || data.password == ' ')
+    toast.error("Üres mező!")
+  else
+  {
+    data.email = userInfoData.value.email
+    deleteUserPwConfirmMutate(data,{
+      onSuccess(){
+        deleteUserMutate(undefined,{
+          onSuccess(){
+            push({name:'Main'})
+            setTimeout(() => {
+              toast.success("A felhasználó törölve lett!")
+            }, 100)
+          },
+          onError(){
+            toast.error("Valami hiba történt kérlek próbáld újra!")
+          }
+        })
+      },
+      onError(error){
+        toast.error("Hibás jelszó!")
+      }
+    })
+  }
 }
 
 const handleAllergiesChange = (algs: allergies) => {
   updateAllergies(algs,{
     onSuccess(){
-      toast.success("Sikeres módosítás!");
+      toast.success("Sikeres módosítás!")
     },
     onError(err){
-      toast.error("Valami hiba történt kérlek próbáld újra!");
+      toast.error("Valami hiba történt kérlek próbáld újra!")
     }
   })
 }
@@ -155,7 +184,7 @@ watch(() => userInfoData.value, (newUserData) => {
       
         <v-card class="order-info">
           <v-card-title><b>Rendelési előzmények:</b></v-card-title>
-          <v-dialog style="background-color: rgba(0, 0, 0, 0.7);" @click:outside="">
+          <v-dialog style="background-color: rgba(0, 0, 0, 0.6);" @click:outside="">
             <!-- RENDELÉSI ELŐZMÉNY GOMB -->
             <template v-slot:activator="{ props: activatorProps }">
               <div style="text-align: center; width: 100%;">
@@ -168,8 +197,8 @@ watch(() => userInfoData.value, (newUserData) => {
             </template>
             <!-- RENDELÉSI ELŐZMÉNY MODAL -->
             <template v-slot:default="{ isActive }">
-              <v-card style="width: 100%; margin: auto;max-width:1250px; background-color: rgba(255, 255, 255, .7);">
-                <v-toolbar title="Rendelések" color="#B71C1C" style="height: auto; text-align: center; color: black; position: sticky; top: 0; z-index: 10; box-shadow: 0 5px 15px -3px black,  0 5px 15px -3px  black inset; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
+              <v-card style="width: 100%; margin: auto;max-width:1250px; background-color: rgba(255, 255, 255, .9);  box-shadow: 0 0 10px 5px black;">
+                <v-toolbar title="Rendelések" color="#B71C1C" style="height: auto; text-align: center; color: black; position: sticky; top: 0; z-index: 10; box-shadow: 0 5px 15px -3px black,  0 5px 15px -3px  black inset; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; box-shadow: 0 0 10px .5px black; ">
                   <v-btn
                   @click="isActive.value = false"
                   style="color: black; "><v-icon>mdi-close</v-icon></v-btn>
@@ -243,23 +272,32 @@ watch(() => userInfoData.value, (newUserData) => {
             </template>
             <!-- FELHNÉV MÓDOSÍTÁS MODAL -->
             <template v-slot:default="{ isActive }">
-              <v-card>
+              <v-card style="width: 100%; margin: auto;max-width:500px; background-color: rgba(255, 255, 255, .9);  box-shadow: 0 0 10px 5px black;">
                 <v-toolbar title="Felhasználónév változtatás" style="height: auto; text-align: center; background: linear-gradient(to right, black, rgb(183, 28, 28), black); color: white;"></v-toolbar>
                 <v-card-text class="text-h4 pa-12" style="background-color: whitesmoke;">
                   <v-text-field v-model="ChangeUserNameRef.userName" label="Új Felhasználónév" variant="outlined" class="field"></v-text-field>
-                  <v-text-field v-model="ChangeUserNameRef.password" label="Jelszó" variant="outlined" class="field" type="password"></v-text-field>
+                  <v-text-field class="field"
+                    v-model="ChangeUserNameRef.password"
+                    label="Jelszó"
+                    variant="outlined"
+                    :type="showPassword ? 'text' : 'password'"
+                    :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    @click:append-inner="showPassword = !showPassword"
+                  ></v-text-field>
                 </v-card-text>
                 
-                <v-card-actions class="justify-end" style="height: auto; background: linear-gradient(to right, black, rgb(183, 28, 28), black);">
+                <v-card-actions style="display: flex; justify-content: space-between; height: auto; background-color: whitesmoke; border-top: 2px solid black; width: 95%; margin: auto;">
                   <v-btn
-                  text="MEGERŐSÍTÉS"
-                  @click="handleUserNameChange(ChangeUserNameRef)"
-                  style="color: whitesmoke; font-size: 1vw;"
-                  ></v-btn>
-                  <v-btn
+                  color="error"
                   text="Bezárás"
                   @click="isActive.value = false"
-                  style="color: whitesmoke; font-size: 1vw; text-align: end;"
+                  style="font-size: clamp(.6rem, 1.4dvw, 1rem); font-weight: bold;"
+                  ></v-btn>
+                  <v-btn
+                  color="success"
+                  text="Megerősítés"
+                  @click="handleUserNameChange(ChangeUserNameRef)"
+                  style="font-size: clamp(.6rem, 1.4dvw, 1rem); font-weight: bold;"
                   ></v-btn>
                   
                 </v-card-actions>
@@ -291,19 +329,24 @@ watch(() => userInfoData.value, (newUserData) => {
             </template>
             <!-- USER TÖRLÉS MODAL -->
             <template v-slot:default="{ isActive }">
-              <v-card>
-                <v-card-title>Biztos törölni akarod a felhasználódat? A művelet nem visszafordítható!</v-card-title>
-                
-                <v-card-actions class="justify-end" style="height: auto; background: linear-gradient(to right, black, rgb(183, 28, 28), black);">
+              <v-card style="width: 100%; margin: auto;max-width:750px; background-color: rgba(255, 255, 255, .9);  box-shadow: 0 0 10px 5px black;">
+                <div style="padding: 2.5%; text-align: center;">
+                  <v-card-title class="multiline-text">Biztos törölni akarod a felhasználódat?</v-card-title>
+                  <v-card-title class="multiline-text" style="color: red; text-shadow: 0 1px 1px black;"><b>A művelet nem visszafordítható!</b></v-card-title>
+                  <v-text-field v-model="DeleteUserDataRef.password" label="Jelszó" type="password" variant="outlined" class="field pt-4" style="width: 50%; margin: auto;"></v-text-field>
+                </div>
+                <v-card-actions style="display: flex; justify-content: space-between; height: auto; background-color: whitesmoke; border-top: 2px solid black; width: 95%; margin: auto;">
                   <v-btn
-                  text="MEGERŐSÍTÉS"
-                  @click="handleDeleteUser()"
-                  style="color: whitesmoke; font-size: 1vw;"
-                  ></v-btn>
-                  <v-btn
+                  color="error"
                   text="Bezárás"
                   @click="isActive.value = false"
-                  style="color: whitesmoke; font-size: 1vw; text-align: end;"
+                  style="font-size: clamp(.6rem, 1.4dvw, 1rem); font-weight: bold;"
+                  ></v-btn>
+                  <v-btn
+                  class="delete-button"
+                  color="success"
+                  text="Megerősités"
+                  @click="handleDeleteUser(DeleteUserDataRef)"
                   ></v-btn>
                   
                 </v-card-actions>
@@ -434,9 +477,25 @@ watch(() => userInfoData.value, (newUserData) => {
   box-shadow: 0 0 4px 2px black;
 }
 
+.delete-button{
+  font-size: clamp(.6rem, 1.4dvw, 1rem);
+  font-weight: bold;
+}
+
+.delete-button:hover{
+  animation: warn 1.5s ease-in-out infinite;
+  color: red !important;
+}
+
 @keyframes fade {
   0%   { opacity:0.01; }
   100% { opacity:1; }
+}
+
+@keyframes warn {
+  0% { transform: scale(1);}
+  50% { transform: scale(1.25);}
+  100% { transform: scale(1);}
 }
 
 @media only screen and (max-width: 800px) {
