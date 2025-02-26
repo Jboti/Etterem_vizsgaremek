@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Security.Policy;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -33,6 +35,8 @@ namespace EtteremSideApp
         public static string adminName = "---";
         public string[] allCategories = new string[] { "Kebab wrap", "Kebab box", "Kebab tál", "Köret", "Üdítő" }; // ehhez kell majd egy get-all-categories endpoint
         public string currentIMGBlob = "empty";
+        public Image selectedNewIMG = null;
+        public Image selectedUpdateIMG = null;
 
         public static List<FullUser> selectedUsers = new List<FullUser>(); // user edit keresési részéhez tartozik
         public static FullUser selectedUser;
@@ -837,6 +841,8 @@ public Form1()
         {
             //Kijelentkezés
             //minden panel hátra küld + hide
+            selectedNewIMG = null;
+            selectedUpdateIMG = null;
 
             panel2.SendToBack();
             panel3.SendToBack();
@@ -1489,8 +1495,7 @@ public Form1()
                     openFileDialog.Filter = "PNG fájlok (*.png)|*.png";
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        // A kiválasztott fájl elérési útja: openFileDialog.FileName
-                        // Itt lehet kezelni a kiválasztott képet
+                        selectedNewIMG = new Bitmap(openFileDialog.FileName);
                     }
                 }
             };
@@ -1550,7 +1555,7 @@ public Form1()
 
         private void NewProductSaveButton_Click()
         {
-            currentIMGBlob = "wadwdawd";
+            currentIMGBlob = ConvertImageToBase64(selectedNewIMG);
             if (EmptyCheckNewProduct())
             {
                 List<(string, int)> cutomisations = new List<(string, int)>();
@@ -1558,11 +1563,29 @@ public Form1()
 
                 ReadNewProductOptionsDataFromDataGridView(ref cutomisations, ref sauces);
 
-                CreateNewProductRequest(nameTextBox.Text, Convert.ToInt32(priceNumericUpDown.Value), cutomisations, sauces, descriptionTextBox.Text, typeComboBox.SelectedItem.ToString(), "img", glutenCheckBox.Checked, lactoseCheckBox.Checked, eggCheckBox.Checked, nutsCheckBox.Checked);
+                CreateNewProductRequest(nameTextBox.Text, Convert.ToInt32(priceNumericUpDown.Value), cutomisations, sauces, descriptionTextBox.Text, typeComboBox.SelectedItem.ToString(), currentIMGBlob, glutenCheckBox.Checked, lactoseCheckBox.Checked, eggCheckBox.Checked, nutsCheckBox.Checked);
             }
             else
             {
                 MessageBox.Show("Nem hagyhat üres mezőket");
+            }
+        }
+        private string ConvertImageToBase64(Image image)
+        {
+            try 
+            { 
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    byte[] imageBytes = ms.ToArray();
+                    return Convert.ToBase64String(imageBytes);
+                }
+            
+            }
+            catch 
+            {
+                MessageBox.Show("Nem töltött fel képet!");
+                return null;
             }
         }
 
@@ -1608,44 +1631,32 @@ public Form1()
             }
         }
 
-        private async void CreateNewProductRequest(string givenName, int givenPrice, List<(string,int)> givenCustomizationOptions, List<string> givenSauceOptions, string givenDescription, string givenType, string givenIMGblob, bool givenGluten, bool givenLactose, bool givenEgg, bool givenNuts)
+        private async void CreateNewProductRequest(string givenName, int givenPrice, List<(string, int)> givenCustomizationOptions, List<string> givenSauceOptions, string givenDescription, string givenType, string givenIMGblob, bool givenGluten, bool givenLactose, bool givenEgg, bool givenNuts)
         {
-            MessageBox.Show(givenName + "\n" + givenPrice.ToString() + "\n" + givenCustomizationOptions.Count.ToString() + "\n" + givenSauceOptions.Count.ToString() + "\n" + givenDescription + "\n" + givenType + "\n" + givenIMGblob + " \n" + givenGluten.ToString() + " " + givenLactose.ToString() + " " + givenEgg.ToString() + " " + givenNuts.ToString());
-
-            var d1 = JsonSerializer.Serialize(
-                givenCustomizationOptions.Select(option => new { name = option.Item1, price = option.Item2 })
-            );
-
-            var d2 = JsonSerializer.Serialize(
-                givenSauceOptions.Select(sauce => new { name = sauce })
-            );
-
-            string url = "http://localhost:3000/api/v1/create-new-dish";
-
-
-            var data = new List<KeyValuePair<string, string>>
+            var product = new
             {
-                new KeyValuePair<string, string>("name", givenName),
-                new KeyValuePair<string, string>("price", Convert.ToString(givenPrice)),
-                new KeyValuePair<string, string>("sauceOptions", d2),
-                new KeyValuePair<string, string>("customizationOptions", d1), 
-                new KeyValuePair<string, string>("description", givenDescription),
-                new KeyValuePair<string, string>("type", givenType),
-                new KeyValuePair<string, string>("image", givenIMGblob), //ide kell még cucc hehe
-                new KeyValuePair<string, string>("gluten",givenGluten.ToString().ToLower()),
-                new KeyValuePair<string, string>("lactose",givenLactose.ToString().ToLower()),
-                new KeyValuePair<string, string>("egg",givenEgg.ToString().ToLower()),
-                new KeyValuePair<string, string>("nuts",givenNuts.ToString().ToLower()),
+                name = givenName,
+                price = givenPrice,
+                customizationOptions = givenCustomizationOptions.Select(option => new { name = option.Item1, price = option.Item2 }),
+                sauceOptions = givenSauceOptions,
+                description = givenDescription,
+                type = givenType,
+                image = givenIMGblob,
+                gluten = givenGluten,
+                lactose = givenLactose,
+                egg = givenEgg,
+                nuts = givenNuts
             };
 
-            MessageBox.Show(d1);
-            MessageBox.Show(d2);
+            string jsonData = JsonSerializer.Serialize(product);
+
+            string url = "http://localhost:3000/api/v1/create-new-dish";
 
             try
             {
                 using (var client = new HttpClient())
                 {
-                    var content = new FormUrlEncodedContent(data);
+                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
                     HttpResponseMessage response = await client.PostAsync(url, content);
 
                     if (response.IsSuccessStatusCode)
@@ -1665,6 +1676,7 @@ public Form1()
             }
         }
 
+
         private void toolStripLabel9_Click(object sender, EventArgs e)
         {
             var modifications = new List<(string, int, bool)>
@@ -1672,7 +1684,6 @@ public Form1()
                 ("", 0, false),
             };
 
-            //Image image = Image.FromFile("C:\\Users\\xboxh\\Pictures\\2024-04-29\\001.jpg");
 
             var menuItem = new MenuItem(
                 id:0,
