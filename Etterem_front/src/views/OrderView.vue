@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useValidateToken } from '@/api/auth/authQuery';
 import type { placeOrderData } from '@/api/menuItems/items';
-import { usePlaceOrder } from '@/api/user/userQuery';
+import { useGetUserInfo, usePlaceOrder } from '@/api/user/userQuery';
 import { useCartStore } from '@/stores/cartStore';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -13,11 +13,14 @@ const notify = () => {}
 const { push } = useRouter()
 const cartStore = useCartStore()
 const { isError, mutate: validateToken } = useValidateToken()
+const { data: userInfoData } = useGetUserInfo()
 const { mutate, isPending } = usePlaceOrder()
 const categoryOrder = ['Wrap', 'Kebab', 'Drink']
-const isModalOpen = ref(false)
-const takeAway = ref(false)
-const message = ref("")
+const isModalOpen = ref<boolean>(false)
+const takeAway = ref<boolean>(false)
+const usePoints = ref<boolean>(false)
+const pointsUsed = ref<number>(0)
+const message = ref<string>("")
 
 const openModal = () => {
     isModalOpen.value = true 
@@ -62,7 +65,8 @@ function placeOrder() {
     takeAway: takeAway.value,
     dishIds: [],
     dishAmounts: [],
-    dishCustomizations: []
+    dishCustomizations: [],
+    pointsUsed: pointsUsed.value
   })
 
   for (let i = 0; i < cartStore.items.length; i++) {
@@ -73,8 +77,8 @@ function placeOrder() {
   }
   mutate(placeOrderDataRef.value,{
     onSuccess(data) {
+      push({name:"order-placed",params:{id:data.id, price: (cartStore.totalPrice-pointsUsed.value)}})
       cartStore.clearCart()
-      push({name:"order-placed",params:{id:data.id}})
       setTimeout(() => 
         toast.success("Rendelés leadva!")
       ,100)
@@ -157,7 +161,21 @@ watch(isError, () => {})
       <v-divider class="mb-6 border-opacity-50"></v-divider>
       <v-textarea v-model="message" label="Megjegyzés" style=" width: 90%; margin: auto;" variant="solo-filled" clearable auto-grow ></v-textarea>
       <v-checkbox v-model="takeAway" label="Elvitel (+100 Ft)" color="success" style="width: 92.5%; margin: auto;" @change="takeAway ? cartStore.totalPrice += 100 : cartStore.totalPrice -= 100"></v-checkbox>
-      <v-card-title style="width: 100%; text-align: center;">Végösszeg: {{cartStore.totalPrice}} Ft</v-card-title>
+      <v-checkbox v-model="usePoints" label="Pont beváltás" color="success" style="width: 92.5%; margin: auto;" @change="!usePoints ? pointsUsed = 0 : pointsUsed"></v-checkbox>
+      <div v-if="usePoints"  style="width: 92.5%; margin: auto;">
+        <v-card-title>Pontok: {{ userInfoData.points }}</v-card-title>
+        <v-number-input
+          style=" width: 50%; margin: 1%;"
+          control-variant="stacked"
+          v-model="pointsUsed"
+          :max="Math.min(cartStore.totalPrice, userInfoData.points)"
+          :min="0"
+          :step="5"
+          @onchange="pointsUsed ? pointsUsed : 0"
+          ></v-number-input>
+      </div>
+      <v-card-title style="width: 100%; text-align: center;" v-if="usePoints">Végösszeg: {{cartStore.totalPrice - pointsUsed}} Ft</v-card-title>
+      <v-card-title style="width: 100%; text-align: center;" v-else>Végösszeg: {{cartStore.totalPrice}} Ft</v-card-title>
       <v-divider class="border-opacity-50"></v-divider>
       <v-card-actions style="display: flex;">
         <v-btn color="red" @click="closeModal" style="width: 25%;"><b>Vissza</b></v-btn>

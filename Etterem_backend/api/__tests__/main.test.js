@@ -249,6 +249,7 @@ describe("Controller tesztek", ()=>
               id:1,
               timestamp: new Date().toISOString(),
               created: new Date().toISOString().split("T")[0],
+              allergenables: new Array(),
               userName: "mockUserName",
               fullName: "Mock FullName",
               email: "mock@example.com",
@@ -266,6 +267,7 @@ describe("Controller tesztek", ()=>
           expect(receivedUser.get({ plain: true }))
           .toEqual({
             id:mockUser.id,
+            allergenables:mockUser.allergenables,
             created:mockUser.created,
             userName:mockUser.userName,
             fullName:mockUser.fullName,

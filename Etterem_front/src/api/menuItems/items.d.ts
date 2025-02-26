@@ -38,5 +38,6 @@ export type placeOrderData = {
     takeAway: boolean,
     dishIds:number[],
     dishAmounts:number[],
-    dishCustomizations:string[]
+    dishCustomizations:string[],
+    pointsUsed: number
 }

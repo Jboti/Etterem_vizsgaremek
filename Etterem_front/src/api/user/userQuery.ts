@@ -5,6 +5,8 @@ import type { ChangeUserName } from "../auth/auth"
 import { useRouter } from "vue-router"
 import type { placeOrderData } from "../menuItems/items"
 import queryClient from "@/lib/queryClient"
+import type { allergies, DeleteUserData } from "./user"
+import type { AxiosResponse } from "axios"
 
 
 const getToken = () =>{
@@ -106,7 +108,75 @@ export const usePlaceOrder = () => {
     return useMutation({
         mutationFn:PlaceOrder,
         onSuccess(){
-            queryClient.removeQueries({ queryKey: [QUERY_KEYS.userPurchases] })
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.userPurchases] })
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.user] })
+        }
+    })
+}
+
+const updateAllergies = async ( data:allergies ) => {
+    const token = getToken()
+    let config = {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+    }
+    const response = await axiosClient.patch("http://localhost:3000/api/v1/update-allergies", data, config)
+    return response.data
+}
+
+export const useUpdateAllergies = () => {
+    return useMutation({
+        mutationFn:updateAllergies,
+        onSuccess(){
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.user] })
+        },
+        onError(err){
+            console.log(err)
+        }
+    })
+}
+
+const deleteUserPwConfirm = async (data: DeleteUserData) =>
+{
+    const token = getToken()
+    let config = {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    }
+    const response = axiosClient.post("http://localhost:3000/api/v1/delete-user-password-check",data, config)
+    return response
+}
+    
+export const useDeleteUserPwConfirm = () => {
+    return useMutation({
+        mutationFn:deleteUserPwConfirm,
+    })
+}
+
+const deleteUser = async () : Promise<AxiosResponse> =>
+{
+    const token = getToken()
+    let config = {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+    }
+    const response = axiosClient.delete("http://localhost:3000/api/v1/delete-user", config)
+    return response
+}
+
+export const useDeleteUser = () => {
+    return useMutation({
+        mutationFn:deleteUser,
+        onSuccess(){
+            document.cookie = "token=; path=/;"
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.user] })
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.userPurchases] })
+        },
+        onError(err){
+            console.log(err)
         }
     })
 }

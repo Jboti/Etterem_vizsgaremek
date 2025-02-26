@@ -1,13 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
+using System.Security.Policy;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static EtteremSideApp.Form1;
 
 //csak C:-n lehet futtatni!!
 
@@ -29,6 +34,9 @@ namespace EtteremSideApp
         public static bool adminLoggedIn = false;
         public static string adminName = "---";
         public string[] allCategories = new string[] { "Kebab wrap", "Kebab box", "Kebab tál", "Köret", "Üdítő" }; // ehhez kell majd egy get-all-categories endpoint
+        public string currentIMGBlob = "empty";
+        public Image selectedNewIMG = null;
+        public Image selectedUpdateIMG = null;
 
         public static List<FullUser> selectedUsers = new List<FullUser>(); // user edit keresési részéhez tartozik
         public static FullUser selectedUser;
@@ -40,17 +48,39 @@ namespace EtteremSideApp
         public FlowLayoutPanel panel3 = new FlowLayoutPanel();
         public FlowLayoutPanel panel4 = new FlowLayoutPanel();
 
+
         public ListBox resultsListBoxUser;
         public TextBox searchTextBoxUser;
 
+        //user edit felület részei
         public ListBox resultsListBoxDish;
         public TextBox searchTextBoxDish;
+        public TextBox idTextBox;
+        public TextBox usernameTextBox;
+        public TextBox fullNameTextBox;
+        public TextBox emailTextBox;
+        public NumericUpDown pointsNumericUpDown;
+        public RadioButton adminYesRadioButton;
+        public RadioButton adminNoRadioButton;
+        public RadioButton ActiveYesRadioButton;
+        public RadioButton ActiveNoRadioButton;
+
+        //uj termek mododsítása
+        public TextBox nameTextBox;
+        public NumericUpDown priceNumericUpDown;
+        public DataGridView optionsDataGridView;
+        public CheckBox glutenCheckBox;
+        public CheckBox lactoseCheckBox;
+        public CheckBox eggCheckBox;
+        public CheckBox nutsCheckBox;
+        public TextBox descriptionTextBox;
+        public ComboBox typeComboBox;
+        public Button imageButton;
 
 
+//------Global values------\\
 
-        //------Global values------\\
-
-        public Form1()
+public Form1()
         {
             InitializeComponent();
         }
@@ -733,11 +763,14 @@ namespace EtteremSideApp
         {
             if (adminLoggedIn)
             {
+                toolStripSeparator3.Visible = false;
                 toolStripSeparator4.Visible = true;
                 toolStripSeparator5.Visible = true;
                 toolStripSeparator6.Visible = true;
                 toolStripSeparator7.Visible = true;
 
+
+                toolStripLabel3.Visible = false; //ne legyen bejelentkezés gomb amíg be van jelentkezve valaki
                 toolStripLabel6.Visible = true;
                 toolStripLabel7.Visible = true;
                 toolStripLabel8.Visible = true;
@@ -747,11 +780,13 @@ namespace EtteremSideApp
             }
             else
             {
+                toolStripSeparator3.Visible = true;
                 toolStripSeparator4.Visible = false;
                 toolStripSeparator5.Visible = false;
                 toolStripSeparator6.Visible = false;
                 toolStripSeparator7.Visible = false;
 
+                toolStripLabel3.Visible = true;
                 toolStripLabel6.Visible = false;
                 toolStripLabel7.Visible = false;
                 toolStripLabel8.Visible = false;
@@ -759,7 +794,6 @@ namespace EtteremSideApp
 
                 adminName = "---";
                 toolStripLabel5.Text = adminName;
-
             }
         }
 
@@ -807,6 +841,8 @@ namespace EtteremSideApp
         {
             //Kijelentkezés
             //minden panel hátra küld + hide
+            selectedNewIMG = null;
+            selectedUpdateIMG = null;
 
             panel2.SendToBack();
             panel3.SendToBack();
@@ -873,7 +909,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 60),
                 AutoSize = true
             };
-            TextBox idTextBox = new TextBox
+            idTextBox = new TextBox
             {
                 Location = new Point(150, 58),
                 Width = 210,
@@ -887,7 +923,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 100),
                 AutoSize = true
             };
-            TextBox usernameTextBox = new TextBox
+            usernameTextBox = new TextBox
             {
                 Location = new Point(150, 98),
                 Width = 210,
@@ -900,7 +936,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 140),
                 AutoSize = true
             };
-            TextBox fullNameTextBox = new TextBox
+            fullNameTextBox = new TextBox
             {
                 Location = new Point(150, 138),
                 Width = 210,
@@ -913,7 +949,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 180),
                 AutoSize = true
             };
-            TextBox emailTextBox = new TextBox
+            emailTextBox = new TextBox
             {
                 Location = new Point(150, 178),
                 Width = 210,
@@ -926,7 +962,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 220),
                 AutoSize = true
             };
-            NumericUpDown pointsNumericUpDown = new NumericUpDown
+            pointsNumericUpDown = new NumericUpDown
             {
                 Location = new Point(150, 218),
                 Width = 100,
@@ -948,7 +984,7 @@ namespace EtteremSideApp
                 Size = new Size(150, 20),
             };
 
-            RadioButton adminYesRadioButton = new RadioButton
+            adminYesRadioButton = new RadioButton
             {
                 Text = "Igen",
                 Location = new Point(0, 0),
@@ -956,7 +992,7 @@ namespace EtteremSideApp
                 Checked = admin,
             };
 
-            RadioButton adminNoRadioButton = new RadioButton
+            adminNoRadioButton = new RadioButton
             {
                 Text = "Nem",
                 Location = new Point(70, 0),
@@ -981,7 +1017,7 @@ namespace EtteremSideApp
                 Size = new Size(150, 20),
             };
 
-            RadioButton ActiveYesRadioButton = new RadioButton
+            ActiveYesRadioButton = new RadioButton
             {
                 Text = "Igen",
                 Location = new Point(0, 0),
@@ -989,7 +1025,7 @@ namespace EtteremSideApp
                 Checked = active,
             };
 
-            RadioButton ActiveNoRadioButton = new RadioButton
+            ActiveNoRadioButton = new RadioButton
             {
                 Text = "Nem",
                 Location = new Point(70, 0),
@@ -1090,59 +1126,105 @@ namespace EtteremSideApp
             panel2.Controls.Add(resultsPanel);
         }
 
-
         private void DeleteButton_Click(object sender, EventArgs e)
         {
             //kiüríti a mezőket
             CreateUserControl(0, null, null, null, 0, false, false);
         }
 
-        private void SaveButton_Click(object sender, EventArgs e)
+        private async void SaveButton_Click(object sender, EventArgs e)
         {
-            //menti a módosításokat
+            // Extract username from adminName using the "Név:" keyword.
+            string input = adminName;
+            string keyword = "Név: ";
+            int startIndex = input.IndexOf(keyword);
+            string username = "";
 
-            //ide kell megírni azt hogy feltöltse az új adatokat
-            postUserModifications(selectedUser.Username, selectedUser.FullName, selectedUser.Email, selectedUser.points, selectedUser.isAdmin, selectedUser.isActive);
+            if (startIndex != -1)
+            {
+                username = input.Substring(startIndex + keyword.Length).Trim();
+            }
+
+            // Flag to determine if logout should occur.
+            bool logoutAfterUpdate = false;
+
+            // If the admin is modifying their own account.
+            if (selectedUser.Username == username)
+            {
+                DialogResult result = MessageBox.Show(
+                    "Ön magát fogja módosítani, a módosítások után újra be kell jelentkezzen!",
+                    "Megerősítés",
+                    MessageBoxButtons.OKCancel,
+                    MessageBoxIcon.Warning
+                );
+
+                if (result != DialogResult.OK)
+                {
+                    return; // Kilépünk, ha a felhasználó a "Mégse" gombot választja.
+                }
+                // Set flag to logout after modifications.
+                logoutAfterUpdate = true;
+            }
+
+
+            // Execute modifications.
+
+            postUserModifications(Convert.ToInt32(idTextBox.Text.Trim()), usernameTextBox.Text.Trim(), fullNameTextBox.Text.Trim(), emailTextBox.Text.Trim(), Convert.ToInt32(pointsNumericUpDown.Value), adminYesRadioButton.Checked, ActiveYesRadioButton.Checked);
             CreateUserControl(0, null, null, null, 0, false, false);
+
+            if (logoutAfterUpdate)
+            {
+                panel2.SendToBack();
+                panel3.SendToBack();
+                panel4.SendToBack();
+
+                adminLoggedIn = false;
+                ShowAdminButtons();
+            }
         }
 
-        private /*async*/ void postUserModifications(string givenUsername, string givenFullname, string givenEmail, int givenPoints, bool givenisAdmin,bool givenisActive)
+
+
+        private async void postUserModifications(int givenID, string givenUsername, string givenFullname, string givenEmail, int givenPoints, bool givenisAdmin, bool givenisActive)
         {
+            //MessageBox.Show(givenUsername + " " + givenFullname + " " + givenEmail + " " + givenPoints.ToString() + " " + givenisAdmin.ToString() + " " + givenisActive.ToString());
 
-            MessageBox.Show(givenUsername + " " + givenFullname + " " + givenEmail + " " + Convert.ToString(givenPoints) + " " + Convert.ToString(givenisAdmin) + " " + Convert.ToString(givenisActive));
+            string url = "http://localhost:3000/api/v1/admin-user-modify";
+            var credentials = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("id", givenID.ToString()),
+                new KeyValuePair<string, string>("username", givenUsername),
+                new KeyValuePair<string, string>("fullname", givenFullname),
+                new KeyValuePair<string, string>("email", givenEmail),
+                new KeyValuePair<string, string>("points", givenPoints.ToString()),
+                new KeyValuePair<string, string>("isAdmin", givenisAdmin.ToString().ToLower()),
+                new KeyValuePair<string, string>("isActive", givenisActive.ToString().ToLower())
+            };
 
-            //string url = "http://localhost:3000/api/v1/post-updated-user";
-            //var credentials = new List<KeyValuePair<string, string>>
-            //{
-            //    new KeyValuePair<string, string>("id", null),
-            //    new KeyValuePair<string, string>("username", givenUsername),
-            //    new KeyValuePair<string, string>("fullname", givenFullname),
-            //    new KeyValuePair<string, string>("email", givenEmail),
-            //    new KeyValuePair<string, string>("points", Convert.ToString(givenPoints)),
-            //    new KeyValuePair<string, string>("isAdmin", Convert.ToString(givenisAdmin)),
-            //    new KeyValuePair<string, string>("isActive", Convert.ToString(givenisActive)),
-            //};
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var content = new FormUrlEncodedContent(credentials);
+                    HttpResponseMessage response = await client.PutAsync(url, content);
 
-            //try
-            //{
-            //    using (var client = new HttpClient())
-            //    {
-            //        var content = new FormUrlEncodedContent(credentials);
-
-            //        HttpResponseMessage response = await client.PostAsync(url, content);
-            //        if (response.IsSuccessStatusCode)
-            //        {
-            //            string responseBody = await response.Content.ReadAsStringAsync();
-            //        }
-            //        else
-            //        {
-            //        }
-            //    }
-            //}
-            //catch
-            //{
-            //}
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show("Sikeres mentés.");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Hiba történt a mentés során 1: " + response.StatusCode);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hiba történt a mentés során 2: " + ex.Message);
+            }
         }
+
 
         private async void SearchButton_Click(object sender, EventArgs e)
         {
@@ -1210,15 +1292,13 @@ namespace EtteremSideApp
         private void toolStripLabel8_Click(object sender, EventArgs e)
         {
             //Új termék
-
-
             panel3.Visible = true;
             panel3.Dock = DockStyle.Fill;
             panel3.FlowDirection = FlowDirection.LeftToRight;
             panel3.WrapContents = true;
             panel3.Padding = new Padding(20, 20, 20, 200);
             panel3.AutoScroll = true;
-            panel3.BackColor = Color.Blue;
+            panel3.BackColor = backGroundColor;
 
             CreateProductControl();
 
@@ -1232,7 +1312,7 @@ namespace EtteremSideApp
 
             Panel centralPanel = new Panel
             {
-                Size = new Size(500, 600),
+                Size = new Size(520, 650), // increased height to accommodate new checkboxes
                 BorderStyle = BorderStyle.FixedSingle,
                 BackColor = Color.LightGray,
             };
@@ -1243,7 +1323,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 20),
                 AutoSize = true
             };
-            TextBox nameTextBox = new TextBox
+            nameTextBox = new TextBox
             {
                 Location = new Point(150, 18),
                 Width = 300
@@ -1255,7 +1335,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 60),
                 AutoSize = true
             };
-            NumericUpDown priceNumericUpDown = new NumericUpDown
+            priceNumericUpDown = new NumericUpDown
             {
                 Location = new Point(150, 58),
                 Width = 100,
@@ -1270,7 +1350,7 @@ namespace EtteremSideApp
                 Location = new Point(20, 100),
                 AutoSize = true
             };
-            DataGridView optionsDataGridView = new DataGridView
+            optionsDataGridView = new DataGridView
             {
                 Location = new Point(150, 98),
                 Width = 300,
@@ -1307,6 +1387,7 @@ namespace EtteremSideApp
                     optionsDataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
                 }
             };
+
             Button addOptionButton = new Button
             {
                 Text = "+",
@@ -1338,15 +1419,43 @@ namespace EtteremSideApp
             toolTip.SetToolTip(addOptionButton, "Sor hozzáadása");
             toolTip.SetToolTip(removeOptionButton, "Kijelölt sor törlése");
 
+            // --- New Checkboxes below the DataGridView ---
+            // Positioning checkboxes in a row under the DataGridView.
+            glutenCheckBox = new CheckBox
+            {
+                Text = "Glutén",
+                Location = new Point(150, 260),
+                AutoSize = true
+            };
+            lactoseCheckBox = new CheckBox
+            {
+                Text = "Laktóz",
+                Location = new Point(240, 260),
+                AutoSize = true
+            };
+            eggCheckBox = new CheckBox
+            {
+                Text = "Tojás",
+                Location = new Point(330, 260),
+                AutoSize = true
+            };
+            nutsCheckBox = new CheckBox
+            {
+                Text = "Magvak",
+                Location = new Point(420, 260),
+                AutoSize = true
+            };
+
+            // Shift description controls downward to avoid overlapping the new checkboxes
             Label descriptionLabel = new Label
             {
                 Text = "Leírás:",
-                Location = new Point(20, 260),
+                Location = new Point(20, 300),
                 AutoSize = true
             };
-            TextBox descriptionTextBox = new TextBox
+            descriptionTextBox = new TextBox
             {
-                Location = new Point(150, 258),
+                Location = new Point(150, 298),
                 Width = 300,
                 Height = 80,
                 Multiline = true
@@ -1355,12 +1464,12 @@ namespace EtteremSideApp
             Label typeLabel = new Label
             {
                 Text = "Típus:",
-                Location = new Point(20, 350),
+                Location = new Point(20, 400),
                 AutoSize = true
             };
-            ComboBox typeComboBox = new ComboBox
+            typeComboBox = new ComboBox
             {
-                Location = new Point(150, 348),
+                Location = new Point(150, 398),
                 Width = 300,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
@@ -1369,13 +1478,13 @@ namespace EtteremSideApp
             Label imageLabel = new Label
             {
                 Text = "Kép:",
-                Location = new Point(20, 390),
+                Location = new Point(20, 440),
                 AutoSize = true
             };
-            Button imageButton = new Button
+            imageButton = new Button
             {
                 Text = "Kép kiválasztása",
-                Location = new Point(150, 388),
+                Location = new Point(150, 438),
                 Width = 150,
                 Height = 30
             };
@@ -1386,8 +1495,7 @@ namespace EtteremSideApp
                     openFileDialog.Filter = "PNG fájlok (*.png)|*.png";
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        // A kiválasztott fájl elérési útja: openFileDialog.FileName
-                        // Itt lehet kezelni a kiválasztott képet
+                        selectedNewIMG = new Bitmap(openFileDialog.FileName);
                     }
                 }
             };
@@ -1395,19 +1503,19 @@ namespace EtteremSideApp
             Button saveButton = new Button
             {
                 Text = "Mentés",
-                Location = new Point(150, 430),
+                Location = new Point(150, 480),
                 Width = 80,
                 Height = 30
             };
             saveButton.Click += (sender, e) =>
             {
-                // save cucc
+                NewProductSaveButton_Click();
             };
 
             Button deleteButton = new Button
             {
                 Text = "Törlés",
-                Location = new Point(240, 430),
+                Location = new Point(240, 480),
                 Width = 80,
                 Height = 30
             };
@@ -1429,6 +1537,10 @@ namespace EtteremSideApp
             centralPanel.Controls.Add(optionsDataGridView);
             centralPanel.Controls.Add(addOptionButton);
             centralPanel.Controls.Add(removeOptionButton);
+            centralPanel.Controls.Add(glutenCheckBox);
+            centralPanel.Controls.Add(lactoseCheckBox);
+            centralPanel.Controls.Add(eggCheckBox);
+            centralPanel.Controls.Add(nutsCheckBox);
             centralPanel.Controls.Add(descriptionLabel);
             centralPanel.Controls.Add(descriptionTextBox);
             centralPanel.Controls.Add(typeLabel);
@@ -1441,16 +1553,137 @@ namespace EtteremSideApp
             panel3.Controls.Add(centralPanel);
         }
 
+        private void NewProductSaveButton_Click()
+        {
+            currentIMGBlob = ConvertImageToBase64(selectedNewIMG);
+            if (EmptyCheckNewProduct())
+            {
+                List<(string, int)> cutomisations = new List<(string, int)>();
+                List<string> sauces = new List<string>();
+
+                ReadNewProductOptionsDataFromDataGridView(ref cutomisations, ref sauces);
+
+                CreateNewProductRequest(nameTextBox.Text, Convert.ToInt32(priceNumericUpDown.Value), cutomisations, sauces, descriptionTextBox.Text, typeComboBox.SelectedItem.ToString(), currentIMGBlob, glutenCheckBox.Checked, lactoseCheckBox.Checked, eggCheckBox.Checked, nutsCheckBox.Checked);
+            }
+            else
+            {
+                MessageBox.Show("Nem hagyhat üres mezőket");
+            }
+        }
+        private string ConvertImageToBase64(Image image)
+        {
+            try 
+            { 
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    byte[] imageBytes = ms.ToArray();
+                    return Convert.ToBase64String(imageBytes);
+                }
+            
+            }
+            catch 
+            {
+                MessageBox.Show("Nem töltött fel képet!");
+                return null;
+            }
+        }
+
+        private void ReadNewProductOptionsDataFromDataGridView(ref List<(string, int)> customisations, ref List<string> sauces)
+        {
+            foreach (DataGridViewRow row in optionsDataGridView.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                string optionName = row.Cells[0].Value?.ToString() ?? "";
+
+                int price = 0;
+                if (row.Cells[1].Value != null)
+                {
+                    int.TryParse(row.Cells[1].Value.ToString(), out price);
+                }
+
+                bool isSauce = false;
+                if (row.Cells[2].Value != null)
+                {
+                    bool.TryParse(row.Cells[2].Value.ToString(), out isSauce);
+                }
+
+                if (isSauce)
+                {
+                    sauces.Add(optionName);
+                }
+                else
+                {
+                    customisations.Add((optionName, price));
+                }
+            }
+        }
+        private bool EmptyCheckNewProduct()
+        {
+            if (nameTextBox.Text.Length == 0 || priceNumericUpDown.Value == null || typeComboBox.SelectedIndex == -1 || currentIMGBlob == "empty")
+            {
+                return false;
+            }
+            else 
+            {
+                return true;
+            }
+        }
+
+        private async void CreateNewProductRequest(string givenName, int givenPrice, List<(string, int)> givenCustomizationOptions, List<string> givenSauceOptions, string givenDescription, string givenType, string givenIMGblob, bool givenGluten, bool givenLactose, bool givenEgg, bool givenNuts)
+        {
+            var product = new
+            {
+                name = givenName,
+                price = givenPrice,
+                customizationOptions = givenCustomizationOptions.Select(option => new { name = option.Item1, price = option.Item2 }),
+                sauceOptions = givenSauceOptions,
+                description = givenDescription,
+                type = givenType,
+                image = givenIMGblob,
+                gluten = givenGluten,
+                lactose = givenLactose,
+                egg = givenEgg,
+                nuts = givenNuts
+            };
+
+            string jsonData = JsonSerializer.Serialize(product);
+
+            string url = "http://localhost:3000/api/v1/create-new-dish";
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                    HttpResponseMessage response = await client.PostAsync(url, content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show("Sikeres mentés.");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Hiba történt a mentés során 1: " + response.StatusCode);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hiba történt a mentés során 2: " + ex.Message);
+            }
+        }
+
 
         private void toolStripLabel9_Click(object sender, EventArgs e)
         {
-
             var modifications = new List<(string, int, bool)>
             {
                 ("", 0, false),
             };
 
-            //Image image = Image.FromFile("C:\\Users\\xboxh\\Pictures\\2024-04-29\\001.jpg");
 
             var menuItem = new MenuItem(
                 id:0,
@@ -1469,7 +1702,7 @@ namespace EtteremSideApp
             panel4.WrapContents = true;
             panel4.Padding = new Padding(20, 20, 20, 200);
             panel4.AutoScroll = true;
-            panel4.BackColor = Color.Green;
+            panel4.BackColor = backGroundColor;
             this.Controls.Add(panel4);
             panel4.BringToFront();
 
@@ -1886,7 +2119,7 @@ namespace EtteremSideApp
             //var blob = Convert.To
             MessageBox.Show(givenItemName + " " + Convert.ToString(givenPrice) + " " + Convert.ToString(givenAvailable) + " " + givenDescription + " " + givenCategory);
 
-            //string url = "http://localhost:3000/api/v1/post-updated-user";
+            //string url = "http://localhost:3000/api/v1/";
             //var credentials = new List<KeyValuePair<string, string>>
             //{
             //    new KeyValuePair<string, string>("name", givenItemName),
@@ -1916,6 +2149,11 @@ namespace EtteremSideApp
             //catch
             //{
             //}
+        }
+
+
+        private void toolStripLabel10_Click(object sender, EventArgs e)
+        {
         }
 
         public class User
@@ -2038,5 +2276,11 @@ namespace EtteremSideApp
         {
 
         }
+
+        private void toolStripLabel5_Click(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }

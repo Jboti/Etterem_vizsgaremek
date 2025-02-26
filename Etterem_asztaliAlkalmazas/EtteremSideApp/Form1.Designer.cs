@@ -122,6 +122,7 @@
             this.toolStripLabel5.Name = "toolStripLabel5";
             this.toolStripLabel5.Size = new System.Drawing.Size(22, 22);
             this.toolStripLabel5.Text = "---";
+            this.toolStripLabel5.Click += new System.EventHandler(this.toolStripLabel5_Click);
             // 
             // toolStripSeparator4
             // 

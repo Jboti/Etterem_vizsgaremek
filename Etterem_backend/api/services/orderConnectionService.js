@@ -3,9 +3,9 @@ const orderConnectionRepository = require('../repositories/order_connectionRepos
 class OrderConnectionService
 {
 
-    async createPurchaseConnection(uid,purhcase,dishInfo)
+    async createPurchaseConnection(uid,purhcase,dishInfo,pointsUsed)
     {
-        return await orderConnectionRepository.createPurchaseConnection(uid,purhcase,dishInfo)
+        return await orderConnectionRepository.createPurchaseConnection(uid,purhcase,dishInfo,pointsUsed)
     }
 
 }

@@ -1,9 +1,11 @@
+const { where } = require('sequelize')
 const db = require('../db/dbContext')
 
 class order_connectionRepository
 {
     constructor(db)
     {
+        this.sequelize = db.Sequelize
         this.Purchase = db.purchase
         this.OrderConnection = db.orderConnection
         this.User = db.user
@@ -12,7 +14,7 @@ class order_connectionRepository
 
 
 
-    async createPurchaseConnection(uid,purchase,dishInfo)
+    async createPurchaseConnection(uid,purchase,dishInfo,pointsUsed)
     {
         const Purchase = await this.Purchase.create(purchase)
         const con = {
@@ -34,6 +36,18 @@ class order_connectionRepository
             await this.OrderDishConnection.create(dCon);
             //console.log("dcon create ITT---------",this.orderDishConnection.create(dCon));
         }
+        await this.User.update(
+            {
+                points: this.sequelize.literal(`points + ${Math.floor((Purchase.totalPrice-pointsUsed) / 100)}`)
+            },
+            {
+                where:
+                {
+                    id : uid
+                }
+            }
+        )
+        
         return Purchase
     }
 

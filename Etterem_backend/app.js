@@ -24,12 +24,14 @@ const userRoutes = require('./api/routes/userRoutes')
 const purchaseRoutes = require('./api/routes/purchaseRoutes')
 const dishRoutes = require('./api/routes/dishRoutes')
 const testRouter = require('./api/routes/testRouter')
+const allergyRoutes = require('./api/routes/allergyRoutes')
 
 //ROUTES
 
 app.use("/api/v1", userRoutes)
 app.use("/api/v1", purchaseRoutes)
 app.use("/api/v1",dishRoutes)
+app.use("/api/v1",allergyRoutes)
 
 //táblákat feltölti pár alap adattal teszthez, ez majd később törlésre kerül
 app.use("/test-data-create",testRouter)

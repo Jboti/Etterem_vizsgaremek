@@ -15,9 +15,15 @@ Kellő endpointok:
 
 -post-dishmodifications
 	data:
+		// id is !!!4
 	    //    new KeyValuePair<string, string>("name", givenItemName),
             //    new KeyValuePair<string, string>("price", Convert.ToString(givenPrice)),
             //    new KeyValuePair<string, string>("available", Convert.ToString(givenAvailable)),
-            //    new KeyValuePair<string, string>("lista", null), //ez kérdéses hogy oldom meg
+
+		// new KeyValuePair<string, string>("lista", null), //ez kérdéses hogy oldom meg 
+		// sauseOptions jsonba
+		// customizationOptions jsonba
+
             //    new KeyValuePair<string, string>("description", givenDescription),
             //    new KeyValuePair<string, string>("category", givenCategory),
+		// img blob !! 

@@ -9,7 +9,13 @@ export const useCartStore = defineStore('cart', () => {
   let cartId = ref(0)
   
   function addItem(item:cartItem) {
-    const index = items.value.findIndex((Eitem) => Eitem.dishId === item.dishId && Eitem.sause === item.sause && Eitem.options === item.options)
+    const index = items.value.findIndex((Eitem) => {
+      
+      const sortedEitemOptions = Eitem.options.split(',').map(opt => opt.trim()).sort().join(',')
+      const sortedItemOptions = item.options.split(',').map(opt => opt.trim()).sort().join(',')
+      
+      return Eitem.dishId === item.dishId && Eitem.sause === item.sause && sortedEitemOptions === sortedItemOptions
+    })
     if(index !== -1) {
       totalPrice.value += item.price*item.quantity
       items.value[index].quantity += item.quantity
@@ -44,6 +50,52 @@ export const useCartStore = defineStore('cart', () => {
     cartId.value = 0
   }
 
+  function reOrder(purchase: any)
+  {
+    for(let i = 0; i< purchase.order_dishes.length;i++)
+    {
+      if(purchase.order_dishes[i].dish.type == "Drink")
+      {
+        const tempItem:cartItem = {
+          cartId: -1,
+          dishId: purchase.order_dishes[i].dish_id,
+          name: purchase.order_dishes[i].dish.name,
+          price: purchase.order_dishes[i].dish.price+50,
+          sause: purchase.order_dishes[i].customizations.split(',')[0].slice(1),
+          options: purchase.order_dishes[i].customizations.split(',').splice(1).join(',').slice(0,-1),
+          type: purchase.order_dishes[i].dish.type,
+          quantity: purchase.order_dishes[i].amount
+        }
+        addItem(tempItem)
+      }
+      else{
+        let additionalPrice = 0
+        const optionPrices = JSON.parse(purchase.order_dishes[i].dish.customizationOptions)
+        const customizationsMade = purchase.order_dishes[i].customizations.split(',').splice(1).join(',').slice(0,-1).split(',')
+  
+        customizationsMade.forEach((customization:any) => {
+          const option = optionPrices.find((opt:any) => opt.name.replace(/\s/g, '') === customization.replace(/\s/g, ''))
+            if (option) {
+                additionalPrice += option.price
+            }
+        })
+        
+  
+        const tempItem:cartItem = {
+          cartId: -1,
+          dishId: purchase.order_dishes[i].dish_id,
+          name: purchase.order_dishes[i].dish.name,
+          price: purchase.order_dishes[i].dish.price+additionalPrice,
+          sause: purchase.order_dishes[i].customizations.split(',')[0].slice(1),
+          options: purchase.order_dishes[i].customizations.split(',').splice(1).join(',').slice(0,-1),
+          type: purchase.order_dishes[i].dish.type,
+          quantity: purchase.order_dishes[i].amount
+        }
+        addItem(tempItem)
+      }
+    }
+  }
 
-  return { items, totalPrice, totalItems, addItem, removeItem, clearCart}
+
+  return { items, totalPrice, totalItems, addItem, removeItem, clearCart, reOrder}
 })
