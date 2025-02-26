@@ -61,7 +61,7 @@ exports.placeOrder = async (req,res,next) =>
         dishAmounts = dishAmounts.map(amount => Number(amount))
         pointsUsed = Number(pointsUsed)
 
-        if(!id || !totalPrice || !message || !String(takeAway) || !dishIds || !dishAmounts || !dishCustomizations || !pointsUsed){
+        if(!id || !totalPrice || !message || !String(takeAway) || !dishIds || !dishAmounts || !dishCustomizations || !String(pointsUsed)){
             const error = new Error("Missing data in placeOrder")
             error.status = 404
             throw error

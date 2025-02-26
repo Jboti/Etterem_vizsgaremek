@@ -510,7 +510,7 @@ exports.DataCreate = async (req,res,next) =>
 
         for(let i = 0 ; i<uids.length;i++)
         {
-            await order_connectionRepository.createPurchaseConnection(uids[i],purchases[i],dishInfos[i])
+            await order_connectionRepository.createPurchaseConnection(uids[i],purchases[i],dishInfos[i],0)
             
             
         }
