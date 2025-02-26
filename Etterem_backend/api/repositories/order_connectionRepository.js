@@ -21,7 +21,6 @@ class order_connectionRepository
             order_id: Purchase.id,
         }
         await this.OrderConnection.create(con)
-        //console.log("con create ITT---------",con)
         for(let i = 0;i<dishInfo.dishIds.length;i++)
         {            
             const dCon = {

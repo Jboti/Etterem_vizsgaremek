@@ -3,12 +3,10 @@ const request = require("supertest");
 //jest.setTimeout(15000); //evvel tudjuk meghosszabbítani a várási időt, alap 5 mp(5000)
 
 const app = require("../../app");
-
 const dishController = require("../controllers/dishController");
 const purchaseController = require("../controllers/purchaseController");
 const testController = require("../controllers/testController");
 const userController = require("../controllers/userController");
-
 
 jest.mock("../db/dbContext", () => require("../../__mocks__/db"));
 
@@ -25,65 +23,14 @@ describe("Controller tesztek", ()=>
             expect(dishController[keres]).toBeDefined();
         });
         
-        /*describe("dishController tesztek", ()=>{
-            describe("createDish", () => {
-            it("should create a dish successfully when valid data is provided", async () => {
-                const validDish = {
-                    name: "Mockname",
-                    price: 10.99,
-                    customizationOptions: ["Extra cheese", "No garlic"],
-                    description: "Mockdescription",
-                    type: "Mocktype"
-                };
+        jest.mock("../services/dishService");
         
-                const response = await request(app)
-                    .get("/get-dishes")
-                    .send(validDish)
-                    .expect(201); // Ellenőrzi, hogy a válasz státusza 201 (Created)
+        describe("Dish Controller Tests", () => {
         
-                expect(response.body).toHaveProperty("name", "Mockname");
-                expect(response.body).toHaveProperty("price", 10.99);
-                expect(response.body).toHaveProperty("description", "Mockdescription");
-                expect(response.body).toHaveProperty("type", "Mocktype");
-                console.log("Dish created successfully:", response.body);
-            });
-        
-            it("should return an error if required fields are missing", async () => {
-                const invalidDish = {
-                    name: "Burger",
-                    price: 5.99
-                };
-        
-                const response = await request(app)
-                    .get("/get-dishes")
-                    .send(invalidDish)
-                    .expect(404); // Ellenőrzi, hogy a válasz státusza 404 (Nem található)
-        
-                expect(response.text).toBe("Not found");
-            });
+            
         });
+    
 
-        describe("getAllDishes", () => {
-            it("should return all dishes", async () => {
-                const response = await request(app)
-                    .get("/get-dishes")
-                    .expect(200); // Ellenőrzi, hogy a válasz státusza 200 (OK)
-        
-                expect(Array.isArray(response.body)).toBe(true);
-                expect(response.body.length).toBeGreaterThan(0);
-                console.log("All dishes retrieved:", response.body);
-            });
-        
-            it("should return an empty array when no dishes are available", async () => {
-                // Itt egy tesztet adhatsz hozzá arra az esetre, ha nincsenek éttermek (például egy üres adatbázis).
-                const response = await request(app)
-                    .get("/get-dishes")
-                    .expect(200);
-        
-                expect(response.body).toEqual([]);
-            });
-        })
-        })*/
     
         
     
