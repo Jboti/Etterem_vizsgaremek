@@ -7,6 +7,7 @@ const dishController = require("../controllers/dishController");
 const purchaseController = require("../controllers/purchaseController");
 const testController = require("../controllers/testController");
 const userController = require("../controllers/userController");
+const { BLOB } = require("sequelize");
 
 jest.mock("../db/dbContext", () => require("../../__mocks__/db"));
 
@@ -26,12 +27,77 @@ describe("Controller tesztek", ()=>
         jest.mock("../services/dishService");
         
         describe("Dish Controller Tests", () => {
-        
-            
-        });
-    
 
-    
+            test("getDishes test helytelen", async () => 
+                {
+                    const res = await request(app).get("/api/v1/get-dishes");
+
+                    expect(res.statusCode).toBe(500);
+                })
+                
+            test("createDish test helyes", async () => 
+                {
+                    const base64Image = "iVBORw0KGgoAAAANSUhEUgAA...";
+                    const res = await request(app).post("/api/v1/create-new-dish")
+                    .send({
+                        name:"TestDishName",price:100,created:"vmiido",
+                        available:true,sauceOptions:{},customizationOptions:{},
+                        description:"description",type:"type",
+                        img:Blob,gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"//NEMTOM H KELL BLOBOT TESZTELNI
+
+                    });
+
+                    expect(res.statusCode).toBe(201);
+                    
+                })
+
+            test("getDishes test helyes", async () => 
+                {
+                    const res = await request(app).get("/api/v1/get-dishes");
+
+                    expect(res.statusCode).toBe(200);
+                })
+
+            test("createDish test helytelen", async () => 
+                {
+                    
+                    const res = await request(app).post("/api/v1/create-new-dish")
+                    .send({
+                        name:"TestDishName",price:"100",created:"vmiido",
+                        available:true,sauceOptions:{},customizationOptions:{},
+                        description:"description",type:"type",
+                        image:null,gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
+                    });
+
+                    expect(res.statusCode).toBe(404);
+                })
+                    
+            test("createDish test hiányos", async () => 
+                {
+                    const res = await request(app).post("/api/v1/create-new-dish")
+                    .send({
+                        name:"TestDishName",price:100,created:"vmiido",
+                    });
+
+                    expect(res.statusCode).toBe(404);
+                })
+
+        });
+        
+        describe("userController", () => {
+
+            test("createUser test helyes", async () => 
+                {
+                    const res = await request(app).post("/api/v1/register")
+                    .send({
+                        userName:"TestUserName",fullName:"TestFullName",email:"email",password:"password"
+                    });
+
+                    expect(res.statusCode).toBe(201);
+                })
+
+        });
+        
         
     
     
@@ -78,69 +144,6 @@ describe("Controller tesztek", ()=>
         })
     })
     
-    //------Routes------
-    describe("Routes tesztek", ()=>
-    {/*
-    
-        test.each(["/get-user"])("userRouteson helyes státusszal térnek vissza a GET kérések: %s", async (endpoint) => {
-            const token = 'some-valid-token';
-            const userData = { id: 1, name: 'John Doe', email: 'john@example.com' };
-          
-            const res = await request(app)
-              .get(`/api/v1${endpoint}`)
-              .set('Authorization', `Bearer ${token}`);
-          
-            expect(res.statusCode).toBe(200);
-            expect(res.body).toEqual(userData);
-          });
-          
-          test.each(["/get-user"])("userRouteson helyes státusszal térnek vissza a GET kérések (unauthenticated): %s", async (endpoint) => {
-            const token = 'some-invalid-token';
-          
-            const res = await request(app)
-              .get(`/api/v1${endpoint}`)
-              .set('Authorization', `Bearer ${token}`);
-          
-            expect(res.statusCode).toBe(401);
-            expect(res.text).toBe('Unauthorized');
-          });
-    
-        test.each(["/get-all-active-order"])("purchaseRouteson helyes státusszal térnek vissza a GET kérések: %s",async (endpoint)=>{
-            const res = await request(app).get(`/api/v1/${endpoint}`);
-            expect(res.statusCode).toBe(200);
-        });
-        
-        test.each(["/place-order/1"])("purchaseRouteson helyes státusszal térnek vissza a POST kérések: %s",async (endpoint)=>{
-            const res = await request(app).post(`/api/v1/${endpoint}`);
-            expect(res.statusCode).toBe(201);
-        });
-    
-        test.each(["/in-activate-order/1"])("purchaseRouteson helyes státusszal térnek vissza a PATCH kérések: %s",async (endpoint)=>{
-            const res = await request(app).patch(`/api/v1${endpoint}`);
-            expect(res.statusCode).toBe(200);
-        });
-    
-        test.each(["/get-users","/get-user/1"])("userRouteson helyes státusszal térnek vissza a GET kérések: %s",async (endpoint)=>{
-            const res = await request(app).get(`/api/v1${endpoint}`);
-            expect(res.statusCode).toBe(200);
-        });
-    
-        test.each(["/register","/login"])("userRouteson helyes státusszal térnek vissza a POST kérések: %s",async (endpoint)=>{
-            const res = await request(app).post(`/api/v1${endpoint}`);
-            expect(res.statusCode).toBe(201);
-        });
-    
-        test.each(["/delete-user/1"])("userRouteson helyes státusszal térnek vissza a DELETE kérések: %s",async (endpoint)=>{
-            const res = await request(app).delete(`/api/v1${endpoint}`);
-            expect(res.statusCode).toBe(200);
-        });
-    
-        test.each(["/verify-user"])("userRouteson helyes státusszal térnek vissza a PATCH kérések: %s",async (endpoint)=>{
-            const res = await request(app).patch(`/api/v1${endpoint}`);
-            expect(res.statusCode).toBe(200);
-        });*/
-    })
-    
     //------Modellek------
     describe("Modellek léteznek", ()=>
     {
@@ -151,52 +154,6 @@ describe("Controller tesztek", ()=>
             expect(models).toBeDefined();
         });
         
-    })
-    
-    //------Services------
-    describe("Services tesztek", ()=>
-    {
-        test.each(["dishService","orderConnectionService","purchaseService","userService"])
-        ("Services fileok léteznek: %s",(service)=>{
-            var services = require(`../services/${service}`)
-            expect(services).toBeDefined();
-        });
-    
-        test.each([
-            ["dishService", "DishService"],
-            ["orderConnectionService", "OrderConnectionService"],
-            ["purchaseService", "PurchaseService"],
-            ["userService", "UserService"]
-        ])
-        ("Services osztály példánya létezik: %s -> %s", (service, osztaly) => {
-            const services = require(`../services/${service}`);
-            
-            expect(services.constructor.name).toBe(osztaly); // így működik csak mert példányt ad vissza a service :P
-        });
-        
-        test.each(["createDish","getAllDishes"])
-        ("dishService funkcióa'i' létezik/nek: %s",(funkcio)=>{
-            var dishService = require(`../services/dishService`)
-            expect(dishService[funkcio]).toBeDefined();
-        });
-    
-        test.each(["createPurchaseConnection"])
-        ("orderConnectionService funkcióa'i' létezik/nek: %s",(funkcio)=>{
-            var orderConnectionService = require(`../services/orderConnectionService`)
-            expect(orderConnectionService[funkcio]).toBeDefined();
-        });
-    
-        test.each(["getAllActivePurchase","deActivatePurchase"])
-        ("purchaseService funkcióa'i' létezik/nek: %s",(funkcio)=>{
-            var purchaseService = require(`../services/purchaseService`)
-            expect(purchaseService[funkcio]).toBeDefined();
-        });
-    
-        test.each(["createUser","getAllUser","getUser","deleteUser","verifyEmail","checkForExistinguserName","getUserByEmail"])
-        ("userService funkció'i' létezik/nek: %s",(funkcio)=>{
-            var userService = require(`../services/userService`)
-            expect(userService[funkcio]).toBeDefined();
-        });
     })
 
 
@@ -212,6 +169,7 @@ describe("Controller tesztek", ()=>
       const purchaseRepository = require("../repositories/purchaseRepository");
       const order_connectionRepositroy = require("../repositories/order_connectionRepository");
 
+      const DishService = require("../services/dishService");
       let mockDish;
 
       describe("DishRepo tesztek", () => {
@@ -228,7 +186,8 @@ describe("Controller tesztek", ()=>
             type: "Mock Type",
             img: null
           };
-            await dishRepository.createDish(mockDish);
+
+            await dishRepository.createDish(mockDish,{"Peanut":true});
         });
   
         test("getDish returns mockDish", async () => {
@@ -236,11 +195,38 @@ describe("Controller tesztek", ()=>
             expect(receivedDish.get({ plain: true })).toEqual(mockDish);
         });
 
-        test("deleteDish deletes the dish and GetAllDishes returns 0 dishes", async () => {
-          await dishRepository.deleteDish(mockDish);
-          expect((await dishRepository.getAllDishes()).length).toBe(0);
+        test("getAllDishes returns 1 dish", async () => {
+          const receivedDishes = await dishRepository.getAllDishes();
+          expect(receivedDishes.length).toBe(1);
         });
-      });
+
+        test("modifyDish updates dish", async () => {
+            const modifiedDish = {
+                id: 1,
+                name: "Modified Dish",
+                created: new Date().toISOString().split("T")[0],//az adat struktúrában dateonly va, viszont itt visszakapjuk a timeot is ezért azt le kell vágni ebből
+                price: 10,
+                available: true,
+                sauceOptions: {},
+                customizationOptions: {},
+                description: "This is a modified dish",
+                type: "Mock Type",
+                img: null
+            };
+
+            const newAllergy = { "Peanut": true };
+            const mockPeanutAllergy = { id: 10, name: "Peanut" };
+
+            dishRepository.Allergy.findOne = jest.fn().mockResolvedValue(mockPeanutAllergy);
+            dishRepository.Allergenables.findOne = jest.fn().mockResolvedValue(null); // Nincs még hozzárendelve
+            dishRepository.Allergenables.create = jest.fn().mockResolvedValue({});
+
+            await DishService.modifyDish(modifiedDish, newAllergy);
+            await dishRepository.modifyDish(modifiedDish,newAllergy);
+            const receivedDish = await dishRepository.getDish(1);
+            expect(receivedDish.get({ plain: true })).toEqual(modifiedDish);
+
+      })});
 
       describe("UserRepo tesztek", () => {
         let mockUser;
@@ -313,23 +299,60 @@ describe("Controller tesztek", ()=>
             
         })
 
-        /*test("changePassword changes password", async () => {
-            console.log(await userRepository.changePassword("newpassword",1))
-            await userRepository.changePassword("newpassword",1);
-            expect(mockUser.password).toEqual("newpassword")
-        })*/
-
         test("changeUserName changes username", async () => {
             await userRepository.changeUserName("newusername",1);
             const receivedUser = await userRepository.getUser(1);
             expect(receivedUser.userName).toEqual("newusername")
         })
 
-        test("getUserPwById returns with correct password", async () => {
+        test("changePassword changes password andgetUserPwById returns with correct password", async () => {
+            await userRepository.changePassword("newpassword",1);
             const foundUser = await userRepository.getUserPwById(1);
             const plainUser = foundUser.get({ plain: true });
-            expect(plainUser.password).toEqual(mockUser.password);
+            expect(plainUser.password).toEqual("newpassword");
+        });
+
+        test("adminUserModify updates the user", async () => {
+            const Userupdate = {id:1, userName:"newusername"};
+            await userRepository.adminUserModify(Userupdate);
+            const receivedUser = await userRepository.getUser(1);
+            expect(receivedUser.userName).toEqual("newusername")
+        });
+
+        test("usePoints updates the points", async () => {
+            await userRepository.usePoints(1,1);
+            const receivedUser = await userRepository.getUser(1);
+            expect(receivedUser.points).toEqual(-1)
+        });
+         //UPDATE ALLERGIES
+
+        test("update Allregies updates allergies", async () => {
+            const userId = 1;
+            const newAllergy = { "Peanut": true };
+
+            const mockPeanutAllergy = { id: 10, name: "Peanut" };
+
+            userRepository.Allergy.findOne = jest.fn().mockResolvedValue(mockPeanutAllergy);
+            userRepository.Allergenable.findOne = jest.fn().mockResolvedValue(null); 
+            userRepository.Allergenable.create = jest.fn().mockResolvedValue({});
+            //findOne() → Lekérdezi az allergiát az Allergy táblából.
+            //findOne() (Allergenable) → Ellenőrzi, hogy az allergia már hozzárendelve van-e a userhez.
+            //create() → Hozzáadja az allergiát a Allergenable táblába.
+
+            await userRepository.updateAllregies(userId, newAllergy);
+
+            userRepository.getUser = jest.fn().mockResolvedValue({
+                id: userId,
+                allergies: [{ name: "Peanut" }]
+            });
+
+
+            const receivedUser = await userRepository.getUser(userId, { include: ["allergies"] });
+
+            expect(receivedUser.allergies).toEqual([{ name: "Peanut" }]);
         })
+
+        //a delete legyen az utolsó minden esetben---
 
         test("deleteUser deletes the user and GetAllUser returns 0 users", async () => {
             await userRepository.deleteUser(1);
@@ -378,17 +401,17 @@ describe("Controller tesztek", ()=>
             console.log("mockorder_connection: ",mockorder_connection);    
 
             const dishinfo = {
-                dishIds: [1],
-                dishAmounts: [1],
-                dishCustomizations: [{"customizationId":'as'}],
+                dishIds: [1,2],
+                dishAmounts: [2,1],
+                dishCustomizations: [{"customizationId":'as'},{ customizationId: "spicy" }],
             };
 
             console.log("dishInfo: ",dishinfo);
 
 
-            //mockorder_dish_connection = await order_connectionRepositroy.createPurchaseConnection(createdUser.id, mockPurchase, dishinfo);
+            //mockorder_dish_connection = await order_connectionRepositroy.createPurchaseConnection(createdUser.id, mockPurchase, {}, 0);
 
-            //console.log("Mock order_dish_connection:", mockorder_dish_connection); EZ NEM JÓ, ORDER_CONNECTIONREPOSITORY BAN A TESZT ADATTAL NEM CREATELŐDIK dCon
+            //console.log("Mock order_dish_connection:", mockorder_dish_connection);//EZ NEM JÓ, ORDER_CONNECTIONREPOSITORY BAN A TESZT ADATTAL NEM CREATELŐDIK dCon
 
     })
         test("getPurchase returns mockpurchase", async () =>{

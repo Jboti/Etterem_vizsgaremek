@@ -32,9 +32,9 @@ class order_connectionRepository
                 amount: dishInfo.dishAmounts[i],
                 customizations: dishInfo.dishCustomizations[i]
             }
-            //console.log("dcon ITT---------: ",dCon);
+            console.log("dcon ITT---------: ",dCon);
             await this.OrderDishConnection.create(dCon);
-            //console.log("dcon create ITT---------",this.orderDishConnection.create(dCon));
+            console.log("dcon create ITT---------",this.orderDishConnection.create(dCon));
         }
         await this.User.update(
             {

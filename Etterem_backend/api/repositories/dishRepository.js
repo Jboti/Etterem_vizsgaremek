@@ -69,7 +69,7 @@ class dishRepository
 
                 if (allergy) {
                     if (allergies[allergyName]) {
-                        const existingAllergen = await this.Allergenable.findOne({
+                        const existingAllergen = await this.Allergenables.findOne({
                             where: {
                                 allergenable_type: 'dish',
                                 allergenable_id: modifiedDish.id,
@@ -78,7 +78,7 @@ class dishRepository
                         })
                         // Ha az allergia 'true' és nem létezik már a kapcsolat, hozzáadjuk az allergént a Dish-hez
                         if(!existingAllergen){
-                            await this.Allergenable.create({
+                            await this.Allergenables.create({
                                 allergenable_type: 'dish',
                                 allergenable_id: modifiedDish.id,
                                 allergen_id: allergy.id
@@ -86,7 +86,7 @@ class dishRepository
                         }
                     } else {
                         // Ha az allergia 'false', töröljük az allergént a Dish-től
-                        await this.Allergenable.destroy({
+                        await this.Allergenables.destroy({
                             where: {
                                 allergenable_type: 'dish',
                                 allergenable_id: modifiedDish.id,
