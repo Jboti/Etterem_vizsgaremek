@@ -11,11 +11,11 @@ router.get("/get-users", userController.getAllUser)
 router.post("/get-admin-user",userController.getAdminUser)
 
 //auth
+router.post("/authenticateToken",userAuth.authenticateToken,userController.authenticateToken)
 router.post("/register", userController.createUser)
 router.patch("/verify-user",userController.verifyEmail)
 router.post("/login", userController.loginUser)
 router.post("/logout", userController.logoutUser)
-router.post("/authenticateToken",userAuth.authenticateToken,userController.authenticateToken)
 router.patch("/password-reset-email",userController.sendEmail)
 
 //modify

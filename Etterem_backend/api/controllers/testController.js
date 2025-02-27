@@ -458,10 +458,20 @@ exports.DataCreate = async (req,res,next) =>
                 type: "Drink",
             },
         ]
+
+        const allergies = [
+            {
+                gluten: false,
+                lactose: false,
+                egg: false,
+                nuts: false
+            },
+            //itt lehetne a többi ha úgyvan, most egyenlőre mindegyik false
+        ]
+
         for(let i = 0;i<dishes.length;i++)
         {
-            const dish = await dishRepository.createDish(dishes[i])
-            
+            const dish = await dishRepository.createDish(dishes[i],allergies)
         }
 
         const uids = [1,1,2]
@@ -510,7 +520,7 @@ exports.DataCreate = async (req,res,next) =>
 
         for(let i = 0 ; i<uids.length;i++)
         {
-            await order_connectionRepository.createPurchaseConnection(uids[i],purchases[i],dishInfos[i])
+            await order_connectionRepository.createPurchaseConnection(uids[i],purchases[i],dishInfos[i],0)
             
             
         }

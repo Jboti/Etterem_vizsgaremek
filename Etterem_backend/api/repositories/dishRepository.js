@@ -26,8 +26,6 @@ class dishRepository
         return await this.Dish.findAll({})
     }
 
-    
-
     async createDish(dish, allergies)
     {
         const newDish = await this.Dish.create(dish)
@@ -60,7 +58,12 @@ class dishRepository
                 type: dish.type,
                 img: dish.img
             },
-            {where:{id:dish.id}}
+            {
+                where:
+                {
+                    id:dish.id
+                }
+            }
         )
         for (const allergyName in allergies) {
                 const allergy = await this.Allergy.findOne({

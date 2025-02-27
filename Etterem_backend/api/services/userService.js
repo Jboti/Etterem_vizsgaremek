@@ -1,4 +1,4 @@
-const userRepository  = require("../repositories/userRepository")
+const userRepository = require("../repositories/userRepository")
 
 class UserService
 {
@@ -51,6 +51,7 @@ class UserService
     {
         return await userRepository.changeUserName(userName,id)
     }
+
     async getUserPwById(id)
     {
         return await userRepository.getUserPwById(id)
