@@ -90,7 +90,7 @@ describe("Controller tesztek", ()=>
                 {
                     const res = await request(app).post("/api/v1/register")
                     .send({
-                        userName:"TestUserName",fullName:"TestFullName",email:"email",password:"password"
+                        userName:"TestUserName",fullName:"TestFullName",email:"danikataurusz@gmail.com",password:"password"
                     });
 
                     expect(res.statusCode).toBe(201);
