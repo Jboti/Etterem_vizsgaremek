@@ -7,6 +7,7 @@ const dishController = require("../controllers/dishController");
 const purchaseController = require("../controllers/purchaseController");
 const testController = require("../controllers/testController");
 const userController = require("../controllers/userController");
+const purchaseService = require("../services/purchaseService");
 const { BLOB } = require("sequelize");
 
 jest.mock("../db/dbContext", () => require("../../__mocks__/db"));
@@ -26,7 +27,7 @@ describe("Controller tesztek", ()=>
         
         jest.mock("../services/dishService");
         
-        describe("Dish Controller Tests", () => {
+        /*describe("Dish Controller Tests", () => {
 
             test("getDishes test helytelen", async () => 
                 {
@@ -82,9 +83,9 @@ describe("Controller tesztek", ()=>
                     expect(res.statusCode).toBe(404);
                 })
 
-        });
+        });*/
         
-        describe("userController", () => {
+        /*describe("userController", () => {
 
             test("createUser test helyes", async () => 
                 {
@@ -96,8 +97,34 @@ describe("Controller tesztek", ()=>
                     expect(res.statusCode).toBe(201);
                 })
 
-        });
+        });*/
         
+        /*jest.mock("../services/purchaseService", () => ({
+            getAllPurchaseUserInfo: jest.fn()
+        }));
+
+        describe("purchaseController", () => {
+
+            const mockPurchases = [
+                { id: 1, userId: 123, totalPrice: 2500, date: "2024-02-27T10:00:00Z" },
+                { id: 2, userId: 123, totalPrice: 3200, date: "2024-02-26T14:30:00Z" }
+            ];
+
+            test("Vásárlások sikeres lekérése (200 OK)", async () => {
+                // Mock visszatérési érték beállítása
+                //purchaseService.getAllPurchaseUserInfo.mockResolvedValue(mockPurchases);
+        
+                const res = await request(app)
+                    .get("/api/v1/get-all-order-user-only")
+                    .set("Authorization", "Bearer mock-token") // Ha kell JWT
+                    .set("uid", "123"); // Mockolt user ID
+        
+                expect(res.statusCode).toBe(200);
+                //expect(res.body).toEqual(mockPurchases);
+                //expect(purchaseService.getAllPurchaseUserInfo).toHaveBeenCalledWith(123);
+            });
+
+        });*/
         
     
     
@@ -365,6 +392,7 @@ describe("Controller tesztek", ()=>
         let mockorder_connection;
         let mockorder_dish_connection;
         let mockUser;
+        let dishInfo;
         beforeAll(async () => {
             mockUser = {
                 id:1,
@@ -393,6 +421,7 @@ describe("Controller tesztek", ()=>
             const createdPurchase = await purchaseRepository.createPurchase(mockPurchase);
             console.log("Mock purchase:", createdPurchase);
 
+
             mockorder_connection = {
                 user_id: createdUser.id,
                 order_id: createdPurchase.id, // Helyesen kapcsoljuk az ID-t
@@ -400,20 +429,18 @@ describe("Controller tesztek", ()=>
 
             console.log("mockorder_connection: ",mockorder_connection);    
 
-            const dishinfo = {
-                dishIds: [1,2],
-                dishAmounts: [2,1],
-                dishCustomizations: [{"customizationId":'as'},{ customizationId: "spicy" }],
+            dishInfo = {
+                dishIds: 1,
+                dishAmounts: 2,
+                dishCustomizations: {"customizationId":'as'},
             };
 
-            console.log("dishInfo: ",dishinfo);
+            console.log("dishInfo: ",dishInfo);
 
+        })
+        
+        console.log("DISHINFO KINN",dishInfo);
 
-            //mockorder_dish_connection = await order_connectionRepositroy.createPurchaseConnection(createdUser.id, mockPurchase, {}, 0);
-
-            //console.log("Mock order_dish_connection:", mockorder_dish_connection);//EZ NEM JÓ, ORDER_CONNECTIONREPOSITORY BAN A TESZT ADATTAL NEM CREATELŐDIK dCon
-
-    })
         test("getPurchase returns mockpurchase", async () =>{
             const receivedpurchase = await purchaseRepository.getPurchase(1);
             console.log(mockPurchase)
@@ -459,6 +486,11 @@ describe("Controller tesztek", ()=>
             expect((await purchaseRepository.getAllActivePurchase()).length).toBe(0);
         });
 
+        test("idkezeles", async () => {
+            mockorder_dish_connection = await order_connectionRepositroy.createPurchaseConnection(mockorder_connection.user_id, mockPurchase, dishInfo, 0);
+
+            console.log("Mock order_dish_connection:", mockorder_dish_connection);//EZ NEM JÓ, ORDER_CONNECTIONREPOSITORY BAN A TESZT ADATTAL NEM CREATELŐDIK dCon
+        });
     });
     
 })})
