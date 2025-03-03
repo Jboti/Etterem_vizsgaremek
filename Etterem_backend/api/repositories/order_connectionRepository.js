@@ -16,6 +16,7 @@ class order_connectionRepository
 
     async createPurchaseConnection(uid,purchase,dishInfo,pointsUsed)
     {
+        console.log("OrderDishConnection létezik?:", this.OrderDishConnection, "dishInfo",dishInfo);
         const Purchase = await this.Purchase.create(purchase)
         const con = {
             id: null,
@@ -23,7 +24,6 @@ class order_connectionRepository
             order_id: Purchase.id,
         }
         await this.OrderConnection.create(con)
-        //console.log("con create ITT---------",con)
         for(let i = 0;i<dishInfo.dishIds.length;i++)
         {            
             const dCon = {
@@ -33,9 +33,9 @@ class order_connectionRepository
                 amount: dishInfo.dishAmounts[i],
                 customizations: dishInfo.dishCustomizations[i]
             }
-            //console.log("dcon ITT---------: ",dCon);
+            console.log("dcon ITT---------: ",dCon);
             await this.OrderDishConnection.create(dCon);
-            //console.log("dcon create ITT---------",this.orderDishConnection.create(dCon));
+            console.log("dcon create ITT---------",await this.OrderDishConnection.create(dCon));
         }
         await this.User.update(
             {

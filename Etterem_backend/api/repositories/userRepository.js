@@ -200,7 +200,10 @@ class userRepository
                 isActive: user.isActive,
             },
             {
-                where: { id: user.id },
+                where:
+                { 
+                    id: user.id 
+                },
             }
         )
     }
@@ -221,7 +224,5 @@ class userRepository
     }
 
 }
-
-
 
 module.exports = new userRepository(db)
