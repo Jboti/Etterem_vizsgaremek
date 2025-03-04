@@ -160,16 +160,16 @@ onMounted(() => {
       <v-divider class="mb-6 border-opacity-50"></v-divider>
       <v-textarea v-model="message" label="Megjegyzés" style=" width: 90%; margin: auto;" variant="solo-filled" clearable auto-grow ></v-textarea>
       <v-checkbox v-model="takeAway" label="Elvitel (+100 Ft)" color="success" style="width: 92.5%; margin: auto;" @change="takeAway ? cartStore.totalPrice += 100 : cartStore.totalPrice -= 100"></v-checkbox>
-      <v-checkbox v-model="usePoints" label="Pont beváltás" color="success" style="width: 92.5%; margin: auto;" @change="!usePoints ? pointsUsed = 0 : pointsUsed"></v-checkbox>
+      <v-checkbox v-model="usePoints" label="Pont beváltás" color="success" style="width: 92.5%; margin: auto;" @change="!usePoints ? pointsUsed = 0 : pointsUsed" v-if="userInfoData.points > 0"></v-checkbox>
       <div v-if="usePoints"  style="width: 92.5%; margin: auto;">
-        <v-card-title>Pontok: {{ userInfoData.points }}</v-card-title>
+        <v-card-title>Pontok: {{ userInfoData.points }} <a style="color: darkred;">- {{ pointsUsed }}</a></v-card-title>
         <v-number-input
           style=" width: 50%; margin: 1%;"
           control-variant="stacked"
           v-model="pointsUsed"
           :max="Math.min(cartStore.totalPrice, userInfoData.points)"
-          :min="0"
-          :step="5"
+          :min="1"
+          :step="1"
           @onchange="pointsUsed ? pointsUsed : 0"
           ></v-number-input>
       </div>

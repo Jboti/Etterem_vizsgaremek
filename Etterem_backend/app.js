@@ -1,5 +1,10 @@
 const express = require('express')
 const app = express()
+
+const bodyParser = require('body-parser')
+app.use(bodyParser.json({limit: '1000mb'}))
+app.use(bodyParser.urlencoded({limit: '1000mb', extended: true}))
+
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 
@@ -34,6 +39,7 @@ app.use("/api/v1",dishRoutes)
 //táblákat feltölti pár alap adattal teszthez, ez majd később törlésre kerül
 app.use("/test-data-create",testRouter)
 
+//errorHandlerek
 app.use(errorHandler.notFoundError)
 app.use(errorHandler.showError)
 
