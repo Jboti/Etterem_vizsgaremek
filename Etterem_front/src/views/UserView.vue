@@ -10,13 +10,18 @@ import { toast } from 'vue3-toastify';
 import type { allergies, DeleteUserData } from '@/api/user/user';
 import { useCartStore } from '@/stores/cartStore';
 
-const notify = () => {}
 const { push } = useRouter()
+const cartStore = useCartStore()
+const notify = () => {}
 
+// Api hívások
+
+// Query hook-ok
 const { isError, mutate: validateToken } = useValidateToken()
-
 const { data: purchaseData } = useGetAllPurchaseUserInfo()
 const { data: userInfoData, isLoading } = useGetUserInfo()
+
+// Mutation hook-ok
 const { mutate: changeUserNameMutate } = useUserNameChange()
 const { mutate: resetPasswordMutate } = usePasswordResetEmail()
 const { mutate: deleteUserMutate } = useDeleteUser()
@@ -24,7 +29,6 @@ const { mutate: deleteUserPwConfirmMutate } = useDeleteUserPwConfirm()
 const { mutate: updateAllergies } = useUpdateAllergies()
 const { mutate: logout} = useLogout()
 
-const cartStore = useCartStore()
 
 const showPassword = ref<boolean>(false)
 
@@ -42,7 +46,6 @@ const DeleteUserDataRef = ref<DeleteUserData>({
   password: '',
 })
 
-
 const userAllergiesRef = ref<allergies>({
   gluten: false,
   lactose: false,
@@ -50,6 +53,18 @@ const userAllergiesRef = ref<allergies>({
   nuts: false,
 })
 
+watch(() => userInfoData.value, (newUserData) => {
+  if (newUserData && newUserData.allergenables) {
+    userAllergiesRef.value = {
+      gluten: newUserData.allergenables.some((a: any) => a.allergy.name === 'gluten'),
+      lactose: newUserData.allergenables.some((a: any) => a.allergy.name === 'lactose'),
+      egg: newUserData.allergenables.some((a: any) => a.allergy.name === 'egg'),
+      nuts: newUserData.allergenables.some((a: any) => a.allergy.name === 'nuts'),
+    };
+  }
+}, { immediate: true })
+
+// Handler-ek
 
 const handlePwResetEmailSend = () => {
   ResetPasswordDataRef.value.email = userInfoData.value.email
@@ -131,42 +146,35 @@ const handleAllergiesChange = (algs: allergies) => {
   })
 }
 
+
 onMounted(() => {
   window.scrollTo(0, 0)
   validateToken()
 })
-
-watch(isError, () => {},{immediate: true})
-
-watch(() => userInfoData.value, (newUserData) => {
-  if (newUserData && newUserData.allergenables) {
-    userAllergiesRef.value = {
-      gluten: newUserData.allergenables.some((a: any) => a.allergy.name === 'gluten'),
-      lactose: newUserData.allergenables.some((a: any) => a.allergy.name === 'lactose'),
-      egg: newUserData.allergenables.some((a: any) => a.allergy.name === 'egg'),
-      nuts: newUserData.allergenables.some((a: any) => a.allergy.name === 'nuts'),
-    };
-  }
-}, { immediate: true })
-
 </script>
+
 
 <template>
   <div v-if="isError">
-    <v-card class="mt-8 logged-out" style="text-align: center;"><h1 style="font-size: clamp(12px, 2.5vh, 30px);"><b>Ahoz hogy megnézd és módosítsd az adataidat először be kell hogy jelentkezz!</b></h1></v-card>
+    <v-card class="mt-8 logged-out" style="text-align: center;">
+      <h1 style="font-size: clamp(12px, 2.5vh, 30px);">
+        <b>Ahoz hogy megnézd és módosítsd az adataidat először be kell hogy jelentkezz!</b>
+      </h1>
+    </v-card>
   </div>
   
   <div v-else-if="isLoading" class="spinner"></div>
     
-    <div v-else class="page">
+  <div v-else class="page">
       
-      <v-card class="user-info-box">
-        <v-card class="user-info" v-if="userInfoData">
-          <v-card-title><b>Felhasználó:</b> {{userInfoData.userName }}</v-card-title>
-          <v-card-title><b>Teljes név:</b> {{userInfoData.fullName}}</v-card-title>
-          <v-card-title><b>Email:</b> {{userInfoData.email}}</v-card-title>
-          <v-card-title><b>Fiók készítése:</b> {{userInfoData.created}}</v-card-title>
-          <v-card-title style="display: flex;"><b>Pontok:</b>&nbsp;{{userInfoData.points}}
+    <!-- Felhasználó adatok -->
+    <v-card class="user-info-box">
+      <v-card class="user-info" v-if="userInfoData">
+        <v-card-title><b>Felhasználó:</b> {{userInfoData.userName }}</v-card-title>
+        <v-card-title><b>Teljes név:</b> {{userInfoData.fullName}}</v-card-title>
+        <v-card-title><b>Email:</b> {{userInfoData.email}}</v-card-title>
+        <v-card-title><b>Fiók készítése:</b> {{userInfoData.created}}</v-card-title>
+        <v-card-title style="display: flex;"><b>Pontok:</b>&nbsp;{{userInfoData.points}}
           <v-tooltip text="Pontokat minden elköltött 100 Ft után kapsz!">
             <template v-slot:activator="{ props }">
               <v-btn
@@ -177,74 +185,71 @@ watch(() => userInfoData.value, (newUserData) => {
               </v-btn>
             </template>
           </v-tooltip>
-
-          </v-card-title>
-          
-        </v-card>
-      
-        <v-card class="order-info">
-          <v-card-title><b>Rendelési előzmények:</b></v-card-title>
-          <v-dialog style="background-color: rgba(0, 0, 0, 0.6);" @click:outside="">
-            <!-- RENDELÉSI ELŐZMÉNY GOMB -->
-            <template v-slot:activator="{ props: activatorProps }">
-              <div style="text-align: center; width: 100%;">
+        </v-card-title>
+      </v-card>
+  
+      <!-- Rendelési előzmények -->
+      <v-card class="order-info">
+        <v-card-title><b>Rendelési előzmények:</b></v-card-title>
+        <v-dialog style="background-color: rgba(0, 0, 0, 0.6);" @click:outside="">
+          <!-- RENDELÉSI ELŐZMÉNY GOMB -->
+          <template v-slot:activator="{ props: activatorProps }">
+            <div style="text-align: center; width: 100%;">
+              <v-btn
+                v-bind="activatorProps"
+                text="Megnyitás"
+                class="button"
+                ></v-btn>
+            </div>
+          </template>
+          <!-- RENDELÉSI ELŐZMÉNY MODAL -->
+          <template v-slot:default="{ isActive }">
+            <v-card style="width: 100%; margin: auto;max-width:1250px; background-color: rgba(255, 255, 255, .9);  box-shadow: 0 0 10px 5px black;">
+              <v-toolbar title="Rendelések" color="#B71C1C" style="height: auto; text-align: center; color: black; position: sticky; top: 0; z-index: 10; box-shadow: 0 5px 15px -3px black,  0 5px 15px -3px  black inset; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; box-shadow: 0 0 10px .5px black; ">
                 <v-btn
-                  v-bind="activatorProps"
-                  text="Megnyitás"
-                  class="button"
-                  ></v-btn>
-              </div>
-            </template>
-            <!-- RENDELÉSI ELŐZMÉNY MODAL -->
-            <template v-slot:default="{ isActive }">
-              <v-card style="width: 100%; margin: auto;max-width:1250px; background-color: rgba(255, 255, 255, .9);  box-shadow: 0 0 10px 5px black;">
-                <v-toolbar title="Rendelések" color="#B71C1C" style="height: auto; text-align: center; color: black; position: sticky; top: 0; z-index: 10; box-shadow: 0 5px 15px -3px black,  0 5px 15px -3px  black inset; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; box-shadow: 0 0 10px .5px black; ">
-                  <v-btn
-                  @click="isActive.value = false"
-                  style="color: black; "><v-icon>mdi-close</v-icon></v-btn>
-                </v-toolbar>
-
-
-                <v-card-text>
-                  <v-row>
-                    <v-col 
-                      v-for="purchase in [...purchaseData].reverse()" 
-                      :key="purchase.id"  
-                      cols="12" sm="12" md="12" xl="12">
-                      <v-card color="#B71C1C" style="box-shadow: 0 0 8px 4px black inset, 0 0 5px 2px black; color: whitesmoke; max-width: 1000px; margin: auto; padding: 1%;">
-                        <v-card-title class="multiline-text">Dátum: {{ new Date(purchase.purchase.date).toLocaleString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}}</v-card-title>
-                        <div v-if="purchase.purchase.takeAway">
-                          <v-card-title class="multiline-text">Összeg: {{ purchase.purchase.totalPrice-100 }} + 100 Ft</v-card-title>
-                          <v-card-subtitle class="multiline-text mb-4">Elvitel</v-card-subtitle>
-                        </div>
-                        
-                        <v-card-title class="multiline-text mb-4" v-else>Összeg: {{ purchase.purchase.totalPrice }} Ft</v-card-title>
-                        <v-row>
-                          <v-col 
-                            v-for="dish in purchase.purchase.order_dishes" 
-                            :key="dish.dish_id"
-                            style="padding: 1dvh;"  
-                            cols="12" sm="12" md="12" xl="12">
-                            <v-card class="ml-4 mr-4" style="background-color: rgba(255, 255, 255, .9); border-radius: 10px; box-shadow: 0 0 5px 2px black;">
-                              <v-card-title v-if="dish.amount > 1" class="multiline-text">{{ dish.dish.name }} x {{ dish.amount }}</v-card-title>
-                              <v-card-title v-else class="multiline-text">{{ dish.dish.name }}</v-card-title>
-                              <div v-if="dish.dish.type != 'Drink'">
-                                <div v-if="String(dish.customizations).split(',').length > 1">
-                                  <v-card-title>Szósz: <v-card-subtitle class="multiline-text">{{ String(dish.customizations).split(',')[0].substring(1) }}</v-card-subtitle></v-card-title>
-                                  <v-card-title>Módosítás: <v-card-subtitle class="multiline-text">{{ String(dish.customizations).split(',').splice(1).join(',').slice(0,-1) }}</v-card-subtitle></v-card-title>
-                                </div>
-                                <v-card-title v-else>Szósz: <v-card-subtitle class="multiline-text">{{ String(dish.customizations).split(',')[0].slice(1,-1) }}</v-card-subtitle></v-card-title>
+                @click="isActive.value = false"
+                style="color: black; "><v-icon>mdi-close</v-icon></v-btn>
+              </v-toolbar>
+              <v-card-text>
+                <v-row>
+                  <v-col 
+                    v-for="purchase in [...purchaseData].reverse()" 
+                    :key="purchase.id"  
+                    cols="12" sm="12" md="12" xl="12">
+                    <v-card color="#B71C1C" style="box-shadow: 0 0 8px 4px black inset, 0 0 5px 2px black; color: whitesmoke; max-width: 1000px; margin: auto; padding: 1%;">
+                      <v-card-title class="multiline-text">Dátum: {{ new Date(purchase.purchase.date).toLocaleString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}}</v-card-title>
+                      <div v-if="purchase.purchase.takeAway">
+                        <v-card-title class="multiline-text">Összeg: {{ purchase.purchase.totalPrice-100 }} + 100 Ft</v-card-title>
+                        <v-card-subtitle class="multiline-text mb-4">Elvitel</v-card-subtitle>
+                      </div>
+                      
+                      <v-card-title class="multiline-text mb-4" v-else>Összeg: {{ purchase.purchase.totalPrice }} Ft</v-card-title>
+                      <v-row>
+                        <v-col 
+                          v-for="dish in purchase.purchase.order_dishes" 
+                          :key="dish.dish_id"
+                          style="padding: 1dvh;"  
+                          cols="12" sm="12" md="12" xl="12">
+                          <v-card class="ml-4 mr-4" style="background-color: rgba(255, 255, 255, .9); border-radius: 10px; box-shadow: 0 0 5px 2px black;">
+                            <v-card-title v-if="dish.amount > 1" class="multiline-text">{{ dish.dish.name }} x {{ dish.amount }}</v-card-title>
+                            <v-card-title v-else class="multiline-text">{{ dish.dish.name }}</v-card-title>
+                            <div v-if="dish.dish.type != 'Drink'">
+                              <div v-if="String(dish.customizations).split(',').length > 1">
+                                <v-card-title>Szósz: <v-card-subtitle class="multiline-text">{{ String(dish.customizations).split(',')[0].substring(1) }}</v-card-subtitle></v-card-title>
+                                <v-card-title>Módosítás: <v-card-subtitle class="multiline-text">{{ String(dish.customizations).split(',').splice(1).join(',').slice(0,-1) }}</v-card-subtitle></v-card-title>
                               </div>
-                            </v-card>
-                          </v-col>
-                        </v-row>
+                              <v-card-title v-else>Szósz: <v-card-subtitle class="multiline-text">{{ String(dish.customizations).split(',')[0].slice(1,-1) }}</v-card-subtitle></v-card-title>
+                            </div>
+                          </v-card>
+                        </v-col>
+                      </v-row>
 
-                        <v-btn @click="reOrderHandler(purchase)" class="mx-4 mb-4 mt-6 re-order-button" color="success">Újra rendelés</v-btn>
-                      </v-card>
-                    </v-col>
-                  </v-row>
-                  
-                </v-card-text>
+                      <v-btn @click="reOrderHandler(purchase)" class="mx-4 mb-4 mt-6 re-order-button" color="success">Újra rendelés</v-btn>
+                    </v-card>
+                  </v-col>
+                </v-row>
+                
+              </v-card-text>
               </v-card>
             </template>
           </v-dialog>
@@ -255,10 +260,10 @@ watch(() => userInfoData.value, (newUserData) => {
 
    
       <v-card class="user-info-change-box">
-        <v-card class="user-info-change">
 
+        <!-- Fiók beállítások -->
+        <v-card class="user-info-change">
           <v-card-title><b>Fiókbeállítások:</b></v-card-title>
-          
           <v-dialog>
             <!-- FELHNÉV MÓDOSÍTÁS GOMB -->
             <template v-slot:activator="{ props: activatorProps }">
@@ -356,6 +361,7 @@ watch(() => userInfoData.value, (newUserData) => {
 
         </v-card>
                 
+        <!-- Allergia beállítások -->
         <v-card class="allergy-box">
           <div style="display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%;">
             <v-card-title><b>Allergiák beállítása:</b></v-card-title>
@@ -378,15 +384,12 @@ watch(() => userInfoData.value, (newUserData) => {
             </v-card>
           </div>
         </v-card>
-
-        
       </v-card>
   </div>
   <div>
       <button @click="notify"></button>
   </div>
 </template>
-
 
 
 <style scoped>
@@ -402,6 +405,7 @@ watch(() => userInfoData.value, (newUserData) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: .25s ease-in-out fade;
 }
 
 .page{
@@ -419,7 +423,6 @@ watch(() => userInfoData.value, (newUserData) => {
   width: 96%;
   margin: 2%;
   display: flex;
-
   background-color: transparent;
   box-shadow: none;
 }
@@ -440,7 +443,6 @@ watch(() => userInfoData.value, (newUserData) => {
   align-items: center;
 }
 
-
 .allergy-grid{
   display: grid;
   justify-items: center;
@@ -453,7 +455,6 @@ watch(() => userInfoData.value, (newUserData) => {
   width: 75%;
   font-size: clamp(.6rem, 1.4dvw, 1.5rem);
   text-shadow: 1px 1px 0.5px rgba(0,0,0,0.2);
-  
 }
 
 .button:hover{
@@ -487,17 +488,7 @@ watch(() => userInfoData.value, (newUserData) => {
   color: red !important;
 }
 
-@keyframes fade {
-  0%   { opacity:0.01; }
-  100% { opacity:1; }
-}
-
-@keyframes warn {
-  0% { transform: scale(1);}
-  50% { transform: scale(1.25);}
-  100% { transform: scale(1);}
-}
-
+/* Media query */
 @media only screen and (max-width: 800px) {
   .page{
     padding: 5%;
@@ -533,33 +524,16 @@ watch(() => userInfoData.value, (newUserData) => {
   }
 }
 
+/* Animations */
+@keyframes fade {
+  0%   { opacity:0.01; }
+  100% { opacity:1; }
+}
 
-.loader {
-  margin: auto;
-  margin-top: 20dvh;
-  transform: rotateZ(45deg);
-  perspective: 1000px;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  color: #B71C1C;
-}
-.loader:before, .loader:after {
-  content: '';
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: inherit;
-  height: inherit;
-  border-radius: 50%;
-  transform: rotateX(70deg);
-  animation: 1s spin linear infinite;
-}
-.loader:after {
-  color: white;
-  transform: rotateY(70deg);
-  animation-delay: .4s;
+@keyframes warn {
+  0% { transform: scale(1);}
+  50% { transform: scale(1.25);}
+  100% { transform: scale(1);}
 }
 
 @keyframes rotate {
@@ -606,5 +580,34 @@ watch(() => userInfoData.value, (newUserData) => {
   87% {
     box-shadow: .2em -.2em 0 0 currentcolor;
   }
+}
+
+/* Loader css */
+.loader {
+  margin: auto;
+  margin-top: 20dvh;
+  transform: rotateZ(45deg);
+  perspective: 1000px;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  color: #B71C1C;
+}
+.loader:before, .loader:after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: inherit;
+  height: inherit;
+  border-radius: 50%;
+  transform: rotateX(70deg);
+  animation: 1s spin linear infinite;
+}
+.loader:after {
+  color: white;
+  transform: rotateY(70deg);
+  animation-delay: .4s;
 }
 </style>

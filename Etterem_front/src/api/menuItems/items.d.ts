@@ -26,7 +26,7 @@ export type cartItem = {
     dishId:number,
     name:string,
     price:number
-    sause:string,
+    sause:string | null,
     options:string,
     type:string,
     quantity: number

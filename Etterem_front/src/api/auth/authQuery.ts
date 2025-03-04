@@ -6,7 +6,7 @@ import { QUERY_KEYS } from "@/utils/queryKeys"
 
 
 const registration = async (data: RegistrationData) => {
-    const response = await axiosClient.post("http://localhost:3000/api/v1/register", data)
+    const response = await axiosClient.post("/register", data)
     return response.data
 }
 
@@ -16,8 +16,9 @@ export const useRegistration = () => {
     })
 }
 
+
 const emailVertification = async (data: emailVerifyData) => {
-    const response = await axiosClient.patch("http://localhost:3000/api/v1/verify-user", data)
+    const response = await axiosClient.patch("/verify-user", data)
     return response.data.data
 }
 
@@ -27,13 +28,13 @@ export const useEmailVertification = () => {
         mutationFn: emailVertification,
         onSuccess() {
             push({name:'Bejelentkezés'})
-            
         },
     })
 }
 
+
 const Login = async (data: LoginData) : Promise<LoginResponse> => {
-    const response = await axiosClient.post('http://localhost:3000/api/v1/login', data)
+    const response = await axiosClient.post("/login", data)
     return response.data
 }
 
@@ -50,7 +51,7 @@ export const useLogin = () => {
 
 
 const Logout = async () => {
-    const response = await axiosClient.post('http://localhost:3000/api/v1/logout', {})
+    const response = await axiosClient.post("/logout", {})
     return response.data
 }
 
@@ -70,12 +71,7 @@ export const useLogout = () => {
 
 
 const PasswordReset = async (token: string, data: SetPasswordData) => {
-    let config = {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-    }
-    const response = await axiosClient.post(`http://localhost:3000/api/v1/password-reset/`, data, config) 
+    const response = await axiosClient.post("/password-reset", data, { headers: { Authorization: `Bearer ${token}` } })
     return response.data
 }
 
@@ -87,7 +83,7 @@ export const usePasswordReset = () => {
 
 
 const PasswordResetEmail = async (data: ResetPasswordData) => {
-    const response = await axiosClient.patch('http://localhost:3000/api/v1/password-reset-email', data)
+    const response = await axiosClient.patch("/password-reset-email", data)
     return response.data
 }
 
@@ -97,24 +93,13 @@ export const usePasswordResetEmail = () => {
     })
 }
 
-const getToken = () =>{
-    const cookies = document.cookie.split('; ')
-    const tokenCookie = cookies.find(row => row.startsWith('token='))
-    return tokenCookie ? tokenCookie.split('=')[1] : null
-}
 
-const validateToken = async () =>{
-    const token = getToken()
-    let config = {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-    }
-    const response = await axiosClient.post("http://localhost:3000/api/v1/authenticateToken",{} ,config)
+const validateToken = async () => {
+    const response = await axiosClient.post("/authenticate-token")
     return response.data
 }
 
-export const useValidateToken = () =>{
+export const useValidateToken = () => {
     return useMutation({
         mutationFn:validateToken
     })

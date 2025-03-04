@@ -1,61 +1,68 @@
 <script lang="ts" setup>
 import { useLogout, useValidateToken } from '@/api/auth/authQuery';
 import { useGetUserInfo } from '@/api/user/userQuery';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
-const links = [
+const { push } = useRouter()
+
+const authLinks = [
   { name: 'Bejelentkezés', icon: 'mdi-login' },
   { name: 'Regisztráció', icon: 'mdi-account-plus' },
 ]
 
-const { push } = useRouter()
+// API hívások
 const { isError, mutate: validateToken, isPending:validating } = useValidateToken()
+const { data: userData } = useGetUserInfo()
+const { mutate:logout, isPending:loggingOut} = useLogout()
 
-const { data } = useGetUserInfo()
-const { mutate, isPending} = useLogout()
+const isLoggedIn = computed(() => !isError.value && userData.value)
 
-
-const handleLogout = () => {
-  mutate()
-  
+const navigateTo = (routeName: string) => {
+  push({ name: routeName })
 }
 
 onMounted(() => {
-  window.scrollTo(0, 0);
+  window.scrollTo(0, 0)
   validateToken()
 })
-watch(isError, () => {})
-
 </script>
+
+
 <template>
   <div v-if="validating" class="loader"></div>
   <div v-else>
-
     <v-container fluid class="main-page-tp mb-4">
         <v-img src="../../donerlogoNobg.png" class="ml-6 mr-3 logo"></v-img>
-        <v-card v-if="isError" class="mr-8 ml-3 logo-buttons-placement">
-          <v-btn v-for="link in links" :key="link.name"
+
+        <!-- Logged out view -->
+        <v-card v-if="!isLoggedIn" class="mr-8 ml-3 logo-buttons-placement">
+          <v-btn v-for="link in authLinks" :key="link.name"
                   class="mx-1 mt-2 mb-2 pl-5 pr-5 auth-buttons"
                   color="white"
                   variant="text"
-                  @click="push({ name: link.name })">
+                  @click="navigateTo(link.name)">
                   <v-icon class="mx-1" style="line-height: 0;">{{ link.icon }}</v-icon>
                   <span class="ml-1" style="line-height: 1.5; font-weight: bold;">{{ link.name }}</span>
             </v-btn>
         </v-card>
-          <v-card v-else class="mr-8 ml-3 logo-buttons-placement">
-          <v-card-title><h2 style="font-size: clamp(16px, 4vw, 50px);"><b>Szia {{ data?.userName }}!</b></h2></v-card-title>
-          <v-btn
-                  class="mx-1 mt-2 mb-4 pl-5 pr-5 auth-buttons"
-                  color="white"
-                  variant="text"
-                  @click="handleLogout()" :loading="isPending">
-                  <v-icon class="mx-1" style="line-height: 0;">mdi-logout</v-icon>
-                  <span class="ml-1" style="line-height: 1.5; font-weight: bold;">Kijelentkezés</span>
-            </v-btn>
+        
+        <!-- Logged in view -->
+        <v-card v-else class="mr-8 ml-3 logo-buttons-placement">
+        <v-card-title><h2 style="font-size: clamp(16px, 4vw, 50px);"><b>Szia {{ userData?.userName }}!</b></h2></v-card-title>
+        <v-btn
+                class="mx-1 mt-2 mb-4 pl-5 pr-5 auth-buttons"
+                color="white"
+                variant="text"
+                @click="logout()"
+                :loading="loggingOut">
+                <v-icon class="mx-1" style="line-height: 0;">mdi-logout</v-icon>
+                <span class="ml-1" style="line-height: 1.5; font-weight: bold;">Kijelentkezés</span>
+          </v-btn>
         </v-card>
       </v-container>
+
+
       <v-container class="infoBoxok">
         <v-card class="nyitvaTartas">
           <div style="height: 20%; padding-bottom: 1dvh;">
@@ -77,14 +84,22 @@ watch(isError, () => {})
           </v-card>
           <div class="terkepInfo">
             <div class="terkep">
-              <!-- Ez jó csak hogy ez error kódok ne zavarjanak azért van ki kommentezve -->
-              <div style="width: 100%"><iframe class="terkepMeret" width="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?width=100%25&amp;height=400&amp;hl=en&amp;q=2700%20Cegl%C3%A9d,%20szabads%C3%A1g%20t%C3%A9r+(D%C3%B6ner%20Cegl%C3%A9d)&amp;t=&amp;z=15&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"><a href="https://www.gps.ie/">gps handsets</a></iframe></div>
+              <iframe class="terkepMeret"
+                    width="100%"
+                    frameborder="0"
+                    scrolling="no"
+                    marginheight="0"
+                    marginwidth="0"
+                    src="https://maps.google.com/maps?width=100%25&amp;height=400&amp;hl=en&amp;q=2700%20Cegl%C3%A9d,%20szabads%C3%A1g%20t%C3%A9r+(D%C3%B6ner%20Cegl%C3%A9d)&amp;t=&amp;z=15&amp;ie=UTF8&amp;iwloc=B&amp;output=embed">
+                <a href="https://www.gps.ie/">gps handsets</a>
+              </iframe>
             </div>
           </div>
         </v-card>
       </v-container>
   </div>
 </template>
+
 <style scoped>
 
 .main-page-tp{
@@ -124,7 +139,6 @@ watch(isError, () => {})
   filter: drop-shadow(0 0 20px brown);
   animation: 1s ease-out 0s 1 slideInFromLeft;
 }
-
 
 .auth-buttons{
   background-image: linear-gradient(to right, #B71C1C 10%,  black 100%);
@@ -195,13 +209,13 @@ watch(isError, () => {})
   box-shadow: none;
 }
 
-
 .terkepInfo{
   width: 50%;
   height: 100%;
 }
 
 .terkep{
+  background-color: #f5f3f3;
   height: 100%;
   width: 100%;
   box-shadow: 0 0 5px .5px black;
@@ -211,6 +225,8 @@ watch(isError, () => {})
   height: 42dvh;
 }
 
+
+/* Mediaquery */
 @media screen and (max-width: 1060px){
   .infoBoxok{
     flex-direction: column;
@@ -250,6 +266,7 @@ watch(isError, () => {})
   }
 }
 
+/* Animations */
 @keyframes slideInFromLeft {
   0% {
     transform: translateX(-100%);
@@ -270,34 +287,6 @@ watch(isError, () => {})
 @keyframes fade {
   0%   { opacity:0; }
   100% { opacity:1; }
-}
-
-.loader {
-  margin: auto;
-  margin-top: 20dvh;
-  transform: rotateZ(45deg);
-  perspective: 1000px;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  color: #B71C1C;
-}
-.loader:before,.loader:after {
-  content: '';
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: inherit;
-  height: inherit;
-  border-radius: 50%;
-  transform: rotateX(70deg);
-  animation: 1s spin linear infinite;
-}
-.loader:after {
-  color: white;
-  transform: rotateY(70deg);
-  animation-delay: .4s;
 }
 
 @keyframes rotate {
@@ -346,4 +335,32 @@ watch(isError, () => {})
   }
 }
    
+/* Loader css */
+.loader {
+  margin: auto;
+  margin-top: 20dvh;
+  transform: rotateZ(45deg);
+  perspective: 1000px;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  color: #B71C1C;
+}
+.loader:before,.loader:after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: inherit;
+  height: inherit;
+  border-radius: 50%;
+  transform: rotateX(70deg);
+  animation: 1s spin linear infinite;
+}
+.loader:after {
+  color: white;
+  transform: rotateY(70deg);
+  animation-delay: .4s;
+}
 </style>

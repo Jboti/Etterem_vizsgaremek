@@ -229,8 +229,8 @@ exports.changePassword = async (req, res, next) => {
             error.status = 404
             throw error
         }
-        password = await bcrypt.hash(password, salt)
-        const result = await userService.changePassword(password, id)
+        const passwordHash = await bcrypt.hash(password, salt)
+        const result = await userService.changePassword(passwordHash, id)
         if (!result) {
             const error = new Error("Password change went wrong!")
             error.status = 400

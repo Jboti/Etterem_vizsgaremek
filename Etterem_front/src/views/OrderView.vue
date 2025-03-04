@@ -7,44 +7,41 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
 
-
-const notify = () => {}
-
 const { push } = useRouter()
 const cartStore = useCartStore()
+const notify = () => {}
+
+// API hívások
 const { isError, mutate: validateToken } = useValidateToken()
 const { data: userInfoData } = useGetUserInfo()
 const { mutate, isPending } = usePlaceOrder()
-const categoryOrder = ['Wrap', 'Kebab', 'Drink']
+
+// Állapot változók
 const isModalOpen = ref<boolean>(false)
 const takeAway = ref<boolean>(false)
 const usePoints = ref<boolean>(false)
 const pointsUsed = ref<number>(0)
 const message = ref<string>("")
 
-const openModal = () => {
-    isModalOpen.value = true 
-}
+// Modal actions
+const openModal = () => { isModalOpen.value = true }
+const closeModal = () => { isModalOpen.value = false }
 
-const closeModal = () => {
-  isModalOpen.value = false
-}
 
 function removeItemFromCart(itemId : number) {
   const index = cartStore.items.findIndex((item) => item.cartId === itemId)
   if(cartStore.items[index].quantity == 1){
     const item = document.getElementById(String(itemId))
     item?.classList.add('cart-item-remove')
-  
     setTimeout(() => {
       cartStore.removeItem(itemId)
     }, 500);
   }else
-    cartStore.removeItem(itemId)
-
+  cartStore.removeItem(itemId)
 }
 
-
+// Szűrés
+const categoryOrder = ['Wrap', 'Kebab', 'Drink']
 const groupedItems = computed(() => {
   const groups: Record<string, typeof cartStore.items> = {};
   cartStore.items.forEach((item) => {
@@ -57,6 +54,7 @@ const groupedItems = computed(() => {
     categoryOrder.filter((category) => groups[category]).map((category) => [category, groups[category]])
   )
 })
+
 
 function placeOrder() {
   const placeOrderDataRef = ref<placeOrderData>({
@@ -75,6 +73,7 @@ function placeOrder() {
     const options = (cartStore.items[i].sause ? cartStore.items[i].sause : '') + (cartStore.items[i].options ? ', '+cartStore.items[i].options : '')
     placeOrderDataRef.value.dishCustomizations.push(options)
   }
+
   mutate(placeOrderDataRef.value,{
     onSuccess(data) {
       push({name:"order-placed",params:{id:data.id, price: (cartStore.totalPrice-pointsUsed.value)}})
@@ -94,14 +93,14 @@ onMounted(() => {
   window.scrollTo(0, 0);
   validateToken()
 })
-watch(isError, () => {})
-
-
 </script>
+
+
 <template>
   <div v-if="isError">
     <v-card class="mt-8 logged-out" style="text-align: center;"><h1><b>Ahoz hogy rendelj be kell jelentkezned!</b></h1></v-card>
   </div>
+
   <div v-else>
     <div v-if="cartStore.items.length==0">
       <v-card class="mt-8 empty-cart"><h1><b>A kosár üres!</b></h1></v-card>
@@ -185,6 +184,7 @@ watch(isError, () => {})
     </v-card>
   </v-dialog>
 </template>
+
 <style scoped>
 
 .order-options{
@@ -235,7 +235,6 @@ watch(isError, () => {})
   padding: 1dvw;
 }
 
-
 .total-price{
   color: black;
   width: 100%;
@@ -254,7 +253,6 @@ watch(isError, () => {})
   background-size: 200% auto;
   animation: .7s ease-in-out slideInFromLeft;
 }
-
 
 .place-order, .clear-cart{
   text-shadow: 1px 2px black;
@@ -347,6 +345,7 @@ watch(isError, () => {})
   animation: .7s ease-in-out fade;
 }
 
+/* Media query */
 @media screen and (max-width: 950px){
   .cart{
     width: 95%;
@@ -370,6 +369,7 @@ watch(isError, () => {})
   }
 }
 
+/* Animations */
 @keyframes fade {
   0%   { opacity:0; }
   100% { opacity:1; }

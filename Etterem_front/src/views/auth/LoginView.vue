@@ -5,20 +5,16 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
 
+const { push } = useRouter()
+const notify = () => {}
+
+const { mutate, isPending} = useLogin()
+
 const LoginDataRef = ref<LoginData>({
     email: '',
     password:''
 })
-
-
-const { push } = useRouter()
-const { mutate, isPending} = useLogin()
 const showPassword = ref<boolean>(false)
-
-
-const notify = () => {
-    toast.success("Sikeres bejelentkezés!")
-}
 
 
 const handleLogin = (LoginDataRef: LoginData) => {
@@ -38,8 +34,9 @@ const handleLogin = (LoginDataRef: LoginData) => {
         })
     }
 }
-
 </script>
+
+
 <template>
     <v-container class="" style=" height: 75%; width: 90%; max-width: 1000px; min-width: 375px; min-height: 600px;">
         <v-card class="bg-red-darken-4 card" outlined>
@@ -69,9 +66,9 @@ const handleLogin = (LoginDataRef: LoginData) => {
             </div>
         </v-card>
     </v-container>
-<div>
-    <button @click="notify"></button>
-</div>
+    <div>
+        <button @click="notify"></button>
+    </div>
 </template>
 
 <style scoped>
@@ -106,6 +103,7 @@ const handleLogin = (LoginDataRef: LoginData) => {
     transform: scale(1.2);
 }
 
+/* Animations */
 @keyframes fade {
   0%   { opacity:0; }
   100% { opacity:1; }

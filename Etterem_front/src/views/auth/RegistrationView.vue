@@ -7,7 +7,10 @@ import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
 const { push } = useRouter()
+const notify = () => {}
+
 const { mutate, isPending } = useRegistration()
+
 const showPassword = ref<boolean>(false)
 const showPasswordRe = ref<boolean>(false)
 
@@ -19,12 +22,7 @@ const registrationDataRef = ref<RegistrationData>({
    passwordRe: ''
 })
 
-
-const notify = () => {
-    toast.success("Sikeres regisztráció!")
-}
-
-
+// Regex validációk
 const validateUsername = (userName: string): boolean => {
     const userNameRegex = /^[A-Za-záÁéÉöÖőŐóÓüÜűŰúÚ][A-Za-z0-9_áÁéÉöÖőŐóÓüÜűŰúÚ]{5,18}$/ //min 6 hosszú, max 18 hosszú, ne kezdődjön számmal
     return userNameRegex.test(userName)
@@ -40,6 +38,7 @@ const validatePassword = (password: string): boolean => {
     return passwordRegex.test(password)
 }
     
+
 const handleRegister = (registrationDataRef: RegistrationData) => {
     if (registrationDataRef.email == '' || registrationDataRef.fullName == '' || registrationDataRef.password == '' || registrationDataRef.userName == '' || registrationDataRef.passwordRe == '') {
         toast.error("Hiányzó adatok, kérlek töltsd ki az összes mezőt mielőtt tovább haladsz!")
@@ -65,9 +64,8 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
         })
     }
 }
-
-
 </script>
+
 
 <template>
     <v-container style=" width: 100%; max-width: 1000px;">
@@ -132,11 +130,9 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
 
 .button{
     animation: 1s ease-in slideInFromBottomAndFade;
-
 }
 
 .card{
-
     animation-fill-mode: forwards;
     box-shadow: 0 0 40px 8px black inset, 0 0 5px 2px black; 
     min-height: 62.5%;
@@ -171,6 +167,8 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
     margin-left: 10%;
     margin-right: 10%;
 }
+
+/* Media query */
 @media screen and (max-width: 500px){
    .form{
         flex-direction: column;
@@ -185,6 +183,8 @@ const handleRegister = (registrationDataRef: RegistrationData) => {
         width: 80%;
     }
 }
+
+/* Animations */
 @keyframes fade {
   0%   { opacity:0.01; }
   100% { opacity:1; }

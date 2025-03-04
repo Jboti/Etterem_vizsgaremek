@@ -6,32 +6,11 @@ import { useRouter } from "vue-router"
 import type { placeOrderData } from "../menuItems/items"
 import queryClient from "@/lib/queryClient"
 import type { allergies, DeleteUserData } from "./user"
-import type { AxiosResponse } from "axios"
 
-
-const getToken = () =>{
-    const cookies = document.cookie.split('; ')
-    const tokenCookie = cookies.find(row => row.startsWith('token='))
-    return tokenCookie ? tokenCookie.split('=')[1] : null
-}
 
 const getUserInfo = async () => {
-    try {
-        const token = getToken()
-        if (!token) return null
-        
-        let config = {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        }
-        
-        const response = await axiosClient.get("http://localhost:3000/api/v1/get-user", config)
-        return response.data
-    } catch (error) {
-        console.error("Hiba történt a getUserInfo hívás során: ", error)
-        return null
-    }
+    const response = await axiosClient.get("/user")
+    return response.data
 }
 
 export const useGetUserInfo = () => {
@@ -43,18 +22,12 @@ export const useGetUserInfo = () => {
             retry: 0
         }
     )
-    
 }
 
+
 const getAllPurchaseUserInfo = async () =>{
-    const token = getToken()
-    let config = {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-    }
-    const response = await axiosClient.get("http://localhost:3000/api/v1/get-all-order-user-only", config)
-    return response.data;
+    const response = await axiosClient.get("/user-orders")
+    return response.data
 }
 
 export const useGetAllPurchaseUserInfo = () => {
@@ -63,17 +36,12 @@ export const useGetAllPurchaseUserInfo = () => {
         queryFn: getAllPurchaseUserInfo, 
         staleTime: 3600 * 1000,  
         retry: 1                 
-    });
-};
+    })
+}
+
 
 const UserNameChange = async (data: ChangeUserName) => {
-    const token = getToken()
-    let config = {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-    }
-    const response = await axiosClient.patch('http://localhost:3000/api/v1/user-name-change', data, config )
+    const response = await axiosClient.patch('/username', data )
     return response.data
 }
 
@@ -91,18 +59,11 @@ export const useUserNameChange = () => {
     })
 }
 
+
 const PlaceOrder = async (data:placeOrderData) => {
-    const token = getToken()
-    let config = {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-    }
-    const response = await axiosClient.post("http://localhost:3000/api/v1/place-order",data, config)
+    const response = await axiosClient.post("/order",data)
     return response.data.data
 }
-
-
 
 export const usePlaceOrder = () => {
     return useMutation({
@@ -114,14 +75,9 @@ export const usePlaceOrder = () => {
     })
 }
 
+
 const updateAllergies = async ( data:allergies ) => {
-    const token = getToken()
-    let config = {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-    }
-    const response = await axiosClient.patch("http://localhost:3000/api/v1/update-allergies", data, config)
+    const response = await axiosClient.patch("/allergies", data)
     return response.data
 }
 
@@ -137,16 +93,10 @@ export const useUpdateAllergies = () => {
     })
 }
 
+
 const deleteUserPwConfirm = async (data: DeleteUserData) =>
 {
-    const token = getToken()
-    let config = {
-        headers: {
-            'Authorization': 'Bearer ' + token
-        }
-    }
-    const response = axiosClient.post("http://localhost:3000/api/v1/delete-user-password-check",data, config)
-    return response
+    await axiosClient.post("/user-password-validate",data)
 }
     
 export const useDeleteUserPwConfirm = () => {
@@ -155,16 +105,10 @@ export const useDeleteUserPwConfirm = () => {
     })
 }
 
-const deleteUser = async () : Promise<AxiosResponse> =>
+
+const deleteUser = async () =>
 {
-    const token = getToken()
-    let config = {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-    }
-    const response = axiosClient.delete("http://localhost:3000/api/v1/delete-user", config)
-    return response
+    await axiosClient.delete("/user")
 }
 
 export const useDeleteUser = () => {

@@ -5,26 +5,26 @@ import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
 
+const { push } = useRouter()
+const notify = () => {}
+const {query} = useRoute()
+
+const { mutate, isPending} = usePasswordReset()
+
+const token = query.token as string
+const showPassword = ref<boolean>(false)
+const showPassword2 = ref<boolean>(false)
+
 const PasswordResetDataRef = ref<SetPasswordData>({
     password: '',
     password_confirmation: ''
 })
 
-const { push } = useRouter()
-const {query} = useRoute()
-const token = query.token as string
-const showPassword = ref<boolean>(false)
-const showPassword2 = ref<boolean>(false)
 
 const validatePassword = (password: string): boolean => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/ //min 8 hosszú, min 1 kis betű, min 1 nagy betű, min 1 szám
     return passwordRegex.test(password)
 }
-
-
-const notify = () => {}
-
-const { mutate, isPending} = usePasswordReset()
 
 const handlePasswordReset = (PasswordResetDataRef : SetPasswordData) => {
     if( PasswordResetDataRef.password == '' || PasswordResetDataRef.password_confirmation == ''){
@@ -47,8 +47,9 @@ const handlePasswordReset = (PasswordResetDataRef : SetPasswordData) => {
         })
     }
 }
-
 </script>
+
+
 <template>
     <v-container class="" style=" height: 75%; width: 90%; max-width: 1000px; min-width: 375px; min-height: 600px;">
         <v-card class="bg-red-darken-4 card" outlined>
@@ -81,9 +82,9 @@ const handlePasswordReset = (PasswordResetDataRef : SetPasswordData) => {
             </div>
         </v-card>
     </v-container>
-<div>
-    <button @click="notify"></button>
-</div>
+    <div>
+        <button @click="notify"></button>
+    </div>
 </template>
 
 <style scoped>
@@ -118,6 +119,7 @@ const handlePasswordReset = (PasswordResetDataRef : SetPasswordData) => {
     transform: scale(1.2);
 }
 
+/* Animations */
 @keyframes fade {
   0%   { opacity:0; }
   100% { opacity:1; }

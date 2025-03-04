@@ -5,19 +5,14 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
 
+const { push } = useRouter()
+const notify = () => {}
+
+const { mutate, isPending} = usePasswordResetEmail()
+
 const ResetPasswordDataRef = ref<ResetPasswordData>({
     email: '',
 })
-
-const { push } = useRouter()
-const { mutate, isPending} = usePasswordResetEmail()
-
-
-
-const notify = () => {
-    toast.success("Email Sikeresen elküldve!")
-}
-
 
 const handlePwResetEmailSent = (ResetPasswordDataRef: ResetPasswordData) => {
     if(ResetPasswordDataRef.email == ''){
@@ -36,8 +31,9 @@ const handlePwResetEmailSent = (ResetPasswordDataRef: ResetPasswordData) => {
         })
     }
 }
-
 </script>
+
+
 <template>
     <v-container class="pt-0 mt-10" style=" height: 50dvh; width: 90%; max-width: 1000px; min-width: 375px; min-height: 100px; max-height: 600px;">
         <v-card class="bg-red-darken-4 mt-2 card" outlined>

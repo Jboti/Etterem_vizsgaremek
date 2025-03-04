@@ -4,7 +4,7 @@ import { QUERY_KEYS } from "@/utils/queryKeys"
 import type { dishData } from "./items"
 
 const getDishes = async (): Promise<dishData> => {
-    const response = await axiosClient.get("http://localhost:3000/api/v1/get-dishes")
+    const response = await axiosClient.get("/dishes")
     return response.data
 }
 

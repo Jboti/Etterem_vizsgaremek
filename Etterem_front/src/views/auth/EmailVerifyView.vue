@@ -4,8 +4,7 @@ import { useEmailVertification } from '@/api/auth/authQuery';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-
-const {query} = useRoute()
+const { query } = useRoute()
 const token = query.token as string
 
 const emailverifyDataRef = ref<emailVerifyData>({
@@ -14,8 +13,8 @@ const emailverifyDataRef = ref<emailVerifyData>({
 emailverifyDataRef.value.token = token
 
 const {mutate, isPending} = useEmailVertification()
-
 </script>
+
 
 <template>
   <v-container class="d-flex justify-center align-center" style="min-height: 90%;">
