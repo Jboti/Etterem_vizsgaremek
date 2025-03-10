@@ -25,7 +25,6 @@ namespace EtteremSideApp
         Random rand = new Random();
         private int refetchIntervall = 2000;
         static bool conn_alive = false;
-        static string conn_link = "http://localhost:3000/api/v1/get-users";
         public static List<Order> all_orders = new List<Order>();
         public static bool must_Update;
         public static int previousOrdersCount = 0;
@@ -65,7 +64,7 @@ namespace EtteremSideApp
         public RadioButton ActiveYesRadioButton;
         public RadioButton ActiveNoRadioButton;
 
-        //uj termek mododsítása
+        //uj termek
         public TextBox nameTextBox;
         public NumericUpDown priceNumericUpDown;
         public DataGridView optionsDataGridView;
@@ -77,6 +76,21 @@ namespace EtteremSideApp
         public ComboBox typeComboBox;
         public Button imageButton;
 
+        //termek modositasa
+
+        public TextBox nameTextBox_Modify;
+        public NumericUpDown priceNumericUpDown_Modify;
+        public DataGridView optionsDataGridView_Modify;
+        public CheckBox glutenCheckBox_Modify;
+        public CheckBox lactoseCheckBox_Modify;
+        public CheckBox eggCheckBox_Modify;
+        public CheckBox nutsCheckBox_Modify;
+        public TextBox descriptionTextBox_Modify;
+        public ComboBox typeComboBox_Modify;
+        public PictureBox pictureBox_Modify;
+        public RadioButton availableRadioButton_Modify;
+        public RadioButton notAvailableRadioButton_Modify;
+        public Button saveButton_Modify;
 
 //------Global values------\\
 
@@ -102,20 +116,21 @@ public Form1()
         {
             try
             {
-                HttpResponseMessage response = await sharedClient.GetAsync(conn_link);
+                string url = "http://localhost:3000/api/v1/users";
+                HttpResponseMessage response = await sharedClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
                     return true;
                 }
                 else
                 {
-                    Console.WriteLine("Request failed with status code: " + response.StatusCode);
+                    Console.WriteLine("Hiba!\nüzenet: " + response.StatusCode);
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("An error occurred: " + ex.Message);
+                Console.WriteLine("Hiba!\nüzenet: " + ex.Message);
                 return false;
             }
         }
@@ -126,7 +141,8 @@ public Form1()
 
             try
             {
-                HttpResponseMessage response = await sharedClient.GetAsync("http://localhost:3000/api/v1/get-all-active-order");
+                string url = "http://localhost:3000/api/v1/active-orders";
+                HttpResponseMessage response = await sharedClient.GetAsync(url);
 
                 response.EnsureSuccessStatusCode();
 
@@ -144,18 +160,18 @@ public Form1()
             }
             catch (HttpRequestException ex)
             {
-                Console.WriteLine($"Request error: {ex.Message}");
+                Console.WriteLine($"Hiba!\nüzenet: {ex.Message}");
                 conn_alive = false;
             }
             catch (JsonException ex)
             {
-                Console.WriteLine($"JSON error: {ex.Message}");
+                Console.WriteLine($"JSON hiba!\nüzenet: {ex.Message}");
                 conn_alive = false;
 
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected error: {ex.Message}");
+                Console.WriteLine($"Hiba!\nüzenet: {ex.Message}");
                 conn_alive = false;
 
             }
@@ -673,12 +689,12 @@ public Form1()
                     }
                     else
                     {
-                        Console.WriteLine($"Hiba történt: {response.StatusCode}");
+                        Console.WriteLine($"Hiba!\nüzenet: {response.StatusCode}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Hiba történt: {ex.Message}");
+                    Console.WriteLine($"Hiba!\nüzenet: {ex.Message}");
                 }
             }
         }
@@ -801,7 +817,7 @@ public Form1()
 
         public async Task<string> getLogin(string givenEmail, string givenPw)
         {
-            string url = "http://localhost:3000/api/v1/get-admin-user";
+            string url = "http://localhost:3000/api/v1/admin-user";
             var credentials = new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("email", givenEmail),
@@ -1128,13 +1144,11 @@ public Form1()
 
         private void DeleteButton_Click(object sender, EventArgs e)
         {
-            //kiüríti a mezőket
             CreateUserControl(0, null, null, null, 0, false, false);
         }
 
         private async void SaveButton_Click(object sender, EventArgs e)
         {
-            // Extract username from adminName using the "Név:" keyword.
             string input = adminName;
             string keyword = "Név: ";
             int startIndex = input.IndexOf(keyword);
@@ -1145,10 +1159,8 @@ public Form1()
                 username = input.Substring(startIndex + keyword.Length).Trim();
             }
 
-            // Flag to determine if logout should occur.
             bool logoutAfterUpdate = false;
 
-            // If the admin is modifying their own account.
             if (selectedUser.Username == username)
             {
                 DialogResult result = MessageBox.Show(
@@ -1160,14 +1172,11 @@ public Form1()
 
                 if (result != DialogResult.OK)
                 {
-                    return; // Kilépünk, ha a felhasználó a "Mégse" gombot választja.
+                    return;
                 }
-                // Set flag to logout after modifications.
                 logoutAfterUpdate = true;
             }
 
-
-            // Execute modifications.
 
             postUserModifications(Convert.ToInt32(idTextBox.Text.Trim()), usernameTextBox.Text.Trim(), fullNameTextBox.Text.Trim(), emailTextBox.Text.Trim(), Convert.ToInt32(pointsNumericUpDown.Value), adminYesRadioButton.Checked, ActiveYesRadioButton.Checked);
             CreateUserControl(0, null, null, null, 0, false, false);
@@ -1187,9 +1196,8 @@ public Form1()
 
         private async void postUserModifications(int givenID, string givenUsername, string givenFullname, string givenEmail, int givenPoints, bool givenisAdmin, bool givenisActive)
         {
-            //MessageBox.Show(givenUsername + " " + givenFullname + " " + givenEmail + " " + givenPoints.ToString() + " " + givenisAdmin.ToString() + " " + givenisActive.ToString());
 
-            string url = "http://localhost:3000/api/v1/admin-user-modify";
+            string url = "http://localhost:3000/api/v1/user";
             var credentials = new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("id", givenID.ToString()),
@@ -1215,13 +1223,13 @@ public Form1()
                     }
                     else
                     {
-                        MessageBox.Show("Hiba történt a mentés során 1: " + response.StatusCode);
+                        MessageBox.Show("Hiba!\nüzenet: " + response.StatusCode);
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Hiba történt a mentés során 2: " + ex.Message);
+                MessageBox.Show("Hiba!\nüzenet: " + ex.Message);
             }
         }
 
@@ -1237,7 +1245,7 @@ public Form1()
             }
             catch
             {
-                MessageBox.Show("Hiba a keresés során 3");
+                MessageBox.Show("Hiba a keresés során!");
             }
         }
 
@@ -1258,7 +1266,7 @@ public Form1()
 
         public async Task<List<FullUser>> getAllUsers()
         {
-            string url = "http://localhost:3000/api/v1/get-users";
+            string url = "http://localhost:3000/api/v1/users";
 
             try
             {
@@ -1277,12 +1285,12 @@ public Form1()
                 }
                 else
                 {
-                    Console.WriteLine("HIBA a felhasználók lekérdezése során 1");
+                    MessageBox.Show("Hiba!\nüzenet: " + response.StatusCode);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                Console.WriteLine("HIBA a felhasználók lekérdezése során 2");
+                MessageBox.Show("Hiba!\nüzenet: " + ex.Message);
             }
 
             return new List<FullUser>(); 
@@ -1312,7 +1320,7 @@ public Form1()
 
             Panel centralPanel = new Panel
             {
-                Size = new Size(520, 650), // increased height to accommodate new checkboxes
+                Size = new Size(520, 650),
                 BorderStyle = BorderStyle.FixedSingle,
                 BackColor = Color.LightGray,
             };
@@ -1419,8 +1427,6 @@ public Form1()
             toolTip.SetToolTip(addOptionButton, "Sor hozzáadása");
             toolTip.SetToolTip(removeOptionButton, "Kijelölt sor törlése");
 
-            // --- New Checkboxes below the DataGridView ---
-            // Positioning checkboxes in a row under the DataGridView.
             glutenCheckBox = new CheckBox
             {
                 Text = "Glutén",
@@ -1446,7 +1452,6 @@ public Form1()
                 AutoSize = true
             };
 
-            // Shift description controls downward to avoid overlapping the new checkboxes
             Label descriptionLabel = new Label
             {
                 Text = "Leírás:",
@@ -1561,7 +1566,7 @@ public Form1()
                 List<(string, int)> cutomisations = new List<(string, int)>();
                 List<string> sauces = new List<string>();
 
-                ReadNewProductOptionsDataFromDataGridView(ref cutomisations, ref sauces);
+                ReadNewProductOptionsDataFromDataGridView(ref cutomisations, ref sauces, optionsDataGridView);
 
                 CreateNewProductRequest(nameTextBox.Text, Convert.ToInt32(priceNumericUpDown.Value), cutomisations, sauces, descriptionTextBox.Text, typeComboBox.SelectedItem.ToString(), currentIMGBlob, glutenCheckBox.Checked, lactoseCheckBox.Checked, eggCheckBox.Checked, nutsCheckBox.Checked);
             }
@@ -1589,9 +1594,9 @@ public Form1()
             }
         }
 
-        private void ReadNewProductOptionsDataFromDataGridView(ref List<(string, int)> customisations, ref List<string> sauces)
+        private void ReadNewProductOptionsDataFromDataGridView(ref List<(string, int)> customisations, ref List<string> sauces, DataGridView datagridview)
         {
-            foreach (DataGridViewRow row in optionsDataGridView.Rows)
+            foreach (DataGridViewRow row in datagridview.Rows)
             {
                 if (row.IsNewRow) continue;
 
@@ -1650,7 +1655,7 @@ public Form1()
 
             string jsonData = JsonSerializer.Serialize(product);
 
-            string url = "http://localhost:3000/api/v1/create-new-dish";
+            string url = "http://localhost:3000/api/v1/dish";
 
             try
             {
@@ -1666,13 +1671,13 @@ public Form1()
                     }
                     else
                     {
-                        MessageBox.Show("Hiba történt a mentés során 1: " + response.StatusCode);
+                        MessageBox.Show("Hiba!\nüzenet:" + response.StatusCode);
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Hiba történt a mentés során 2: " + ex.Message);
+                MessageBox.Show("Hiba!\nüzenet:" + ex.Message);
             }
         }
 
@@ -1693,7 +1698,11 @@ public Form1()
                 modifications: modifications,
                 description: "",
                 category: "",
-                img: null
+                img: null,
+                gluten: false,
+                lactose: false,
+                egg: false,
+                nuts: false
             );
 
             panel4.Visible = true;
@@ -1705,7 +1714,6 @@ public Form1()
             panel4.BackColor = backGroundColor;
             this.Controls.Add(panel4);
             panel4.BringToFront();
-
             CreateProductEdit(menuItem);
         }
 
@@ -1741,7 +1749,7 @@ public Form1()
                 Location = new Point(20, 60),
                 AutoSize = true
             };
-            TextBox nameTextBox = new TextBox
+            nameTextBox_Modify = new TextBox
             {
                 Location = new Point(150, 58),
                 Width = 300,
@@ -1754,7 +1762,7 @@ public Form1()
                 Location = new Point(20, 100),
                 AutoSize = true
             };
-            NumericUpDown priceNumericUpDown = new NumericUpDown
+            priceNumericUpDown_Modify = new NumericUpDown
             {
                 Location = new Point(150, 98),
                 Width = 100,
@@ -1770,7 +1778,7 @@ public Form1()
                 Location = new Point(20, 140),
                 AutoSize = true
             };
-            DataGridView optionsDataGridView = new DataGridView
+            optionsDataGridView_Modify = new DataGridView
             {
                 Location = new Point(150, 138),
                 Width = 400,
@@ -1778,21 +1786,22 @@ public Form1()
                 AllowUserToAddRows = false
             };
 
-            optionsDataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Opció", HeaderText = "Opció" });
-            optionsDataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Felár", HeaderText = "Felár" });
-            optionsDataGridView.Columns.Add(new DataGridViewCheckBoxColumn { Name = "Szósz", HeaderText = "Szósz" });
+            optionsDataGridView_Modify.Columns.Add(new DataGridViewTextBoxColumn { Name = "Opció", HeaderText = "Opció" });
+            optionsDataGridView_Modify.Columns.Add(new DataGridViewTextBoxColumn { Name = "Felár", HeaderText = "Felár" });
+            optionsDataGridView_Modify.Columns.Add(new DataGridViewCheckBoxColumn { Name = "Szósz", HeaderText = "Szósz" });
 
             foreach (var mod in item.modifications)
             {
-                optionsDataGridView.Rows.Add(mod.Item1, mod.Item2, mod.Item3);
+                optionsDataGridView_Modify.Rows.Add(mod.Item1, mod.Item2, mod.Item3);
             }
 
-            optionsDataGridView.CellValueChanged += (sender, e) =>
+            // Handle changes to the "Szósz" checkbox
+            optionsDataGridView_Modify.CellValueChanged += (sender, e) =>
             {
-                if (e.ColumnIndex == optionsDataGridView.Columns["Szósz"].Index && e.RowIndex >= 0)
+                if (e.ColumnIndex == optionsDataGridView_Modify.Columns["Szósz"].Index && e.RowIndex >= 0)
                 {
-                    var checkBoxCell = (DataGridViewCheckBoxCell)optionsDataGridView.Rows[e.RowIndex].Cells["Szósz"];
-                    var priceCell = (DataGridViewTextBoxCell)optionsDataGridView.Rows[e.RowIndex].Cells["Felár"];
+                    var checkBoxCell = (DataGridViewCheckBoxCell)optionsDataGridView_Modify.Rows[e.RowIndex].Cells["Szósz"];
+                    var priceCell = (DataGridViewTextBoxCell)optionsDataGridView_Modify.Rows[e.RowIndex].Cells["Felár"];
 
                     if ((bool)checkBoxCell.Value)
                     {
@@ -1806,11 +1815,12 @@ public Form1()
                 }
             };
 
-            optionsDataGridView.CurrentCellDirtyStateChanged += (sender, e) =>
+            // Commit checkbox changes immediately
+            optionsDataGridView_Modify.CurrentCellDirtyStateChanged += (sender, e) =>
             {
-                if (optionsDataGridView.IsCurrentCellDirty && optionsDataGridView.CurrentCell is DataGridViewCheckBoxCell)
+                if (optionsDataGridView_Modify.IsCurrentCellDirty && optionsDataGridView_Modify.CurrentCell is DataGridViewCheckBoxCell)
                 {
-                    optionsDataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                    optionsDataGridView_Modify.CommitEdit(DataGridViewDataErrorContexts.Commit);
                 }
             };
 
@@ -1823,7 +1833,7 @@ public Form1()
             };
             addOptionButton.Click += (sender, e) =>
             {
-                optionsDataGridView.Rows.Add();
+                optionsDataGridView_Modify.Rows.Add();
             };
 
             Button removeOptionButton = new Button
@@ -1835,9 +1845,9 @@ public Form1()
             };
             removeOptionButton.Click += (sender, e) =>
             {
-                foreach (DataGridViewRow row in optionsDataGridView.SelectedRows)
+                foreach (DataGridViewRow row in optionsDataGridView_Modify.SelectedRows)
                 {
-                    optionsDataGridView.Rows.Remove(row);
+                    optionsDataGridView_Modify.Rows.Remove(row);
                 }
             };
 
@@ -1845,15 +1855,40 @@ public Form1()
             toolTip.SetToolTip(addOptionButton, "Sor hozzáadása");
             toolTip.SetToolTip(removeOptionButton, "Kijelölt sor törlése");
 
+            glutenCheckBox_Modify = new CheckBox
+            {
+                Text = "Glutén",
+                Location = new Point(150, 300),
+                AutoSize = true
+            };
+            lactoseCheckBox_Modify = new CheckBox
+            {
+                Text = "Laktóz",
+                Location = new Point(230, 300),
+                AutoSize = true
+            };
+            eggCheckBox_Modify = new CheckBox
+            {
+                Text = "Tojás",
+                Location = new Point(310, 300),
+                AutoSize = true
+            };
+            nutsCheckBox_Modify = new CheckBox
+            {
+                Text = "Magvak",
+                Location = new Point(380, 300),
+                AutoSize = true
+            };
+
             Label descriptionLabel = new Label
             {
                 Text = "Leírás:",
-                Location = new Point(20, 300),
+                Location = new Point(20, 340),
                 AutoSize = true
             };
-            TextBox descriptionTextBox = new TextBox
+            descriptionTextBox_Modify = new TextBox
             {
-                Location = new Point(150, 298),
+                Location = new Point(150, 338),
                 Width = 300,
                 Height = 80,
                 Multiline = true,
@@ -1863,27 +1898,27 @@ public Form1()
             Label typeLabel = new Label
             {
                 Text = "Típus:",
-                Location = new Point(20, 390),
+                Location = new Point(20, 430),
                 AutoSize = true
             };
-            ComboBox typeComboBox = new ComboBox
+            typeComboBox_Modify = new ComboBox
             {
-                Location = new Point(150, 388),
+                Location = new Point(150, 428),
                 Width = 300,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            typeComboBox.Items.AddRange(allCategories);
-            typeComboBox.SelectedItem = item.category;
+            typeComboBox_Modify.Items.AddRange(allCategories);
+            typeComboBox_Modify.SelectedItem = item.category;
 
             Label imageLabel = new Label
             {
                 Text = "Kép:",
-                Location = new Point(20, 420),
+                Location = new Point(20, 460),
                 AutoSize = true
             };
-            PictureBox pictureBox = new PictureBox
+            pictureBox_Modify = new PictureBox
             {
-                Location = new Point(150, 418),
+                Location = new Point(150, 458),
                 Size = new Size(150, 150),
                 BorderStyle = BorderStyle.FixedSingle,
                 SizeMode = PictureBoxSizeMode.Zoom,
@@ -1893,7 +1928,7 @@ public Form1()
             Button imageButton = new Button
             {
                 Text = "Új kép kiválasztása",
-                Location = new Point(310, 548),
+                Location = new Point(310, 588),
                 Width = 150,
                 Height = 30
             };
@@ -1905,7 +1940,7 @@ public Form1()
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
                         Image selectedImage = Image.FromFile(openFileDialog.FileName);
-                        pictureBox.Image = selectedImage;
+                        pictureBox_Modify.Image = selectedImage;
                         item.img = selectedImage;
                     }
                 }
@@ -1914,23 +1949,30 @@ public Form1()
             Label availabilityLabel = new Label
             {
                 Text = "Elérhetőség:",
-                Location = new Point(20, 590),
+                Location = new Point(20, 618),
                 AutoSize = true
             };
-            RadioButton availableRadioButton = new RadioButton
+            availableRadioButton_Modify = new RadioButton
             {
                 Text = "Elérhető",
-                Location = new Point(150, 588),
+                Location = new Point(150, 618),
                 AutoSize = true,
                 Checked = item.available
             };
-            RadioButton notAvailableRadioButton = new RadioButton
+            notAvailableRadioButton_Modify = new RadioButton
             {
                 Text = "Nem elérhető",
-                Location = new Point(250, 588),
+                Location = new Point(250, 618),
                 AutoSize = true,
                 Checked = !item.available
             };
+            saveButton_Modify = new Button
+            {
+                Text = "Mentés",
+                Location = new Point(250,648),
+                
+            };
+            saveButton_Modify.Click += SaveButton_Modify_Click;
 
             Panel resultsPanel = new Panel
             {
@@ -1959,24 +2001,28 @@ public Form1()
                 if (resultsListBoxDish.SelectedItem != null)
                 {
                     string selectedItemname = resultsListBoxDish.SelectedItem.ToString();
-                    optionsDataGridView.Rows.Clear();
+                    optionsDataGridView_Modify.Rows.Clear();
                     selectedMenuItem = selectedMenuItems.FirstOrDefault(menu_item => menu_item.name == selectedItemname);
                     if (selectedMenuItem != null)
                     {
-                        nameTextBox.Text = selectedMenuItem.name;
-                        priceNumericUpDown.Value = selectedMenuItem.price;
-                        descriptionTextBox.Text = selectedMenuItem.description;
-                        typeComboBox.SelectedItem = selectedMenuItem.category;
-                        pictureBox.Image = selectedMenuItem.img;
-                        availableRadioButton.Checked = selectedMenuItem.available;
-                        notAvailableRadioButton.Checked = !selectedMenuItem.available;
+                        nameTextBox_Modify.Text = selectedMenuItem.name;
+                        priceNumericUpDown_Modify.Value = selectedMenuItem.price;
+                        descriptionTextBox_Modify.Text = selectedMenuItem.description;
+                        typeComboBox_Modify.SelectedItem = selectedMenuItem.category;
+                        pictureBox_Modify.Image = selectedMenuItem.img;
+                        availableRadioButton_Modify.Checked = selectedMenuItem.available;
+                        notAvailableRadioButton_Modify.Checked = !selectedMenuItem.available;
+                        glutenCheckBox_Modify.Checked = selectedMenuItem.gluten;
+                        lactoseCheckBox_Modify.Checked = selectedMenuItem.lactose;
+                        eggCheckBox_Modify.Checked = selectedMenuItem.egg;
+                        nutsCheckBox_Modify.Checked = selectedMenuItem.nuts;
 
                         if (selectedMenuItem.modifications != null)
                         {
                             foreach (var mod in selectedMenuItem.modifications)
                             {
-                                int rowIndex = optionsDataGridView.Rows.Add();
-                                DataGridViewRow row = optionsDataGridView.Rows[rowIndex];
+                                int rowIndex = optionsDataGridView_Modify.Rows.Add();
+                                DataGridViewRow row = optionsDataGridView_Modify.Rows[rowIndex];
 
                                 row.Cells[0].Value = mod.Item1;
                                 row.Cells[1].Value = mod.Item2;
@@ -1993,26 +2039,45 @@ public Form1()
             centralPanel.Controls.Add(searchTextBoxDish);
             centralPanel.Controls.Add(searchButton);
             centralPanel.Controls.Add(nameLabel);
-            centralPanel.Controls.Add(nameTextBox);
+            centralPanel.Controls.Add(nameTextBox_Modify);
             centralPanel.Controls.Add(priceLabel);
-            centralPanel.Controls.Add(priceNumericUpDown);
+            centralPanel.Controls.Add(priceNumericUpDown_Modify);
             centralPanel.Controls.Add(optionsLabel);
-            centralPanel.Controls.Add(optionsDataGridView);
+            centralPanel.Controls.Add(optionsDataGridView_Modify);
             centralPanel.Controls.Add(addOptionButton);
             centralPanel.Controls.Add(removeOptionButton);
+
+            centralPanel.Controls.Add(glutenCheckBox_Modify);
+            centralPanel.Controls.Add(lactoseCheckBox_Modify);
+            centralPanel.Controls.Add(eggCheckBox_Modify);
+            centralPanel.Controls.Add(nutsCheckBox_Modify);
+
             centralPanel.Controls.Add(descriptionLabel);
-            centralPanel.Controls.Add(descriptionTextBox);
+            centralPanel.Controls.Add(descriptionTextBox_Modify);
             centralPanel.Controls.Add(typeLabel);
-            centralPanel.Controls.Add(typeComboBox);
+            centralPanel.Controls.Add(typeComboBox_Modify);
             centralPanel.Controls.Add(imageLabel);
-            centralPanel.Controls.Add(pictureBox);
+            centralPanel.Controls.Add(pictureBox_Modify);
             centralPanel.Controls.Add(imageButton);
             centralPanel.Controls.Add(availabilityLabel);
-            centralPanel.Controls.Add(availableRadioButton);
-            centralPanel.Controls.Add(notAvailableRadioButton);
+            centralPanel.Controls.Add(availableRadioButton_Modify);
+            centralPanel.Controls.Add(notAvailableRadioButton_Modify);
+            centralPanel.Controls.Add(saveButton_Modify);
 
             panel4.Controls.Add(centralPanel);
             panel4.Controls.Add(resultsPanel);
+        }
+
+        private void SaveButton_Modify_Click(object sender, EventArgs e)
+        {
+            List<(string, int)> cutomisations = new List<(string, int)>();
+            List<string> sauces = new List<string>();
+
+            ReadNewProductOptionsDataFromDataGridView(ref cutomisations, ref sauces, optionsDataGridView_Modify);
+
+
+            PutDishModificationstRequest(selectedMenuItem.id,nameTextBox_Modify.Text, Convert.ToInt32(priceNumericUpDown_Modify.Value), cutomisations, sauces, descriptionTextBox_Modify.Text, typeComboBox_Modify.SelectedItem.ToString(), "null", glutenCheckBox_Modify.Checked, lactoseCheckBox_Modify.Checked, eggCheckBox_Modify.Checked, nutsCheckBox_Modify.Checked);
+
         }
 
         private async void SearchButton_Dish_Click(object sender, EventArgs e)
@@ -2027,7 +2092,7 @@ public Form1()
 
         public async Task<List<MenuItem>> getAllMenuItems()
         {
-            string url = "http://localhost:3000/api/v1/get-dishes";
+            string url = "http://localhost:3000/api/v1/dishes";
 
             HttpResponseMessage response = await sharedClient.GetAsync(url).ConfigureAwait(false);
             List<MenuItem> items = new List<MenuItem>();
@@ -2056,6 +2121,10 @@ public Form1()
                         string description = finalJsonElement[i].GetProperty("description").GetString();
                         string type = finalJsonElement[i].GetProperty("type").GetString();
                         Image img = null;
+                        bool gluten = false/*finalJsonElement[i].GetProperty("gluten").GetBoolean()*/;
+                        bool lactose = true/*finalJsonElement[i].GetProperty("lactose").GetBoolean()*/;
+                        bool egg = false/*finalJsonElement[i].GetProperty("egg").GetBoolean()*/;
+                        bool nuts = true/*finalJsonElement[i].GetProperty("nuts").GetBoolean()*/;
 
                         List<(string, int, bool)> modifications = new List<(string, int, bool)>(); // név, ár, sauce e?
 
@@ -2081,7 +2150,7 @@ public Form1()
                             modifications = null;
                         }
 
-                        MenuItem item = new MenuItem(id,name,price,available,modifications,description, type, img);
+                        MenuItem item = new MenuItem(id,name,price,available,modifications,description, type, img,gluten,lactose,egg,nuts);
                         items.Add(item);
                     }
 
@@ -2091,11 +2160,8 @@ public Form1()
             }
             else
             {
-                MessageBox.Show("HIBA1");
+                MessageBox.Show("Hiba!\nüzenet 1:"+response.StatusCode);
             }
-            
-
-
             return new List<MenuItem>();
         }
 
@@ -2114,41 +2180,50 @@ public Form1()
             }
         }
 
-        private async void postDishModifications(string givenItemName, int givenPrice, bool givenAvailable, List<(string, int, bool)> givenModifications, string givenDescription, string givenCategory, Image img)
+        private async void PutDishModificationstRequest(int givenID, string givenName, int givenPrice, List<(string, int)> givenCustomizationOptions, List<string> givenSauceOptions, string givenDescription, string givenType, string givenIMGblob, bool givenGluten, bool givenLactose, bool givenEgg, bool givenNuts)
         {
-            //var blob = Convert.To
-            MessageBox.Show(givenItemName + " " + Convert.ToString(givenPrice) + " " + Convert.ToString(givenAvailable) + " " + givenDescription + " " + givenCategory);
+            var product = new
+            {
+                id = givenID,
+                name = givenName,
+                price = givenPrice,
+                customizationOptions = givenCustomizationOptions.Select(option => new { name = option.Item1, price = option.Item2 }),
+                sauceOptions = givenSauceOptions,
+                description = givenDescription,
+                type = givenType,
+                image = givenIMGblob,
+                gluten = givenGluten,
+                lactose = givenLactose,
+                egg = givenEgg,
+                nuts = givenNuts
+            };
 
-            //string url = "http://localhost:3000/api/v1/";
-            //var credentials = new List<KeyValuePair<string, string>>
-            //{
-            //    new KeyValuePair<string, string>("name", givenItemName),
-            //    new KeyValuePair<string, string>("price", Convert.ToString(givenPrice)),
-            //    new KeyValuePair<string, string>("available", Convert.ToString(givenAvailable)),
-            //    new KeyValuePair<string, string>("lista", null), //ez kérdéses hogy oldom meg
-            //    new KeyValuePair<string, string>("description", givenDescription),
-            //    new KeyValuePair<string, string>("category", givenCategory),
-            //};
+            string jsonData = JsonSerializer.Serialize(product);
 
-            //try
-            //{
-            //    using (var client = new HttpClient())
-            //    {
-            //        var content = new FormUrlEncodedContent(credentials);
+            string url = "http://localhost:3000/api/v1/dish";
 
-            //        HttpResponseMessage response = await client.PostAsync(url, content);
-            //        if (response.IsSuccessStatusCode)
-            //        {
-            //            string responseBody = await response.Content.ReadAsStringAsync();
-            //        }
-            //        else
-            //        {
-            //        }
-            //    }
-            //}
-            //catch
-            //{
-            //}
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                    HttpResponseMessage response = await client.PutAsync(url, content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show("Sikeres mentés.");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Hiba!\nüzenet 2:" + response.StatusCode);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hiba!\nüzenet 3:" + ex.Message);
+            }
         }
 
 
@@ -2242,8 +2317,12 @@ public Form1()
             public string description { get; set; }
             public string category { get; set; }
             public Image img { get; set; }
+            public bool gluten { get; set; }
+            public bool lactose { get; set; }
+            public bool egg { get; set; }
+            public bool nuts { get; set; }
 
-            public MenuItem(int id, string name, int price, bool available, List<(string, int, bool)> modifications, string description, string category, Image img)
+            public MenuItem(int id, string name, int price, bool available, List<(string, int, bool)> modifications, string description, string category, Image img, bool gluten, bool lactose, bool egg, bool nuts)
             {
                 this.id = id;
                 this.name = name;
@@ -2253,6 +2332,10 @@ public Form1()
                 this.description = description;
                 this.category = category;
                 this.img = img;
+                this.gluten = gluten;
+                this.lactose = lactose;
+                this.egg = egg;
+                this.nuts = nuts;
             }
 
             public override string ToString()
