@@ -13,6 +13,8 @@ const cartStore = useCartStore()
 const { isError, mutate: validateToken } = useValidateToken()
 const { data } = useGetDishes()
 
+console.log(data.value)
+
 // Állapot változók
 const selectedDish = ref<dishData | null>(null)
 const selectedSauce = ref<string | null>(null)
@@ -161,7 +163,9 @@ onMounted(() => {
         cols="12" sm="6" md="4" xl="3"
       >
         <v-card class="mx-auto mb-6 dish-card" max-width="344">
-          <img height="275px" :src="`data:image/png;base64,${dish.img}`" />
+          <div style="width: 340px; height: 300px;">
+            <img :src="`data:image/png;base64,${dish.img}`" style="width: 100%; height: 100%;" />
+          </div>
           <v-card-text style="border-top: solid whitesmoke 3px; border-top-left-radius: 40px; border-top-right-radius: 40px; background-color: whitesmoke; box-shadow: 0 0 3px 1px whitesmoke;">
             <div class="mt-4 dish-data-box">
               <div class="ml-2 mr-2 dish-data">
@@ -188,7 +192,7 @@ onMounted(() => {
     <v-card style="background-color:  rgba(255, 255, 255, .95); box-shadow: 0 0 10px 5px white;">
       <div class="modalHeader">
         <div class="modalImg">
-          <v-img v-if="selectedDish" :src="`data:image/png;base64,${selectedDish.img}`" style="width: 11.5dvw; height: 15dvh; border: 2px solid black; border-radius: 40px; border-top-right-radius: 4px; margin: 2%; box-shadow: 0 0 5px .5px black; background-color: lightgray"></v-img>
+          <v-img v-if="selectedDish" :src="`data:image/png;base64,${selectedDish.img}`" height="9rem"></v-img>
         </div>
         <div class="modalInfo">
           <v-card-title v-if="selectedDish" class="mb-10"><b>{{ selectedDish.name }}</b></v-card-title>
@@ -311,9 +315,9 @@ onMounted(() => {
 .modalHeader{
   display: flex;
   flex-direction: row-reverse;
-  width: 100%; border-bottom:
-  solid 2px black;
-  padding-bottom: 2%;
+  width: 100%;
+  height: 100%;
+  border-bottom:solid 2px black;
 }
 
 .modalInfo{
@@ -322,7 +326,8 @@ onMounted(() => {
 
 .modalImg{
   width: 30%;
-  visibility: visible;
+  height: auto;
+  display: flex;
 }
 
 .selected-button{
@@ -340,7 +345,7 @@ onMounted(() => {
     display: block;
   }
    .modalImg{
-    visibility: hidden;
+    display: none;
     width: 0;
    }
 }
