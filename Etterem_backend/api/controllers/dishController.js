@@ -47,17 +47,16 @@ exports.createDish = async (req,res,next) =>
     }
 }
 
-exports.getAllDishes = async (req,res,next) =>
-{
-    try
-    {
-        const dishes = await dishService.getAllDishes()
-        res.status(200).json(dishes)
-    } catch (error) {
-        next(error)
-    }
-        
+exports.getAllDishes = async (req, res, next) => {
+  try {
+    const dishes = await dishService.getAllDishes()
+
+    res.status(200).json(dishes)
+  } catch (error) {
+    next(error)
+  }
 }
+
 
 exports.modifyDish = async (req,res,next) =>
 {
