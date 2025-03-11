@@ -1,4 +1,0 @@
-xampp ->
-mysql config gomb ->
-my.ini ->
-max_allowed_packet  = 1M --to--> max_allowed_packet  = 512M

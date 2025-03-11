@@ -13,8 +13,8 @@ const authLinks = [
 
 // API hívások
 const { isError, mutate: validateToken, isPending:validating } = useValidateToken()
-const { data: userData } = useGetUserInfo()
 const { mutate:logout, isPending:loggingOut} = useLogout()
+const { data: userData } = useGetUserInfo()
 
 const isLoggedIn = computed(() => !isError.value && userData.value)
 

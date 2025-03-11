@@ -41,7 +41,7 @@ function removeItemFromCart(itemId : number) {
 }
 
 // Szűrés
-const categoryOrder = ['Wrap', 'Kebab', 'Drink']
+const categoryOrder = ['Wrap', 'Kebab', 'SideDish','Drink']
 const groupedItems = computed(() => {
   const groups: Record<string, typeof cartStore.items> = {};
   cartStore.items.forEach((item) => {
@@ -123,7 +123,7 @@ onMounted(() => {
       </div>
       <div style="margin-bottom: 17.5dvh;">
           <div v-for="(items, type) in groupedItems" :key="type">
-            <h2 class="mt-4 mb-2 pl-4 groups">{{ type === 'Drink' ? "Üdítő" : type}}:</h2>
+            <h2 class="mt-4 mb-2 pl-4 groups">{{ type === 'Drink' ? "Üdítő" : type === 'SideDish' ? 'Köret' : type}}:</h2>
             
             <v-row class="cart">
               <v-col 

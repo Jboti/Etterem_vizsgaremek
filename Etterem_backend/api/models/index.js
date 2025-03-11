@@ -63,6 +63,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'allergenable_id',
         constraints: false,
         as: 'allergenables',
+        onDelete: 'CASCADE',
         scope: {
           allergenable_type: 'dish'
         }
@@ -72,6 +73,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'allergenable_id',
         constraints: false,
         as: 'allergenables',
+        onDelete: 'CASCADE',
         scope: {
           allergenable_type: 'user'
         }

@@ -23,23 +23,38 @@ class dishRepository
 
     async getAllDishes()
     {
-        return await this.Dish.findAll({})
+        return await this.Dish.findAll({
+            include: [
+                {
+                    model: this.Allergenables,
+                    as: "allergenables",
+                    include: [
+                        {
+                            model: this.Allergy,
+                            as: "allergy"
+                        }
+                    ]
+                }
+            ]
+        })
     }
 
     async createDish(dish, allergies)
     {
         const newDish = await this.Dish.create(dish)
         for (const allergyName in allergies) {
-            const foundAllergy = await this.Allergy.findOne({
-                where: { name: allergyName }
-            })
-
-            if (foundAllergy) {
-                await this.Allergenables.create({
-                    allergenable_type: 'dish',
-                    allergenable_id: newDish.id,
-                    allergen_id: foundAllergy.id
+            if(allergies[allergyName]){
+                const foundAllergy = await this.Allergy.findOne({
+                    where: { name: allergyName }
                 })
+
+                if (foundAllergy) {
+                    await this.Allergenables.create({
+                        allergenable_type: 'dish',
+                        allergenable_id: newDish.id,
+                        allergen_id: foundAllergy.id
+                    })
+                }
             }
         }
         return newDish

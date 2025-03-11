@@ -11,8 +11,8 @@ export const useCartStore = defineStore('cart', () => {
   function addItem(item:cartItem) {
     const index = items.value.findIndex((Eitem) => {
       
-      const sortedEitemOptions = Eitem.options.split(',').map(opt => opt.trim()).sort().join(',')
-      const sortedItemOptions = item.options.split(',').map(opt => opt.trim()).sort().join(',')
+      const sortedEitemOptions = Eitem.options?.split(',').map(opt => opt.trim()).sort().join(',')
+      const sortedItemOptions = item.options?.split(',').map(opt => opt.trim()).sort().join(',')
       
       return Eitem.dishId === item.dishId && Eitem.sause === item.sause && sortedEitemOptions === sortedItemOptions
     })
@@ -54,19 +54,36 @@ export const useCartStore = defineStore('cart', () => {
   {
     for(let i = 0; i< purchase.order_dishes.length;i++)
     {
+      const tempItem:cartItem = {
+        cartId: -1,
+        dishId: -1,
+        name: '',
+        price: 0,
+        sause: '',
+        options: '',
+        type: '',
+        quantity: 0
+      }
+
       if(purchase.order_dishes[i].dish.type == "Drink")
       {
-        const tempItem:cartItem = {
-          cartId: -1,
-          dishId: purchase.order_dishes[i].dish_id,
-          name: purchase.order_dishes[i].dish.name,
-          price: purchase.order_dishes[i].dish.price+50,
-          sause: purchase.order_dishes[i].customizations.split(',')[0].slice(1),
-          options: purchase.order_dishes[i].customizations.split(',').splice(1).join(',').slice(0,-1),
-          type: purchase.order_dishes[i].dish.type,
-          quantity: purchase.order_dishes[i].amount
-        }
-        addItem(tempItem)
+        tempItem.dishId = purchase.order_dishes[i].dish_id
+        tempItem.name = purchase.order_dishes[i].dish.name
+        tempItem.price = purchase.order_dishes[i].dish.price+50
+        tempItem.sause = null
+        tempItem.options = null
+        tempItem.type = purchase.order_dishes[i].dish.type
+        tempItem.quantity = purchase.order_dishes[i].amount
+      }
+      else if(purchase.order_dishes[i].dish.type == "SideDish")
+      {
+        tempItem.dishId = purchase.order_dishes[i].dish_id
+        tempItem.name = purchase.order_dishes[i].dish.name
+        tempItem.price = purchase.order_dishes[i].dish.price
+        tempItem.sause = null
+        tempItem.options = null
+        tempItem.type = purchase.order_dishes[i].dish.type
+        tempItem.quantity = purchase.order_dishes[i].amount
       }
       else{
         let additionalPrice = 0
@@ -79,20 +96,17 @@ export const useCartStore = defineStore('cart', () => {
                 additionalPrice += option.price
             }
         })
-        
   
-        const tempItem:cartItem = {
-          cartId: -1,
-          dishId: purchase.order_dishes[i].dish_id,
-          name: purchase.order_dishes[i].dish.name,
-          price: purchase.order_dishes[i].dish.price+additionalPrice,
-          sause: purchase.order_dishes[i].customizations.split(',')[0].slice(1),
-          options: purchase.order_dishes[i].customizations.split(',').splice(1).join(',').slice(0,-1),
-          type: purchase.order_dishes[i].dish.type,
-          quantity: purchase.order_dishes[i].amount
-        }
-        addItem(tempItem)
+        tempItem.dishId = purchase.order_dishes[i].dish_id,
+        tempItem.name = purchase.order_dishes[i].dish.name,
+        tempItem.price = purchase.order_dishes[i].dish.price+additionalPrice,
+        tempItem.sause = purchase.order_dishes[i].customizations.split(',')[0].slice(1),
+        tempItem.options = purchase.order_dishes[i].customizations.split(',').splice(1).join(',').slice(0,-1),
+        tempItem.type = purchase.order_dishes[i].dish.type,
+        tempItem.quantity = purchase.order_dishes[i].amount
+      
       }
+      addItem(tempItem)
     }
   }
 

@@ -27,7 +27,7 @@ export type cartItem = {
     name:string,
     price:number
     sause:string | null,
-    options:string,
+    options:string | null,
     type:string,
     quantity: number
 }

@@ -2,8 +2,9 @@
 import { useValidateToken } from '@/api/auth/authQuery';
 import type { cartItem, dishData } from '@/api/menuItems/items';
 import { useGetDishes } from '@/api/menuItems/itemsQuery'
+import { useGetUserInfo } from '@/api/user/userQuery';
 import { useCartStore } from '@/stores/cartStore';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { toast } from 'vue3-toastify';
 
 const notify = () => {}
@@ -11,9 +12,8 @@ const cartStore = useCartStore()
 
 // API hívások
 const { isError, mutate: validateToken } = useValidateToken()
-const { data } = useGetDishes()
-
-console.log(data.value)
+const { data:dishesData } = useGetDishes()
+const { data:userData } = useGetUserInfo()
 
 // Állapot változók
 const selectedDish = ref<dishData | null>(null)
@@ -23,6 +23,29 @@ const isModalOpen = ref(false)
 const amount = ref(1)
 const selectedCategory = ref<string | null>(null)
 const selectedData = ref<any>(null)
+const dishTypes = [
+  { name: 'Wrap', display:'Wrappek'},
+  { name: 'Kebab', display:'Kebabok'},
+  { name: 'SideDish', display:'Köretek'},
+  { name: 'Drink', display: 'Üdítők'},
+]
+
+// Szűrés
+const groupedItems = computed(() => {
+  const groups: Record<string, dishData[]> = {}
+
+  dishTypes.forEach(({ name }) => {
+    groups[name] = []
+  })
+
+  dishesData.value?.forEach((item) => {
+    if (groups[item.type]) {
+      groups[item.type].push(item)
+    }
+  })
+
+  return groups
+})
 
 // Helper: JSON parse
 const parseJSON = (str: string) => {
@@ -44,7 +67,7 @@ const addToCart = (dish:any) =>{
   if(dish.type == 'Drink'){
     price += 50
   }
-  else{
+  else if(dish.type !== 'SideDish'){
     const sauceOptions = parseJSON(dish.sauceOptions || '[]')
     if(sauceOptions.length == 1)
       selectedSauce.value = sauceOptions[0].name
@@ -56,7 +79,8 @@ const addToCart = (dish:any) =>{
       price += option.price
     })
   }
-  const newItem:cartItem = {
+  const newItem:cartItem = 
+  {
     cartId: -1,
     dishId: dish.id,
     name: dish.name,
@@ -64,10 +88,10 @@ const addToCart = (dish:any) =>{
     sause: selectedSauce.value,
     options: selectedOptions.value.map(o => o.name).join(', '),
     type: dish.type,
-    quantity: dish.type === 'Drink' ? 1 : amount.value,
+    quantity: dish.type === 'Drink' || dish.type === 'SideDish' ? 1 : amount.value,
   }
   cartStore.addItem(newItem)
-  if (dish.type !== 'Drink') {
+  if (dish.type !== 'Drink' || dish.type !== 'SideDish') {
     toast.success('A termék a kosárba került!')
     closeModal()
   }
@@ -100,22 +124,32 @@ const handleSauceSelected = (sauce: any) => {
   }
 }
 
-// Szűrés
+// Felhasználó allergiásE adott ételre
+
+const isUserAllergic = (dish:any) : boolean =>{
+  if(!userData.value || !userData.value.allergenables || !dish.allergenables) return false
+  return dish.allergenables.some((dishAllergen: any) =>
+    userData.value.allergenables.some((userAllergen: any) =>
+      dishAllergen.allergy.name === userAllergen.allergy.name
+    )
+  )
+}
+
+// Rendezés
 function selectedCategoryHandle(category:string){
   if(selectedCategory.value === category)
     selectedCategory.value = null
   else
   {
     selectedCategory.value = category
-    selectedData.value = data.value?.filter((item: dishData) => item.type === category)
+    selectedData.value = dishesData.value?.filter((item: dishData) => item.type === category)
   }
 }
 
 // Modal actions
 const openModal = (dish:any) => {
-  if(dish.type == 'Drink'){
+  if(dish.type == 'Drink' || dish.type == 'SideDish'){
     addToCart(dish)
-    toast.success("A termék a kosárba került!")
   }else{
     selectedDish.value = dish
     isModalOpen.value = true
@@ -141,35 +175,34 @@ onMounted(() => {
   <div class="pb-2 mb-4 text-center topMenu" style="background: linear-gradient(90deg, black 0%, #B71C1C 50%, black 100%); border-bottom: solid 1px white;">
     <h1 class="pb-2 pt-2" style="font-weight: bold; color: whitesmoke;">Étlap</h1>
     <v-row style="width: 100%; margin: auto;">
-      <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl" @click="selectedCategoryHandle('Wrap')" :class="{ 'selected-category': selectedCategory == 'Wrap'}"><b>Wrappek</b></v-btn>
-      </v-col>
-      <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl" @click="selectedCategoryHandle('Kebab')" :class="{ 'selected-category': selectedCategory == 'Kebab'}"><b>Kebabok</b></v-btn>  
-      </v-col>
-      <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl" @click="selectedCategoryHandle('SideDish')" :class="{ 'selected-category': selectedCategory == 'SideDish'}"><b>Köretek</b></v-btn>  
-      </v-col>
-      <v-col cols="6" sm="3">
-        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl" @click="selectedCategoryHandle('Drink')" :class="{ 'selected-category': selectedCategory == 'Drink'}"><b>Üdítők</b></v-btn>
+      <v-col cols="6" sm="3" v-for="type in dishTypes" :key="type.name">
+        <v-btn class="bg-red-darken-4 mr-3 mb-1 mt-1 buttons" rounded="xl" @click="selectedCategoryHandle(type.name)" :class="{ 'selected-category': selectedCategory == type.name}"><b>{{type.display}}</b></v-btn>
       </v-col>
     </v-row>
   </div>
   <v-container style="margin-bottom: 150px;">
     <v-row>
+      <template v-if="!selectedCategory" v-for="(dishes,index) in groupedItems" :key="index">
       <v-col 
-        v-for="(dish, index) in selectedCategory == null ? data : selectedData"
+        v-for="(dish, index) in dishes"
         :key="`${dish.id}`"
         cols="12" sm="6" md="4" xl="3"
       >
-        <v-card class="mx-auto mb-6 dish-card" max-width="344">
-          <div style="width: 340px; height: 300px;">
-            <img :src="`data:image/png;base64,${dish.img}`" style="width: 100%; height: 100%;" />
+        <v-card class="mx-auto mb-6 dish-card" max-width="344" style="background-color: whitesmoke; box-shadow: 0 0 20px 8px black inset, 0 0 5px 2px black; color: black;" :style="`background-image: url(data:image/png;base64,${dish.img});`">
+          <div style="width: 344px; height: 344px;">
+            <v-icon 
+              v-if="isUserAllergic(dish)" 
+              color="red"
+              title="Vigyázz: Valószínűleg allergiás vagy erre az ételre!"
+              style="position: absolute; top: 15px; left: 15px; z-index: 2; font-size: 52px; padding-bottom: 4px; text-shadow: 1.5px 1.5px 2px darkred; border-radius: 25%; background-color: rgba(0, 0, 0, 0.6);"
+            >
+              mdi-exclamation-thick
+            </v-icon>
           </div>
-          <v-card-text style="border-top: solid whitesmoke 3px; border-top-left-radius: 40px; border-top-right-radius: 40px; background-color: whitesmoke; box-shadow: 0 0 3px 1px whitesmoke;">
+          <v-card-text style="border-top-left-radius: 40px; border-top-right-radius: 40px; background-color: rgba(255, 255, 255, 0.5); box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.4);">
             <div class="mt-4 dish-data-box">
               <div class="ml-2 mr-2 dish-data">
-                <div><b>{{ dish.name }}</b></div>
+                <div><b>{{ dish.name }} <a v-if="isUserAllergic(dish)" style="color: red;">!</a></b></div>
                 <div v-if="dish.type == 'Drink'">{{ dish.price }}+50 Ft</div>
                 <div v-else>{{ dish.price }} Ft</div>
               </div>
@@ -180,6 +213,39 @@ onMounted(() => {
           </v-card-text>
         </v-card>
       </v-col>
+      </template>
+      <template v-else>
+        <v-col 
+        v-for="(dish, index) in selectedData"
+        :key="`${dish.id}`"
+        cols="12" sm="6" md="4" xl="3"
+      >
+        <v-card class="mx-auto mb-6 dish-card" max-width="344" style="background-color: whitesmoke; box-shadow: 0 0 20px 8px black inset, 0 0 5px 2px black; color: black;" :style="`background-image: url(data:image/png;base64,${dish.img});`">
+          <div style="width: 344px; height: 344px;">
+            <v-icon 
+              v-if="isUserAllergic(dish)" 
+              color="error" 
+              title="Vigyázz: Valószínűleg allergiás vagy erre az ételre!"
+              style="position: absolute; top: 0px; left: 0px; z-index: 2; font-size: 54px; text-shadow: 1px 1.25px 1px black;"
+            >
+              mdi-bottle-tonic-skull
+            </v-icon>
+          </div>
+          <v-card-text style="border-top-left-radius: 40px; border-top-right-radius: 40px; background-color: rgba(255, 255, 255, 0.5); box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.4);">
+            <div class="mt-4 dish-data-box">
+              <div class="ml-2 mr-2 dish-data">
+                <div><b>{{ dish.name }} <a v-if="isUserAllergic(dish)" style="color: red;">!</a></b></div>
+                <div v-if="dish.type == 'Drink'">{{ dish.price }}+50 Ft</div>
+                <div v-else>{{ dish.price }} Ft</div>
+              </div>
+              <v-btn class="pl-4 pr-4 pt-2 pb-2 cartButtons" @click="handleAddToCartClicked(dish)">
+                <b>Kosárba</b>
+              </v-btn>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      </template>
     </v-row>
   </v-container>
   <div>
@@ -191,9 +257,6 @@ onMounted(() => {
    <v-dialog v-model="isModalOpen" max-width="800px" @click:outside="closeModal" style="background-color: rgba(0, 0, 0, 0.7);">
     <v-card style="background-color:  rgba(255, 255, 255, .95); box-shadow: 0 0 10px 5px white;">
       <div class="modalHeader">
-        <div class="modalImg">
-          <v-img v-if="selectedDish" :src="`data:image/png;base64,${selectedDish.img}`" height="9rem"></v-img>
-        </div>
         <div class="modalInfo">
           <v-card-title v-if="selectedDish" class="mb-10"><b>{{ selectedDish.name }}</b></v-card-title>
           <v-card-text v-if="selectedDish">
@@ -258,13 +321,13 @@ onMounted(() => {
   border-top-right-radius: 10px;
   box-shadow: 0 0 2px 1px whitesmoke inset, 0 0 5px 2px whitesmoke;
   animation: 1s ease-in-out sizeUp;
-  transition: transform .5s ease-in-out, box-shadow .7s ease-in-out;
+  transition: transform .5s ease-in-out, box-shadow .5s ease-in-out, border-color .5s ease-in-out;
 }
 
 .dish-card:has(.cartButtons:hover) {
-  transform: scale(1.05);
-  box-shadow: 0 0 2px 1px black inset, 0 0 5px 2px black;
-  border: black;
+  transform: scale(1.05) translateY(-3%);
+  box-shadow: 0 0 5px 5px black inset, 0 0 5px 2px black;
+  border-color: black;
 }
 
 .dish-data{
@@ -307,7 +370,7 @@ onMounted(() => {
 }
 
 .buttons:hover{
-  transform: scale(1.2);
+  transform: scale(1.1);
   box-shadow: 0 0 2px .5px whitesmoke inset, 0 0 10px 2px whitesmoke;
 
 }
@@ -321,13 +384,7 @@ onMounted(() => {
 }
 
 .modalInfo{
-  width: 70%;
-}
-
-.modalImg{
-  width: 30%;
-  height: auto;
-  display: flex;
+  width: 100%;
 }
 
 .selected-button{
@@ -335,20 +392,6 @@ onMounted(() => {
   color: white;
 }
 
-
-/* Media query */
-@media screen and (max-width: 800px){
-  .modalInfo{
-    width: 100%;
-  }
-  .modalHeader{
-    display: block;
-  }
-   .modalImg{
-    display: none;
-    width: 0;
-   }
-}
 
 /* Animations */
 @keyframes slideInFromTop {

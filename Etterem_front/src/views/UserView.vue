@@ -363,26 +363,22 @@ onMounted(() => {
                 
         <!-- Allergia beállítások -->
         <v-card class="allergy-box">
-          <div style="display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%;">
-            <v-card-title><b>Allergiák beállítása:</b></v-card-title>
-            <v-card style="background-color: transparent; box-shadow: none; width: 100%; display: flex; flex-direction: column;">
+            <v-card style="background-color: transparent; box-shadow: none; display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%;">
+              <v-card-title style="text-align: center;"><b>Allergiák beállítása:</b></v-card-title>
               
-              <div class="allergy-grid">
-                <v-checkbox label="Glutén érzékenység" color="success" v-model="userAllergiesRef.gluten"></v-checkbox>
-                <v-checkbox label="Laktóz érzékenység" color="success" v-model="userAllergiesRef.lactose"></v-checkbox>
-                <v-checkbox label="Tojás érzékenység" color="success" v-model="userAllergiesRef.egg"></v-checkbox>
-                <v-checkbox label="Földimogyoró érzékenység" color="success" v-model="userAllergiesRef.nuts"></v-checkbox>
-              </div>
-
+              <v-card-text class="allergy-grid px-2">
+                <v-checkbox label="Glutén érzékenység" color="success" v-model="userAllergiesRef.gluten"  hide-details></v-checkbox>
+                <v-checkbox label="Laktóz érzékenység" color="success" v-model="userAllergiesRef.lactose"  hide-details></v-checkbox>
+                <v-checkbox label="Tojás érzékenység" color="success" v-model="userAllergiesRef.egg"  hide-details></v-checkbox>
+                <v-checkbox label="Földimogyoró érzékenység" color="success" v-model="userAllergiesRef.nuts"  hide-details></v-checkbox>
+              </v-card-text>
               <div style="text-align: center; margin-top: 10px;">
-                <v-btn class="button" color="success" style="width: 30%;" @click="handleAllergiesChange(userAllergiesRef)">Mentés</v-btn>
+                <v-btn class="button" color="success" style="width: 100%;" @click="handleAllergiesChange(userAllergiesRef)">Mentés</v-btn>
               </div>
-
-              <v-card-subtitle class="multiline-text mt-6" style="display: flex; align-items: center;">
-                <v-icon class="mr-2" color="error">mdi-bottle-tonic-skull</v-icon> Ez az icon fogja jelölni az ételeket, amikre allergiás lehetsz!
-              </v-card-subtitle>
+              <v-card-subtitle class="multiline-text my-2" style="display: flex; align-items: center;">
+              <v-icon class="mr-2" color="error">mdi-exclamation-thick</v-icon> Ez az icon fogja jelölni az ételeket, amikre allergiás lehetsz!
+                </v-card-subtitle>
             </v-card>
-          </div>
         </v-card>
       </v-card>
   </div>
@@ -447,8 +443,8 @@ onMounted(() => {
   display: grid;
   justify-items: center;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
   width: 100%;
+  padding: 0;
 }
 
 .button{
