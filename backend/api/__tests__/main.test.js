@@ -1,14 +1,17 @@
 const request = require("supertest");
+require("dotenv").config();
+
 //var userController = require("./api/controllers/userController")
 //jest.setTimeout(15000); //evvel tudjuk meghosszabbítani a várási időt, alap 5 mp(5000)
-
+const jwt = require("jsonwebtoken");
 const app = require("../../app");
 const dishController = require("../controllers/dishController");
 const purchaseController = require("../controllers/purchaseController");
 const testController = require("../controllers/testController");
 const userController = require("../controllers/userController");
 const purchaseService = require("../services/purchaseService");
-const { BLOB } = require("sequelize");
+const { orderConnectionService } = require('../services/orderConnectionService');
+const { userService } = require('../services/userService');
 
 jest.mock("../db/dbContext", () => require("../../__mocks__/db"));
 
@@ -27,34 +30,35 @@ describe("Controller tesztek", ()=>
         
         jest.mock("../services/dishService");
         
-        /*describe("Dish Controller Tests", () => {
+        describe("Dish Controller Tests", () => {
 
             test("getDishes test helytelen", async () => 
                 {
-                    const res = await request(app).get("/api/v1/get-dishes");
+                    const res = await request(app).get("/api/v1/dishes");
 
                     expect(res.statusCode).toBe(500);
                 })
                 
             test("createDish test helyes", async () => 
                 {
-                    const base64Image = "iVBORw0KGgoAAAANSUhEUgAA...";
-                    const res = await request(app).post("/api/v1/create-new-dish")
+                    const base64Image = "image";
+                    const res = await request(app).post("/api/v1/dish")
+                    .set("Content-Type", "application/json")
                     .send({
                         name:"TestDishName",price:100,created:"vmiido",
                         available:true,sauceOptions:{},customizationOptions:{},
-                        description:"description",type:"type",
-                        img:Blob,gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"//NEMTOM H KELL BLOBOT TESZTELNI
+                        description:"description",type:"type",image:"base64Image",
+                        gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
 
                     });
-
+                    console.log();
                     expect(res.statusCode).toBe(201);
                     
                 })
 
             test("getDishes test helyes", async () => 
                 {
-                    const res = await request(app).get("/api/v1/get-dishes");
+                    const res = await request(app).get("/api/v1/dishes");
 
                     expect(res.statusCode).toBe(200);
                 })
@@ -62,7 +66,7 @@ describe("Controller tesztek", ()=>
             test("createDish test helytelen", async () => 
                 {
                     
-                    const res = await request(app).post("/api/v1/create-new-dish")
+                    const res = await request(app).post("/api/v1/dish")
                     .send({
                         name:"TestDishName",price:"100",created:"vmiido",
                         available:true,sauceOptions:{},customizationOptions:{},
@@ -83,9 +87,9 @@ describe("Controller tesztek", ()=>
                     expect(res.statusCode).toBe(404);
                 })
 
-        });*/
+        });
         
-        /*describe("userController", () => {
+        describe("userController", () => {
 
             test("createUser test helyes", async () => 
                 {
@@ -93,38 +97,95 @@ describe("Controller tesztek", ()=>
                     .send({
                         userName:"TestUserName",fullName:"TestFullName",email:"danikataurusz@gmail.com",password:"password"
                     });
-
+                    console.log(res.body);
                     expect(res.statusCode).toBe(201);
                 })
 
-        });*/
-        
-        /*jest.mock("../services/purchaseService", () => ({
-            getAllPurchaseUserInfo: jest.fn()
-        }));
+        });
 
         describe("purchaseController", () => {
+            
+                // Létrehozunk egy érvényes felhasználót és bejelentkezünk, hogy megkapjuk a JWT tokent
+                // order.test.js (a tesztfájl elején)
+                
+// 1. Mockold a szolgáltatásokat
+jest.mock('../services/orderConnectionService', () => ({
+    createPurchaseConnection: jest.fn() // Közvetlenül a függvényt mockoljuk
+  }));
+  
+  jest.mock('../services/userService', () => ({
+    usePoints: jest.fn()
+  }));
+  
+  // 2. Importáld a mock-olt függvényeket
+  const { createPurchaseConnection } = require('../services/orderConnectionService');
+  const { usePoints } = require('../services/userService');
+  
+  // 3. Mockold az authenticateToken middleware-t
+  // Mockold a szolgáltatásokat
+jest.mock("../services/orderConnectionService", () => ({
+    createPurchaseConnection: jest.fn(),
+  }));
+  
+  jest.mock("../services/userService", () => ({
+    usePoints: jest.fn(),
+  }));
+  
+  // Mockold a JWT middleware-t
+  jest.mock("../middlewares/userAuth", () => ({
+    authenticateToken: (req, res, next) => {
+      req.uid = 1; // Dummy user ID
+      next();
+    },
+  }));
+  
+  
+  describe("POST /api/v1/order", () => {
+    beforeEach(() => {
+      createPurchaseConnection.mockReset();
+      usePoints.mockReset();
+    });
+  
+    it("Sikeres rendelés (201-es státusz)", async () => {
+      // Mock beállítása
+      createPurchaseConnection.mockResolvedValue({ id: 123 });
+      usePoints.mockResolvedValue();
+  
+      // Küldj egy érvénytelen token-t (a middleware mock miatt nem számít)
+      const response = await request(app)
+        .post("/api/v1/order")
+        .set("Authorization", "Bearer invalid_or_malformed_token") // A mock figyelmen kívül hagyja
+        .send({
+          totalPrice: 1500,
+          message: "Kérem gyorsan!",
+          takeAway: true,
+          dishIds: [1, 2],
+          dishAmounts: [2, 1],
+          dishCustomizations: ["extra sajt"],
+          pointsUsed: 100,
+        });
+  
+      // Ellenőrzések
+      expect(response.status).toBe(201);
+      expect(createPurchaseConnection).toHaveBeenCalled();
+      expect(usePoints).toHaveBeenCalledWith(1, 100); // A dummy user ID (1) ellenőrzése
+    });
+  });
 
-            const mockPurchases = [
-                { id: 1, userId: 123, totalPrice: 2500, date: "2024-02-27T10:00:00Z" },
-                { id: 2, userId: 123, totalPrice: 3200, date: "2024-02-26T14:30:00Z" }
-            ];
+            test("getAllPurchaseUserInfo helyes", async () => 
+                {
+                    const res = await request(app).get("/api/v1/user-orders");
 
-            test("Vásárlások sikeres lekérése (200 OK)", async () => {
-                // Mock visszatérési érték beállítása
-                //purchaseService.getAllPurchaseUserInfo.mockResolvedValue(mockPurchases);
-        
-                const res = await request(app)
-                    .get("/api/v1/get-all-order-user-only")
-                    .set("Authorization", "Bearer mock-token") // Ha kell JWT
-                    .set("uid", "123"); // Mockolt user ID
-        
-                expect(res.statusCode).toBe(200);
-                //expect(res.body).toEqual(mockPurchases);
-                //expect(purchaseService.getAllPurchaseUserInfo).toHaveBeenCalledWith(123);
-            });
+                    expect(res.statusCode).toBe(200);
+                });
 
-        });*/
+            test("getAllActivePurchase helyes", async () => 
+                {
+                    const res = await request(app).get("/api/v1/active-orders");
+
+                    expect(res.statusCode).toBe(200);
+                });    
+        });
         
     
     
