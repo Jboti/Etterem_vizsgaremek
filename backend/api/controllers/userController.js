@@ -50,7 +50,6 @@ exports.createUser = async (req, res, next) => {
 
                 const user = {
                     id: null,
-                    timestamp: currentDate.toISOString(),
                     created: currentDate.toISOString(),
                     userName: userName,
                     fullName: fullName,

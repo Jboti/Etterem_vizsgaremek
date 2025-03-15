@@ -9,20 +9,13 @@ const { params } = useRoute()
  <v-container class="d-flex justify-center align-center" style="min-height: 90%; max-height: 90%;">
     <v-card max-width="500" class="pt-8 pb-8 pl-6 pr-6 bg-red-darken-4 card" outlined>
       <v-card-text class="text-center">
-          <h1 class="headline white--text" style="text-shadow: 2px 2px 2px black;">Rendelés leadva!</h1>
-    </v-card-text>
-    <v-card-text class="text-center">
-          <h2 class="headline white--text" style="text-shadow: 2px 2px 2px black;">Rendelésed száma: {{params.id}}</h2>
-    </v-card-text>
-    <v-card-text class="text-center">
-          <h2 class="headline white--text" style="text-shadow: 2px 2px 2px black;">Fizetendő: {{params.price || 0}} Ft</h2>
-    </v-card-text>
-    <v-card-text class="text-center">
-          <h3 class="white--text" style="text-shadow: 2px 2px 2px black;">Köszönjük rendelésed, az étel elkészítéséhez már neki is álltunk!</h3>
+          <h1 class="headline white--text my-6" style="text-shadow: 2px 2px 2px black;">Rendelés leadva!</h1>
+          <h2 class="headline white--text my-4" style="text-shadow: 2px 2px 2px black;">Helyszínen fizetendő: {{params.price || 'Hiba'}} Ft</h2>
+          <h2 class="headline white--text my-4" style="text-shadow: 2px 2px 2px black;">Rendelésed száma: <p style="color:black; text-shadow: none;">{{params.id}}</p></h2>
+          <h3 class="headline white--text my-4" style="text-shadow: 2px 2px 2px black;">Köszönjük rendelésed, az étel elkészítéséhez már neki is álltunk!</h3>
       </v-card-text>
     </v-card>
   </v-container>
-
 </template>
 
 <style scoped>

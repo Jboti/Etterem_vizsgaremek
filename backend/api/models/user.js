@@ -7,44 +7,64 @@ module.exports = (sequelize, DataTypes) => {
           primaryKey: true,
           autoIncrement: true,
         },
-        timestamp: {
-          type: DataTypes.DATE,
-          defaultValue: DataTypes.NOW,
-        },
         created: {
           type: DataTypes.DATEONLY,
           defaultValue: DataTypes.NOW,
+          validate:{
+            isDate:true
+          }
         },
         userName: {
           type: DataTypes.STRING(255),
           allowNull: false,
+          validate:{
+            isAlphanumeric:true
+          }
         },
         fullName: {
           type: DataTypes.STRING(255),
           allowNull: false,
+          validate:{
+            isAlphanumeric:true
+          }
         },
         email: {
           type: DataTypes.STRING(255),
           allowNull: false,
+          validate:{
+            isAlphanumeric:true
+          }
         },
         password: {
           type: DataTypes.STRING(255),
           allowNull: false,
+          validate:{
+            isAlphanumeric:true
+          }
         },
         points: {
           type: DataTypes.INTEGER,
           allowNull: false,
-          default: 0
+          default: 0,
+          validate:{
+            isInt:true
+          }
         },
         isAdmin: {
           type: DataTypes.BOOLEAN,
           allowNull: false,
-          default: false
+          default: false,
+          validate:{
+            isIn:[[true,false]]
+          }
         },
         isActive: {
           type: DataTypes.BOOLEAN,
           allowNull: false,
-          default: true
+          default: true,
+          validate:{
+            isIn:[[true,false]]
+          }
         },
       },
       {

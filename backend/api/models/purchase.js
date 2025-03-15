@@ -10,10 +10,16 @@ module.exports = (sequelize, DataTypes) => {
         date: {
           type: DataTypes.DATE,
           defaultValue: DataTypes.NOW,
+          validate:{
+            isDate:true
+          }
         },
         totalPrice: {
           type: DataTypes.INTEGER,
           allowNull: false,
+          validate:{
+            isInt:true
+          }
         },
         message: {
           type: DataTypes.STRING(255),
@@ -22,10 +28,16 @@ module.exports = (sequelize, DataTypes) => {
         isActive: {
           type: DataTypes.BOOLEAN,
           allowNull: false,
+          validate: {
+            isIn: [[true, false]]
+          }
         },
         takeAway: {
           type: DataTypes.BOOLEAN,
           allowNull: false,
+          validate: {
+            isIn: [[true, false]]
+          }
         },
       },
       {

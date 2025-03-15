@@ -17,8 +17,9 @@ app.use(router)
 app.use(vuetify)
 app.use(VueQueryPlugin, {queryClient:queryClient})
 app.use(Vue3Toastify, {
-    autoClose: 3000,
-    position: 'top-left', 
+    autoClose: 7500,
+    position: 'top-left',
+    theme: 'colored',
   });
 
 app.mount('#app')

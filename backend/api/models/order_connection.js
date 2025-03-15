@@ -12,13 +12,18 @@ module.exports = (sequelize, DataTypes) => {
         {
           type: DataTypes.INTEGER,
           allowNull: false,
+          validate:{
+            isInt:true
+          }
             
         },
         order_id: 
         {
           type: DataTypes.INTEGER,
           allowNull: false,
-         
+          validate:{
+            isInt:true
+          }
         },
       },
       {

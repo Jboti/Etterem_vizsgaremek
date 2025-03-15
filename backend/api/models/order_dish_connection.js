@@ -12,15 +12,24 @@ module.exports = (sequelize, DataTypes) => {
         {
           type: DataTypes.INTEGER,
           allowNull: false,
+          validate:{
+            isInt:true
+          }
         },
         dish_id: 
         {
           type: DataTypes.INTEGER,
           allowNull: false,
+          validate:{
+            isInt:true
+          }
         },
         amount: {
           type: DataTypes.INTEGER,
           allowNull: false,
+          validate:{
+            isInt:true
+          }
         },
         customizations: {
           type: DataTypes.JSON,

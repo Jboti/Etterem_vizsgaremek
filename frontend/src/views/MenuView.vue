@@ -135,6 +135,10 @@ const isUserAllergic = (dish:any) : boolean =>{
   )
 }
 
+const allergenInHun = (allergen) : string =>{
+  return allergen.allergy.name == 'gluten' ? 'Glutén' : allergen.allergy.name == 'lactose' ? 'Laktóz' : allergen.allergy.name == 'egg' ? 'Tójás' : 'Magvak'
+}
+
 // Rendezés
 function selectedCategoryHandle(category:string){
   if(selectedCategory.value === category)
@@ -261,12 +265,21 @@ onMounted(() => {
           <v-card-title v-if="selectedDish" class="mb-10"><b>{{ selectedDish.name }}</b></v-card-title>
           <v-card-text v-if="selectedDish">
             <p class="mb-2"><b>Ár:</b> {{ selectedDish.price }} Ft</p>
-            <p><b>Leírás:</b> {{ selectedDish.description }}</p>
+            <p class="my-2"><b>Leírás:</b> {{ selectedDish.description }}</p>
+            <div v-if="selectedDish?.allergenables.length>0">
+              <p><b>Allergének:</b></p>
+              <ul class="mx-6">
+                <li v-for="allergen in selectedDish.allergenables" :key="allergen">
+                  {{ allergenInHun(allergen) }}
+                </li>
+              </ul>
+            </div>
+            
           </v-card-text>
         </div>
       </div>
       <v-card-text>
-        <p class="mt-2 mb-4"><b v-if="selectedDish?.sauceOptions" style="margin-bottom: 2%;">Szósz:</b></p>
+        <p class="mt-2 mb-4"><b v-if="selectedDish?.sauceOptions" style="margin-bottom: 2%;">Szósz (1db):</b></p>
         <v-row style="border-bottom: solid 2px black; padding-bottom: 3%;">
           <v-col v-if="selectedDish?.sauceOptions" v-for="(sauce,index) in JSON.parse(String(selectedDish.sauceOptions))" :key="index" cols="12" sm="6" md="6" lg="6" xl="4">
             <div style="display: flex; border: 2px solid rgba(0, 0, 0, 0.4); box-shadow: 0 0 5px .5px rgba(0, 0, 0, 0.4); border-radius: 10px; width: 100%; align-items: center; padding: 3%;">

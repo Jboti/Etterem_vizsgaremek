@@ -24,7 +24,7 @@ const registrationDataRef = ref<RegistrationData>({
 
 // Regex validációk
 const validateUsername = (userName: string): boolean => {
-    const userNameRegex = /^[A-Za-záÁéÉöÖőŐóÓüÜűŰúÚ][A-Za-z0-9_áÁéÉöÖőŐóÓüÜűŰúÚ]{5,18}$/ //min 6 hosszú, max 18 hosszú, ne kezdődjön számmal
+    const userNameRegex = /^[A-Za-záÁéÉöÖőŐóÓüÜűŰúÚ][A-Za-z0-9_áÁéÉöÖőŐóÓüÜűŰúÚ\s]{5,18}$/ //min 6 hosszú, max 18 hosszú, ne kezdődjön számmal
     return userNameRegex.test(userName)
 }
 
@@ -34,7 +34,7 @@ const validateEmail = (email: string): boolean => {
 }
 
 const validatePassword = (password: string): boolean => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/ //min 8 hosszú, min 1 kis betű, min 1 nagy betű, min 1 szám
+    const passwordRegex = /^(?=.*[a-záéöőóüűú])(?=.*[A-ZÁÉÖŐÓÜŰÚ])(?=.*\d)[a-zA-ZáÁéÉöÖőŐóÓüÜűŰúÚ\d]{8,}$/ //min 8 hosszú, min 1 kis betű, min 1 nagy betű, min 1 szám
     return passwordRegex.test(password)
 }
     
