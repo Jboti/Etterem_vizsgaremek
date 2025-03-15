@@ -87,7 +87,6 @@ exports.placeOrder = async (req,res,next) =>
             dishCustomizations: dishCustomizations
         }
 
-
         const result = await orderConnectionService.createPurchaseConnection(id,purchase,dishInfo,pointsUsed)
         if(result)
         {

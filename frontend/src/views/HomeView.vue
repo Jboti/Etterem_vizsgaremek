@@ -49,7 +49,7 @@ onMounted(() => {
         
         <!-- Logged in view -->
         <v-card v-else class="mr-8 ml-3 logo-buttons-placement">
-        <v-card-title><h2 style="font-size: clamp(16px, 4vw, 50px);"><b>Szia {{ userData?.userName }}!</b></h2></v-card-title>
+        <v-card-title class="user-welcome"><h2 style="font-size: clamp(16px, 4vw, 50px);"><b>Szia {{ userData?.userName }}!</b></h2></v-card-title>
         <v-btn
                 class="mx-1 mt-2 mb-4 pl-5 pr-5 auth-buttons"
                 color="white"
@@ -65,23 +65,20 @@ onMounted(() => {
 
       <v-container class="infoBoxok">
         <v-card class="nyitvaTartas">
-          <div style="height: 20%; padding-bottom: 1dvh;">
-            <p style="height: 100%; font-size: clamp(1.8rem, 3dvw, 5rem);"><b>Nyitvatartás:</b></p>
-          </div>
-          <div style="height: 80%;">
-            <v-card-text style="align-items: center; padding: 0; height: 100%; display: flex; align-items: center; flex-direction: column; justify-content: center;">
-              <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>H-P:</b> 8:00 - 23:00</p>
-              <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Sz:</b> 10:00 - 21:00</p>
-              <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>V:</b> 11:00 - 20:00</p>
+            <v-card-title style="font-size: clamp(.8rem, 3dvw, 3rem);">Nyitvatartás:</v-card-title>
+            <v-card-text style="display: flex; align-items: center; flex-direction: column; justify-content: center;">
+              <p style="font-size: clamp(.8rem, 2dvw, 3rem);"><b>H-P:</b> 8:00 - 23:00</p>
+              <p style="font-size: clamp(.8rem, 2dvw, 3rem);"><b>Sz:</b> 10:00 - 21:00</p>
+              <p style="font-size: clamp(.8rem, 2dvw, 3rem);"><b>V:</b> 11:00 - 20:00</p>
             </v-card-text>
-          </div>
         </v-card>
         <v-card class="info">
-          <v-card  class="infoCard">
-            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Email:</b> donercegled@gmail.com</p>
-            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Tel szám.:</b> 06 20 123 4567</p>
-            <p style="font-size: clamp(.8rem, 2vw, 3rem);"><b>Cím:</b> 2700 Cegléd, Szabadság tér</p>
-          </v-card>
+          <v-card-text class="infoCard">
+            <p style="font-size: clamp(.8rem, 1.5dvw, 3rem);"><b>Email:</b> donercegled@gmail.com</p>
+            <p style="font-size: clamp(.8rem, 1.5dvw, 3rem);"><b>Tel szám.:</b> 06 20 123 4567</p>
+            <p style="font-size: clamp(.8rem, 1.5dvw, 3rem);"><b>Cím:</b> 2700 Cegléd, Szabadság tér</p>
+          </v-card-text>
+          
           <div class="terkepInfo">
             <div class="terkep">
               <iframe class="terkepMeret"
@@ -158,7 +155,7 @@ onMounted(() => {
   background-position: right;
 }
 
-.v-card-title {
+.user-welcome{
   background: linear-gradient(280deg, black 0%,#B71C1C 30%,#B71C1C 70%, black 100%);
   background-clip: 0;
   -webkit-background-clip: text;
@@ -199,14 +196,10 @@ onMounted(() => {
 }
 
 .infoCard {
-  padding: 4%;
-  width: 50%;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  background-color: transparent;
-  box-shadow: none;
+  align-items: flex-start;
+  justify-content: space-evenly;
 }
 
 .terkepInfo{
@@ -232,8 +225,7 @@ onMounted(() => {
     flex-direction: column;
     margin: auto;
     justify-content: space-around;
-    width: 100dvw;
-    height: 70dvh;
+    height: auto;
   }
   .nyitvaTartas{
     margin: auto;
@@ -251,6 +243,7 @@ onMounted(() => {
   .infoCard{
     height: 40%;
     width: 100%;
+    align-items: center;
   }
   .terkepInfo{
     height: 60%;
