@@ -125,6 +125,24 @@ describe("Controller tesztek", ()=>
                     expect(res.statusCode).toBe(404);
                 })
 
+            test("createUser test helytelen2", async () => 
+                {
+                    const res = await request(app).post("/api/v1/register")
+                    .send({
+                        userName:"TestUserName",fullName:"TestFullName",email:"shranny69@gmail.com",password:'HelyesJszo123',
+                    });
+                    //console.log("CREATEUSER ERRROR"+res.text);
+                    expect(res.statusCode).toBe(409);
+                })
+            test("createUser test helytelen3", async () => 
+                {
+                    const res = await request(app).post("/api/v1/register")
+                    .send({
+                        userName:"TestUjUserName",fullName:"TestFullName",email:"danikataurusz@gmail.com",password:'HelyesJszo123',
+                    });
+                    //console.log("CREATEUSER ERRROR"+res.text);
+                    expect(res.statusCode).toBe(409);
+                })
             test("getUser test helyes", async () =>{
                 const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
                 const res = await request(app).get("/api/v1/user")
@@ -177,6 +195,14 @@ describe("Controller tesztek", ()=>
                     expect(res.statusCode).toBe(500);
                 });
 
+            test("verifyEmail test helytelen3", async () => 
+                {
+
+
+                    const res = await request(app).patch("/api/v1/verify-user");//nincs token
+
+                    expect(res.statusCode).toBe(403);
+                });
             test("loginUser test helyes", async () => 
                 {
                     const res = await request(app).post("/api/v1/login")
@@ -197,6 +223,41 @@ describe("Controller tesztek", ()=>
                     expect(res.statusCode).toBe(400);
                 })
 
+            test("loginUser test helytelen2", async () => 
+                {
+                    const res = await request(app).post("/api/v1/login")
+                    .send({
+                        email:"danikataurusz@gmail.com",
+                    });
+
+                    expect(res.statusCode).toBe(404);
+                })
+            test("loginUser test helytelen3", async () => 
+                {
+                    const res = await request(app).post("/api/v1/login")
+                    .send({
+                        email:"nemregisztralt@gmail.com",password:'HelytelensJszo123',
+                    });
+
+                    expect(res.statusCode).toBe(404);
+                })
+            test("loginUser test helytelen4", async () => 
+                {
+                    const resreg = await request(app).post("/api/v1/register")
+                    .send({
+                        userName:"TestNemAktivaltUserName",fullName:"TestNemAktivaltFullName",email:"shranny69@gmail.com",password:'HelyesJszo123',
+                    });
+
+                    //console.log("CREATEUSER ERRROR"+res.text);
+                    expect(resreg.statusCode).toBe(201);
+
+                    const res = await request(app).post("/api/v1/login")
+                    .send({
+                        email:"shranny69@gmail.com",password:'HelyesJszo123',
+                    });
+
+                    expect(res.statusCode).toBe(404);
+                })
             test("logOut test helyes", async () =>{
                 const res = await request(app).post("/api/v1/logout");
 
@@ -219,6 +280,16 @@ describe("Controller tesztek", ()=>
                 const res = await request(app).patch("/api/v1/username")
                 .set("Authorization", `Bearer ${token}`)
                 .send({userName:"UjUserName",password:'HelyesJszo123'});
+
+                expect(res.statusCode).toBe(404);
+            })
+
+            test("changeUserName test helytelen2", async () =>{
+                const token=jwt.sign({ validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+                
+                const res = await request(app).patch("/api/v1/username")
+                .set("Authorization", `Bearer ${token}`)
+                .send({userName:"UjUserName",password:'HelytelenJszo123'});
 
                 expect(res.statusCode).toBe(404);
             })
@@ -267,6 +338,20 @@ describe("Controller tesztek", ()=>
                 expect(res.statusCode).toBe(200);       
             }) */                                   //NEM LEHET TESZTELNI MERT NEM KÉSZÜL ADMIN USER
 
+            test("sendEmail test helyes", async () =>{
+                const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+                const res = await request(app).patch("/api/v1/password-reset-email")
+                .set("Authorization", `Bearer ${token}`)
+                .send({email:"danikataurusz@gmail.com"});
+                console.log("SENDMAIL ERROR"+res.text)
+                expect(res.statusCode).toBe(201);
+            })
+            test("sendEmail test helytelen", async () =>{
+                const res = await request(app).patch("/api/v1/password-reset-email")
+                .send({email:"helytelenemail@gmail.com"});
+                expect(res.statusCode).toBe(400);
+            })
+
             test("deleteUserPassordCheck test helyes", async () =>{
                 const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//helytelen id -> nincs id
 
@@ -277,7 +362,7 @@ describe("Controller tesztek", ()=>
                 //console.log("DELETEUSERPASSORDCHECK ERROR"+res.text)
                 expect(res.statusCode).toBe(200);
             })
-            test("deleteUserPassordCheck test helytelen", async () =>{
+            test("deleteUserPasswordCheck test helytelen", async () =>{
                 const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
 
                 const res = await request(app).post("/api/v1/user-password-validate")
@@ -286,6 +371,17 @@ describe("Controller tesztek", ()=>
 
 
                 expect(res.statusCode).toBe(400);
+            })
+
+            test("deleteUserPasswordCheck test helytelen2", async () =>{
+                const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+
+                const res = await request(app).post("/api/v1/user-password-validate")
+                .set("Authorization", `Bearer ${token}`)
+                .send({email:"danikataurusz@gmail.com"}); //Hiányos adat
+
+
+                expect(res.statusCode).toBe(404);
             })
 
             test("deleteUser test helytelen", async () =>{
@@ -307,7 +403,7 @@ describe("Controller tesztek", ()=>
             })
 
 
-            test("deleteUserPassordCheck test helytelen", async () =>{
+            test("deleteUserPasswordCheck test helytelen3", async () =>{
                 const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//Már kitöröltük a usert így nem fog találni
 
                 const res = await request(app).post("/api/v1/user-password-validate")
@@ -336,6 +432,7 @@ describe("Controller tesztek", ()=>
                 //console.log("UPDATEALLERGIES ERROR"+res.text)
                 expect(res.statusCode).toBe(200);
             })
+
         });
 
         describe("purchaseController", () => {
