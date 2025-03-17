@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.STRING(255),
           allowNull: false,
           validate:{
-            isAlphanumeric:true
+             is: /^[\p{L}\s]+$/u
           }
         },
         created: {
@@ -49,14 +49,14 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.TEXT,
           allowNull: false,
           validate:{
-            isAlphanumeric:true
+             is: /^[\p{L}\s]+$/u
           }
         },
         type: {
           type: DataTypes.STRING(255),
           allowNull: false,
           validate:{
-            isAlphanumeric:true
+             is: /^[\p{L}\s]+$/u
           }
         },
         img: {

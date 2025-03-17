@@ -339,7 +339,7 @@ exports.getAdminUser = async (req,res,next) =>
     try {
         const {email, password} = req.body
         if(!email || !password){
-            or = new Error("Missing data!")
+            error = new Error("Missing data!")
             error.status = 404
             throw error
         }

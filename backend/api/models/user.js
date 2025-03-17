@@ -1,3 +1,5 @@
+const { isAlphanumeric } = require("validator")
+
 module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define(
       "user",
@@ -25,22 +27,22 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.STRING(255),
           allowNull: false,
           validate:{
-            isAlphanumeric:true
+             is: /^[\p{L}\s]+$/u
           }
         },
         email: {
           type: DataTypes.STRING(255),
           allowNull: false,
           validate:{
-            isAlphanumeric:true
+            isEmail:true
           }
         },
         password: {
           type: DataTypes.STRING(255),
           allowNull: false,
-          validate:{
-            isAlphanumeric:true
-          }
+          /*validate:{
+            is: /^(?=.*[a-záéöőóüűú])(?=.*[A-ZÁÉÖŐÓÜŰÚ])(?=.*\d)[a-zA-ZáÁéÉöÖőŐóÓüÜűŰúÚ\d]{8,}$/  //a jelszó heshelve van így a a megfelelő formátumot a frontenden,- regisztrációkor nézzük
+          }*/
         },
         points: {
           type: DataTypes.INTEGER,

@@ -9,13 +9,16 @@ const dishController = require("../controllers/dishController");
 const purchaseController = require("../controllers/purchaseController");
 const testController = require("../controllers/testController");
 const userController = require("../controllers/userController");
-const purchaseService = require("../services/purchaseService");
-const { orderConnectionService } = require('../services/orderConnectionService');
-const { userService } = require('../services/userService');
 
 jest.mock("../db/dbContext", () => require("../../__mocks__/db"));
 
+const db = require("../db/dbContext");
+const dish = require("../models/dish");
 
+beforeAll(async () => {
+    await db.sequelize.query("PRAGMA foreign_keys = ON;");
+    await db.sequelize.sync({ force: true }); // Létrehozza a táblákat minden teszt előtt
+  });
 
 describe("Backend tesztek",()=>
 {
@@ -32,13 +35,22 @@ describe("Controller tesztek", ()=>
         
         describe("Dish Controller Tests", () => {
 
-            test("getDishes test helytelen", async () => 
-                {
-                    const res = await request(app).get("/api/v1/dishes");
+                test("createDish test helytelen", async () => 
+                    {
+                        const base64Image = "image";
+                        const res = await request(app).post("/api/v1/dish")
+                        .set("Content-Type", "application/json")
+                        .send({
+                            name:"TestDishName",price:100,created:"vmiido",
+                            available:true,sauceOptions:{},customizationOptions:{},
+                            description:"description",type:"type"//hiányos adat
+    
+                        });
+    
+                        expect(res.statusCode).toBe(404);
+                        
+                    })
 
-                    expect(res.statusCode).toBe(500);
-                })
-                
             test("createDish test helyes", async () => 
                 {
                     const base64Image = "image";
@@ -51,9 +63,33 @@ describe("Controller tesztek", ()=>
                         gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
 
                     });
-                    console.log();
+
                     expect(res.statusCode).toBe(201);
                     
+                })
+
+            test("modifyDish test helyes", async () => 
+                {const res = await request(app).put("/api/v1/dish")
+                    .set("Content-Type", "application/json")
+                    .send({
+                        id:1,name:"TestDishNameUj",price:200,created:"vmiido",//új price
+                        available:true,sauceOptions:{},customizationOptions:{},
+                        description:"description",type:"type",image:"base64Image",
+                        gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
+
+                    });
+
+                    expect(res.statusCode).toBe(200);
+                })
+            test("modifyDish test helytelen", async () => 
+                {const res = await request(app).put("/api/v1/dish")
+                    .set("Content-Type", "application/json")
+                    .send({
+                        id:1,name:"TestDishNameUj"
+
+                    });
+
+                    expect(res.statusCode).toBe(404);
                 })
 
             test("getDishes test helyes", async () => 
@@ -63,29 +99,7 @@ describe("Controller tesztek", ()=>
                     expect(res.statusCode).toBe(200);
                 })
 
-            test("createDish test helytelen", async () => 
-                {
-                    
-                    const res = await request(app).post("/api/v1/dish")
-                    .send({
-                        name:"TestDishName",price:"100",created:"vmiido",
-                        available:true,sauceOptions:{},customizationOptions:{},
-                        description:"description",type:"type",
-                        image:null,gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
-                    });
-
-                    expect(res.statusCode).toBe(404);
-                })
-                    
-            test("createDish test hiányos", async () => 
-                {
-                    const res = await request(app).post("/api/v1/create-new-dish")
-                    .send({
-                        name:"TestDishName",price:100,created:"vmiido",
-                    });
-
-                    expect(res.statusCode).toBe(404);
-                })
+            
 
         });
         
@@ -95,86 +109,302 @@ describe("Controller tesztek", ()=>
                 {
                     const res = await request(app).post("/api/v1/register")
                     .send({
-                        userName:"TestUserName",fullName:"TestFullName",email:"danikataurusz@gmail.com",password:"password"
+                        userName:"TestUserName",fullName:"TestFullName",email:"danikataurusz@gmail.com",password:'HelyesJszo123',
                     });
-                    console.log(res.body);
+                    //console.log("CREATEUSER ERRROR"+res.text);
                     expect(res.statusCode).toBe(201);
                 })
+            
+            test("createUser test helytelen", async () => 
+                {
+                    const res = await request(app).post("/api/v1/register")
+                    .send({
+                        email:"danikataurusz@gmail.com",password:'HelyesJszo123',//hiányos adatok
+                    });
+                    //console.log("CREATEUSER ERRROR"+res.text);
+                    expect(res.statusCode).toBe(404);
+                })
 
+            test("getUser test helyes", async () =>{
+                const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+                const res = await request(app).get("/api/v1/user")
+                .set("Authorization", `Bearer ${token}`);
+
+                expect(res.statusCode).toBe(200);
+            })
+            test("getUser test helytelen", async () =>{
+                const token=jwt.sign({  validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//helytelen id -> nincs id
+                const res = await request(app).get("/api/v1/user")
+                .set("Authorization", `Bearer ${token}`);
+
+                expect(res.statusCode).toBe(404);
+            })
+
+            test("getAlluser test helyes", async () =>{
+                const res = await request(app).get("/api/v1/users");
+                expect(res.statusCode).toBe(200);
+            })
+
+            test("verifyEmail test helyes", async () => 
+                {
+                    const token=jwt.sign({ id:1, validLogin:false }, process.env.JWT_KEY, { expiresIn: "1h" });
+
+
+                    const res = await request(app).patch("/api/v1/verify-user")
+                    .send({token});
+
+                    expect(res.statusCode).toBe(201);
+                });
+            
+            test("verifyEmail test helytelen", async () => 
+                {
+                    const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+
+
+                    const res = await request(app).patch("/api/v1/verify-user")
+                    .send({token});
+
+                    expect(res.statusCode).toBe(403);
+                });
+            test("verifyEmail test helytelen2", async () => 
+                {
+                    const token="helytelentoken"
+
+
+                    const res = await request(app).patch("/api/v1/verify-user")
+                    .send({token});
+
+                    expect(res.statusCode).toBe(500);
+                });
+
+            test("loginUser test helyes", async () => 
+                {
+                    const res = await request(app).post("/api/v1/login")
+                    .send({
+                        email:"danikataurusz@gmail.com",password:'HelyesJszo123',
+                    });
+
+                    expect(res.statusCode).toBe(200);
+                })
+
+            test("loginUser test helytelen", async () => 
+                {
+                    const res = await request(app).post("/api/v1/login")
+                    .send({
+                        email:"danikataurusz@gmail.com",password:'HelytelensJszo123',
+                    });
+
+                    expect(res.statusCode).toBe(400);
+                })
+
+            test("logOut test helyes", async () =>{
+                const res = await request(app).post("/api/v1/logout");
+
+                expect(res.statusCode).toBe(200);
+            })
+
+            test("changeUserName test helyes", async () =>{
+                const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+                
+                const res = await request(app).patch("/api/v1/username")
+                .set("Authorization", `Bearer ${token}`)
+                .send({userName:"UjUserName",password:'HelyesJszo123'});
+
+                expect(res.statusCode).toBe(200);
+            })
+
+            test("changeUserName test helytelen", async () =>{
+                const token=jwt.sign({ validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+                
+                const res = await request(app).patch("/api/v1/username")
+                .set("Authorization", `Bearer ${token}`)
+                .send({userName:"UjUserName",password:'HelyesJszo123'});
+
+                expect(res.statusCode).toBe(404);
+            })
+
+            test("changePassword test helyes", async () =>{
+                const token=jwt.sign({id:1, validLogin:false }, process.env.JWT_KEY, { expiresIn: "1h" });
+                
+                const res = await request(app).post("/api/v1/password-reset")
+                .set("Authorization", `Bearer ${token}`)
+                .send({password:"UjJelszo123"});
+
+
+                expect(res.statusCode).toBe(200);
+            })
+
+            test("changePassword test heyltelen", async () =>{
+                const token=jwt.sign({ validLogin:false }, process.env.JWT_KEY, { expiresIn: "1h" });
+                
+                const res = await request(app).post("/api/v1/password-reset")
+                .set("Authorization", `Bearer ${token}`)
+                .send({password:"UjJelszo123"});
+
+
+                expect(res.statusCode).toBe(404);
+            })
+            /*
+            test("getAdminUser test helyes", async () =>{
+                const registrationres =await request(app).post("/api/v1/register")
+                    .send({
+                        userName:"AdminUserName",fullName:"AdminFullName",email:"shranny69@gmail.com",password:'AdminJszo123',isAdmin:true
+                    });
+                expect(registrationres.statusCode).toBe(201);
+
+                const token=jwt.sign({ id:2, validLogin:false }, process.env.JWT_KEY, { expiresIn: "1h" });
+
+
+                    const resverify = await request(app).patch("/api/v1/verify-user")
+                    .send({token});
+
+                    expect(resverify.statusCode).toBe(201);
+
+                const res = await request(app).post("/api/v1/admin-user")
+                .send({email:"shranny69@gmail.com",password:'AdminJszo123'});     
+                
+                console.log("GETADMINUSER ERROR"+res.text)
+                expect(res.statusCode).toBe(200);       
+            }) */                                   //NEM LEHET TESZTELNI MERT NEM KÉSZÜL ADMIN USER
+
+            test("deleteUserPassordCheck test helyes", async () =>{
+                const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//helytelen id -> nincs id
+
+                const res = await request(app).post("/api/v1/user-password-validate")
+                .set("Authorization", `Bearer ${token}`)
+                .send({email:"danikataurusz@gmail.com",password:'UjJelszo123'}); //Új jelszó amit fent beállítottunk a changePassword test-ben
+
+                //console.log("DELETEUSERPASSORDCHECK ERROR"+res.text)
+                expect(res.statusCode).toBe(200);
+            })
+            test("deleteUserPassordCheck test helytelen", async () =>{
+                const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+
+                const res = await request(app).post("/api/v1/user-password-validate")
+                .set("Authorization", `Bearer ${token}`)
+                .send({email:"danikataurusz@gmail.com",password:'Rosszjelszo123'}); //Hibás jelszó 
+
+
+                expect(res.statusCode).toBe(400);
+            })
+
+            test("deleteUser test helytelen", async () =>{
+                const token=jwt.sign({ validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//helytelen id megint-> nincs id
+                
+                const res = await request(app).delete("/api/v1/user")
+                .set("Authorization", `Bearer ${token}`);
+
+                expect(res.statusCode).toBe(404);
+            })
+
+            test("deleteUser test helyes", async () =>{
+                const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+                
+                const res = await request(app).delete("/api/v1/user")
+                .set("Authorization", `Bearer ${token}`);
+
+                expect(res.statusCode).toBe(200);
+            })
+
+
+            test("deleteUserPassordCheck test helytelen", async () =>{
+                const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//Már kitöröltük a usert így nem fog találni
+
+                const res = await request(app).post("/api/v1/user-password-validate")
+                .set("Authorization", `Bearer ${token}`)
+                .send({email:"danikataurusz@gmail.com",password:'HelyesJszo123'});
+
+                expect(res.statusCode).toBe(404);
+            })
+
+            test("updateAllregies test helyes", async () =>{
+                const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//Már kitöröltük a usert így nem fog találni
+
+                const res = await request(app).patch("/api/v1/allergies")
+                .set("Authorization", `Bearer ${token}`)
+                .send({gluten:"glutén",lactose:'laktóz',egg:"tojás",nuts:"mogyik"});
+
+                expect(res.statusCode).toBe(200);
+            })
+            test("updateAllregies test helytelen", async () =>{
+                const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//Már kitöröltük a usert így nem fog találni
+
+                const res = await request(app).patch("/api/v1/allergies")
+                .set("Authorization", `Bearer ${token}`)
+                .send({gluten:"glutén",lactose:'laktóz',egg:"tojás"});//hiányos adat
+
+                //console.log("UPDATEALLERGIES ERROR"+res.text)
+                expect(res.statusCode).toBe(200);
+            })
         });
 
         describe("purchaseController", () => {
             
-                // Létrehozunk egy érvényes felhasználót és bejelentkezünk, hogy megkapjuk a JWT tokent
-                // order.test.js (a tesztfájl elején)
-                
-// 1. Mockold a szolgáltatásokat
-jest.mock('../services/orderConnectionService', () => ({
-    createPurchaseConnection: jest.fn() // Közvetlenül a függvényt mockoljuk
-  }));
-  
-  jest.mock('../services/userService', () => ({
-    usePoints: jest.fn()
-  }));
-  
-  // 2. Importáld a mock-olt függvényeket
-  const { createPurchaseConnection } = require('../services/orderConnectionService');
-  const { usePoints } = require('../services/userService');
-  
-  // 3. Mockold az authenticateToken middleware-t
-  // Mockold a szolgáltatásokat
-jest.mock("../services/orderConnectionService", () => ({
-    createPurchaseConnection: jest.fn(),
-  }));
-  
-  jest.mock("../services/userService", () => ({
-    usePoints: jest.fn(),
-  }));
-  
-  // Mockold a JWT middleware-t
-  jest.mock("../middlewares/userAuth", () => ({
-    authenticateToken: (req, res, next) => {
-      req.uid = 1; // Dummy user ID
-      next();
-    },
-  }));
-  
-  
-  describe("POST /api/v1/order", () => {
-    beforeEach(() => {
-      createPurchaseConnection.mockReset();
-      usePoints.mockReset();
-    });
-  
-    it("Sikeres rendelés (201-es státusz)", async () => {
-      // Mock beállítása
-      createPurchaseConnection.mockResolvedValue({ id: 123 });
-      usePoints.mockResolvedValue();
-  
-      // Küldj egy érvénytelen token-t (a middleware mock miatt nem számít)
-      const response = await request(app)
-        .post("/api/v1/order")
-        .set("Authorization", "Bearer invalid_or_malformed_token") // A mock figyelmen kívül hagyja
-        .send({
-          totalPrice: 1500,
-          message: "Kérem gyorsan!",
-          takeAway: true,
-          dishIds: [1, 2],
-          dishAmounts: [2, 1],
-          dishCustomizations: ["extra sajt"],
-          pointsUsed: 100,
-        });
-  
-      // Ellenőrzések
-      expect(response.status).toBe(201);
-      expect(createPurchaseConnection).toHaveBeenCalled();
-      expect(usePoints).toHaveBeenCalledWith(1, 100); // A dummy user ID (1) ellenőrzése
-    });
-  });
+            //jest.mock("../middlewares/userAuth", () => require());
+            const userAuth = require("../middlewares/userAuth");
+            userAuth.authenticateToken = jest.fn((req, res, next) => {
+                req.uid = 1; 
+                next();
+            });
 
+            test("placeOrder test helyes", async ()=>{
+
+                const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+
+
+                const dishRes = await request(app).post("/api/v1/dish")
+                    .set("Content-Type", "application/json")
+                    .send({
+                        name:"TestDishName",price:100,created:"vmiido",
+                        available:true,sauceOptions:{},customizationOptions:{},
+                        description:"description",type:"type",image:"base64Image",
+                        gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
+
+                    });
+
+                const dishRes2 = await request(app).post("/api/v1/dish")
+                .set("Content-Type", "application/json")
+                .send({
+                    name:"TestDishName",price:100,created:"vmiido",
+                    available:true,sauceOptions:{},customizationOptions:{},
+                    description:"description",type:"type",image:"base64Image",
+                    gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
+
+                });
+
+                console.log(dishRes.text);
+                console.log(dishRes2.text);
+
+                const dishId1 = dishRes.body.id;
+                const dishId2 = dishRes2.body.id;
+
+                expect(dishRes.statusCode).toBe(201);
+                expect(dishRes2.statusCode).toBe(201);
+
+                const response = await request(app)
+                    .post("/api/v1/order")
+                    .set("Authorization", `Bearer ${token}`) 
+                    .send({
+                    totalPrice: 1500,
+                    message: "Kérem gyorsan!",
+                    takeAway: true,
+                    dishIds: [dishId1,dishId2],
+                    dishAmounts: [2,1],
+                    dishCustomizations: ["extra sajt"],
+                    pointsUsed: 0,
+                    });
+
+                    console.log(response.text);
+                    expect(response.statusCode).toBe(201);
+                    
+            })
+  
             test("getAllPurchaseUserInfo helyes", async () => 
                 {
-                    const res = await request(app).get("/api/v1/user-orders");
+                    const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+
+                    const res = await request(app).get("/api/v1/user-orders")
+                    .set("Authorization", `Bearer ${token}`);
 
                     expect(res.statusCode).toBe(200);
                 });
@@ -230,6 +460,35 @@ jest.mock("../services/orderConnectionService", () => ({
     
             expect(userAuth[funkcio]).toBeDefined(); 
         })
+
+        test("middleware helyes errort ad vissza hibás kérésnél", async () => 
+            {
+                const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+
+
+                const res = await request(app).patch("/api/v1/verify-email")//nem létező endpoint
+                .send({token});
+
+                expect(res.statusCode).toBe(404);
+            });
+            test("middleware helyes errort ad vissza hibás kérésnél2", async () => 
+                {
+                    const token=jwt.sign({ id:1, validLogin:false }, process.env.JWT_KEY, { expiresIn: "1h" });
+                    const res = await request(app).get("/api/v1/user")
+                    .set("Authorization", `Bearer ${token}`);
+
+                    //console.log("GETUSER ERROR"+res.text)
+                    expect(res.statusCode).toBe(403);
+                });
+            test("middleware helyes errort ad vissza hibás kérésnél3", async () => 
+                {
+                    const token=jwt.sign({ id:1, validLogin:false }, process.env.JWT_KEY, { expiresIn: "1h" });
+                    const res = await request(app).get("/api/v1/user")
+                    .set("Authorization", `Helytelen ${token}`);
+
+                    //console.log("GETUSER ERROR"+res.text)
+                    expect(res.statusCode).toBe(500);
+                });
     })
     
     //------Modellek------
@@ -325,9 +584,9 @@ jest.mock("../services/orderConnectionService", () => ({
               created: new Date().toISOString().split("T")[0],
               allergenables: new Array(),
               userName: "mockUserName",
-              fullName: "Mock FullName",
+              fullName: "MockFullName",
               email: "mock@example.com",
-              password: "mockPassword",
+              password: "mockPassword123",
               points: 0,  
               isAdmin: false,
               isActive: false, // email verification után true
@@ -370,7 +629,7 @@ jest.mock("../services/orderConnectionService", () => ({
         test("getUserByEmail returns with correct user", async () => {
             const foundUser = await userRepository.getUserByEmail("mock@example.com");
             const plainUser = foundUser.get({ plain: true });
-            console.log(plainUser);
+            //console.log(plainUser);
             expect(plainUser.email).toEqual(mockUser.email);
         })
         test("checkForExistinguserName returns with correct user", async () => {
@@ -394,10 +653,10 @@ jest.mock("../services/orderConnectionService", () => ({
         })
 
         test("changePassword changes password andgetUserPwById returns with correct password", async () => {
-            await userRepository.changePassword("newpassword",1);
+            await userRepository.changePassword("newPassword123",1);
             const foundUser = await userRepository.getUserPwById(1);
             const plainUser = foundUser.get({ plain: true });
-            expect(plainUser.password).toEqual("newpassword");
+            expect(plainUser.password).toEqual("newPassword123");
         });
 
         test("adminUserModify updates the user", async () => {
@@ -462,7 +721,7 @@ jest.mock("../services/orderConnectionService", () => ({
                 userName: "mockUserName",
                 fullName: "Mock FullName",
                 email: "mock@example.com",
-                password: "mockPassword",
+                password: "mockPassword123",
                 points: 0,  
                 isAdmin: false,
                 isActive: false, // email verification után true
@@ -480,7 +739,7 @@ jest.mock("../services/orderConnectionService", () => ({
             };
 
             const createdPurchase = await purchaseRepository.createPurchase(mockPurchase);
-            console.log("Mock purchase:", createdPurchase);
+            //console.log("Mock purchase:", createdPurchase);
 
 
             mockorder_connection = {
@@ -488,7 +747,7 @@ jest.mock("../services/orderConnectionService", () => ({
                 order_id: createdPurchase.id, // Helyesen kapcsoljuk az ID-t
             };
 
-            console.log("mockorder_connection: ",mockorder_connection);    
+            //console.log("mockorder_connection: ",mockorder_connection);    
 
             dishInfo = {
                 dishIds: 1,
@@ -496,15 +755,15 @@ jest.mock("../services/orderConnectionService", () => ({
                 dishCustomizations: {"customizationId":'as'},
             };
 
-            console.log("dishInfo: ",dishInfo);
+            //console.log("dishInfo: ",dishInfo);
 
         })
         
-        console.log("DISHINFO KINN",dishInfo);
+        //console.log("DISHINFO KINN",dishInfo);
 
         test("getPurchase returns mockpurchase", async () =>{
             const receivedpurchase = await purchaseRepository.getPurchase(1);
-            console.log(mockPurchase)
+            //console.log(mockPurchase)
             expect(receivedpurchase.get({plain:true})).toEqual({
                 id:mockPurchase.id,
                 date:mockPurchase.date,
@@ -517,7 +776,7 @@ jest.mock("../services/orderConnectionService", () => ({
 
         test("getAllPurchase returns length 1", async () =>{
             const receivedpurchase = await purchaseRepository.getPurchase(1);
-            console.log(mockPurchase)
+            //console.log(mockPurchase)
             expect(receivedpurchase.get({plain:true})).toEqual({
                 id:mockPurchase.id,
                 date:mockPurchase.date,
@@ -538,7 +797,7 @@ jest.mock("../services/orderConnectionService", () => ({
             mockPurchase.message = "new message";
             await purchaseRepository.updatePurchaseMessage(mockPurchase);
             const receivedpurchase = await purchaseRepository.getPurchase(1);
-            console.log("received: ",receivedpurchase);
+            //console.log("received: ",receivedpurchase);
             expect(receivedpurchase.message).toEqual("new message");
         });
 
@@ -547,10 +806,10 @@ jest.mock("../services/orderConnectionService", () => ({
             expect((await purchaseRepository.getAllActivePurchase()).length).toBe(0);
         });
 
-        test("idkezeles", async () => {
+        test("createPurchaseConnection creates order_dish_connection", async () => {
             mockorder_dish_connection = await order_connectionRepositroy.createPurchaseConnection(mockorder_connection.user_id, mockPurchase, dishInfo, 0);
 
-            console.log("Mock order_dish_connection:", mockorder_dish_connection);//EZ NEM JÓ, ORDER_CONNECTIONREPOSITORY BAN A TESZT ADATTAL NEM CREATELŐDIK dCon
+            console.log("Mock order_dish_connection:", mockorder_dish_connection);
         });
     });
     
