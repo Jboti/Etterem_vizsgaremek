@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -32,7 +33,7 @@ namespace EtteremSideApp
         public static Color backGroundColor = Color.Black;
         public static bool adminLoggedIn = false;
         public static string adminName = "---";
-        public string[] allCategories = new string[] { "Kebab wrap", "Kebab box", "Kebab tál", "Köret", "Üdítő" }; // ehhez kell majd egy get-all-categories endpoint
+        public string[] allCategories = new string[] { "Kebab", "Wrap", "Drink", "SideDish"};
         public string currentIMGBlob = "empty";
         public Image selectedNewIMG = null;
         public Image selectedUpdateIMG = null;
@@ -92,9 +93,9 @@ namespace EtteremSideApp
         public RadioButton notAvailableRadioButton_Modify;
         public Button saveButton_Modify;
 
-//------Global values------\\
+        //------Global values------\\
 
-public Form1()
+        public Form1()
         {
             InitializeComponent();
         }
@@ -1320,29 +1321,15 @@ public Form1()
 
             Panel centralPanel = new Panel
             {
-                Size = new Size(520, 650),
+                Size = new Size(550, 700), // Adjusted size
                 BorderStyle = BorderStyle.FixedSingle,
                 BackColor = Color.LightGray,
             };
 
-            Label nameLabel = new Label
-            {
-                Text = "Név:",
-                Location = new Point(20, 20),
-                AutoSize = true
-            };
-            nameTextBox = new TextBox
-            {
-                Location = new Point(150, 18),
-                Width = 300
-            };
+            Label nameLabel = new Label { Text = "Név:", Location = new Point(20, 20), AutoSize = true };
+            nameTextBox = new TextBox { Location = new Point(150, 18), Width = 300 };
 
-            Label priceLabel = new Label
-            {
-                Text = "Ár:",
-                Location = new Point(20, 60),
-                AutoSize = true
-            };
+            Label priceLabel = new Label { Text = "Ár:", Location = new Point(20, 60), AutoSize = true };
             priceNumericUpDown = new NumericUpDown
             {
                 Location = new Point(150, 58),
@@ -1352,12 +1339,7 @@ public Form1()
                 DecimalPlaces = 2
             };
 
-            Label optionsLabel = new Label
-            {
-                Text = "Opciók:",
-                Location = new Point(20, 100),
-                AutoSize = true
-            };
+            Label optionsLabel = new Label { Text = "Opciók:", Location = new Point(20, 100), AutoSize = true };
             optionsDataGridView = new DataGridView
             {
                 Location = new Point(150, 98),
@@ -1369,14 +1351,15 @@ public Form1()
             optionsDataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Felár", HeaderText = "Felár" });
             optionsDataGridView.Columns.Add(new DataGridViewCheckBoxColumn { Name = "Szósz", HeaderText = "Szósz" });
 
+            // Event to handle "Szósz" checkbox logic
             optionsDataGridView.CellValueChanged += (sender, e) =>
             {
-                if (e.ColumnIndex == optionsDataGridView.Columns["Szósz"].Index && e.RowIndex >= 0)
+                if (e.RowIndex >= 0 && e.ColumnIndex == optionsDataGridView.Columns["Szósz"].Index)
                 {
                     var checkBoxCell = (DataGridViewCheckBoxCell)optionsDataGridView.Rows[e.RowIndex].Cells["Szósz"];
                     var priceCell = (DataGridViewTextBoxCell)optionsDataGridView.Rows[e.RowIndex].Cells["Felár"];
 
-                    if ((bool)checkBoxCell.Value)
+                    if (checkBoxCell.Value != null && (bool)checkBoxCell.Value)
                     {
                         priceCell.Value = 0;
                         priceCell.ReadOnly = true;
@@ -1396,25 +1379,10 @@ public Form1()
                 }
             };
 
-            Button addOptionButton = new Button
-            {
-                Text = "+",
-                Location = new Point(460, 98),
-                Width = 30,
-                Height = 30
-            };
-            addOptionButton.Click += (sender, e) =>
-            {
-                optionsDataGridView.Rows.Add();
-            };
+            Button addOptionButton = new Button { Text = "+", Location = new Point(460, 98), Width = 30, Height = 30 };
+            addOptionButton.Click += (sender, e) => { optionsDataGridView.Rows.Add(); };
 
-            Button removeOptionButton = new Button
-            {
-                Text = "-",
-                Location = new Point(460, 138),
-                Width = 30,
-                Height = 30
-            };
+            Button removeOptionButton = new Button { Text = "-", Location = new Point(460, 138), Width = 30, Height = 30 };
             removeOptionButton.Click += (sender, e) =>
             {
                 foreach (DataGridViewRow row in optionsDataGridView.SelectedRows)
@@ -1423,41 +1391,12 @@ public Form1()
                 }
             };
 
-            ToolTip toolTip = new ToolTip();
-            toolTip.SetToolTip(addOptionButton, "Sor hozzáadása");
-            toolTip.SetToolTip(removeOptionButton, "Kijelölt sor törlése");
+            glutenCheckBox = new CheckBox { Text = "Glutén", Location = new Point(150, 260), AutoSize = true };
+            lactoseCheckBox = new CheckBox { Text = "Laktóz", Location = new Point(240, 260), AutoSize = true };
+            eggCheckBox = new CheckBox { Text = "Tojás", Location = new Point(330, 260), AutoSize = true };
+            nutsCheckBox = new CheckBox { Text = "Magvak", Location = new Point(420, 260), AutoSize = true };
 
-            glutenCheckBox = new CheckBox
-            {
-                Text = "Glutén",
-                Location = new Point(150, 260),
-                AutoSize = true
-            };
-            lactoseCheckBox = new CheckBox
-            {
-                Text = "Laktóz",
-                Location = new Point(240, 260),
-                AutoSize = true
-            };
-            eggCheckBox = new CheckBox
-            {
-                Text = "Tojás",
-                Location = new Point(330, 260),
-                AutoSize = true
-            };
-            nutsCheckBox = new CheckBox
-            {
-                Text = "Magvak",
-                Location = new Point(420, 260),
-                AutoSize = true
-            };
-
-            Label descriptionLabel = new Label
-            {
-                Text = "Leírás:",
-                Location = new Point(20, 300),
-                AutoSize = true
-            };
+            Label descriptionLabel = new Label { Text = "Leírás:", Location = new Point(20, 300), AutoSize = true };
             descriptionTextBox = new TextBox
             {
                 Location = new Point(150, 298),
@@ -1466,26 +1405,17 @@ public Form1()
                 Multiline = true
             };
 
-            Label typeLabel = new Label
-            {
-                Text = "Típus:",
-                Location = new Point(20, 400),
-                AutoSize = true
-            };
+            Label typeLabel = new Label { Text = "Típus:", Location = new Point(20, 400), AutoSize = true };
             typeComboBox = new ComboBox
             {
                 Location = new Point(150, 398),
                 Width = 300,
-                DropDownStyle = ComboBoxStyle.DropDownList
+                DropDownStyle = ComboBoxStyle.DropDownList,
             };
-            typeComboBox.Items.AddRange(new string[] { "Típus1", "Típus2", "Típus3" });
+            typeComboBox.Items.AddRange(allCategories);
 
-            Label imageLabel = new Label
-            {
-                Text = "Kép:",
-                Location = new Point(20, 440),
-                AutoSize = true
-            };
+            Label imageLabel = new Label { Text = "Kép:", Location = new Point(20, 440), AutoSize = true };
+
             imageButton = new Button
             {
                 Text = "Kép kiválasztása",
@@ -1493,6 +1423,15 @@ public Form1()
                 Width = 150,
                 Height = 30
             };
+
+            PictureBox imagePreview = new PictureBox
+            {
+                Location = new Point(320, 438),
+                Size = new Size(100, 100),
+                BorderStyle = BorderStyle.FixedSingle,
+                SizeMode = PictureBoxSizeMode.Zoom
+            };
+
             imageButton.Click += (sender, e) =>
             {
                 using (OpenFileDialog openFileDialog = new OpenFileDialog())
@@ -1501,37 +1440,33 @@ public Form1()
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
                         selectedNewIMG = new Bitmap(openFileDialog.FileName);
+                        imagePreview.Image = selectedNewIMG; // Display image
                     }
                 }
             };
 
-            Button saveButton = new Button
+            Button saveButton = new Button 
             {
                 Text = "Mentés",
-                Location = new Point(150, 480),
-                Width = 80,
-                Height = 30
+                Location = new Point(150, 560),
+                Width = 80, Height = 30 
             };
-            saveButton.Click += (sender, e) =>
-            {
-                NewProductSaveButton_Click();
-            };
+            saveButton.Click += (sender, e) => { NewProductSaveButton_Click(); };
 
-            Button deleteButton = new Button
-            {
+            Button deleteButton = new Button 
+            { 
                 Text = "Törlés",
-                Location = new Point(240, 480),
-                Width = 80,
-                Height = 30
+                Location = new Point(240, 560),
+                Width = 80, Height = 30
             };
             deleteButton.Click += (sender, e) =>
             {
                 nameTextBox.Clear();
                 priceNumericUpDown.Value = 0;
                 optionsDataGridView.Rows.Clear();
-                optionsDataGridView.Rows.Add();
                 descriptionTextBox.Clear();
                 typeComboBox.SelectedIndex = -1;
+                imagePreview.Image = null;
             };
 
             centralPanel.Controls.Add(nameLabel);
@@ -1552,11 +1487,14 @@ public Form1()
             centralPanel.Controls.Add(typeComboBox);
             centralPanel.Controls.Add(imageLabel);
             centralPanel.Controls.Add(imageButton);
+            centralPanel.Controls.Add(imagePreview);
             centralPanel.Controls.Add(saveButton);
             centralPanel.Controls.Add(deleteButton);
 
             panel3.Controls.Add(centralPanel);
         }
+
+
 
         private void NewProductSaveButton_Click()
         {
@@ -1643,7 +1581,7 @@ public Form1()
                 name = givenName,
                 price = givenPrice,
                 customizationOptions = givenCustomizationOptions.Select(option => new { name = option.Item1, price = option.Item2 }),
-                sauceOptions = givenSauceOptions,
+                sauceOptions = givenSauceOptions.Select(sauce => new { name = sauce }),
                 description = givenDescription,
                 type = givenType,
                 image = givenIMGblob,
@@ -1815,7 +1753,6 @@ public Form1()
                 }
             };
 
-            // Commit checkbox changes immediately
             optionsDataGridView_Modify.CurrentCellDirtyStateChanged += (sender, e) =>
             {
                 if (optionsDataGridView_Modify.IsCurrentCellDirty && optionsDataGridView_Modify.CurrentCell is DataGridViewCheckBoxCell)
@@ -1918,8 +1855,8 @@ public Form1()
             };
             pictureBox_Modify = new PictureBox
             {
-                Location = new Point(150, 458),
-                Size = new Size(150, 150),
+                Location = new Point(200, 515),
+                Size = new Size(100, 100),
                 BorderStyle = BorderStyle.FixedSingle,
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Image = item.img
@@ -1939,9 +1876,9 @@ public Form1()
                     openFileDialog.Filter = "PNG fájlok (*.png)|*.png";
                     if (openFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        Image selectedImage = Image.FromFile(openFileDialog.FileName);
-                        pictureBox_Modify.Image = selectedImage;
-                        item.img = selectedImage;
+                        selectedUpdateIMG = new Bitmap(openFileDialog.FileName);
+                        pictureBox_Modify.Image = selectedUpdateIMG;
+                        item.img = selectedUpdateIMG;
                     }
                 }
             };
@@ -1970,7 +1907,8 @@ public Form1()
             {
                 Text = "Mentés",
                 Location = new Point(250,648),
-                
+                Width = 80,
+                Height = 30,
             };
             saveButton_Modify.Click += SaveButton_Modify_Click;
 
@@ -2075,9 +2013,7 @@ public Form1()
 
             ReadNewProductOptionsDataFromDataGridView(ref cutomisations, ref sauces, optionsDataGridView_Modify);
 
-
-            PutDishModificationstRequest(selectedMenuItem.id,nameTextBox_Modify.Text, Convert.ToInt32(priceNumericUpDown_Modify.Value), cutomisations, sauces, descriptionTextBox_Modify.Text, typeComboBox_Modify.SelectedItem.ToString(), "null", glutenCheckBox_Modify.Checked, lactoseCheckBox_Modify.Checked, eggCheckBox_Modify.Checked, nutsCheckBox_Modify.Checked);
-
+            PutDishModificationstRequest(selectedMenuItem.id,nameTextBox_Modify.Text, Convert.ToInt32(priceNumericUpDown_Modify.Value), cutomisations, sauces, descriptionTextBox_Modify.Text, typeComboBox_Modify.SelectedItem.ToString(), ConvertImageToBase64(selectedUpdateIMG), glutenCheckBox_Modify.Checked, lactoseCheckBox_Modify.Checked, eggCheckBox_Modify.Checked, nutsCheckBox_Modify.Checked);
         }
 
         private async void SearchButton_Dish_Click(object sender, EventArgs e)
@@ -2121,10 +2057,12 @@ public Form1()
                         string description = finalJsonElement[i].GetProperty("description").GetString();
                         string type = finalJsonElement[i].GetProperty("type").GetString();
                         Image img = null;
-                        bool gluten = false/*finalJsonElement[i].GetProperty("gluten").GetBoolean()*/;
-                        bool lactose = true/*finalJsonElement[i].GetProperty("lactose").GetBoolean()*/;
-                        bool egg = false/*finalJsonElement[i].GetProperty("egg").GetBoolean()*/;
-                        bool nuts = true/*finalJsonElement[i].GetProperty("nuts").GetBoolean()*/;
+
+                        //allergiákat nem kapja meg valami miatt !!!!!!!!
+                        bool gluten = true /*finalJsonElement[i].GetProperty("gluten").GetBoolean()*/;
+                        bool lactose = false /*finalJsonElement[i].GetProperty("lactose").GetBoolean()*/;
+                        bool egg = false /*finalJsonElement[i].GetProperty("egg").GetBoolean()*/;
+                        bool nuts = true /*finalJsonElement[i].GetProperty("nuts").GetBoolean()*/;
 
                         List<(string, int, bool)> modifications = new List<(string, int, bool)>(); // név, ár, sauce e?
 
@@ -2188,7 +2126,7 @@ public Form1()
                 name = givenName,
                 price = givenPrice,
                 customizationOptions = givenCustomizationOptions.Select(option => new { name = option.Item1, price = option.Item2 }),
-                sauceOptions = givenSauceOptions,
+                sauceOptions = givenSauceOptions.Select(sauce => new { name = sauce }),
                 description = givenDescription,
                 type = givenType,
                 image = givenIMGblob,
@@ -2224,145 +2162,6 @@ public Form1()
             {
                 MessageBox.Show("Hiba!\nüzenet 3:" + ex.Message);
             }
-        }
-
-
-        private void toolStripLabel10_Click(object sender, EventArgs e)
-        {
-        }
-
-        public class User
-        {
-            public string Email { get; set; }
-            public string Username { get; set; }
-
-            public User(string email, string username)
-            {
-                Email = email;
-                Username = username;
-            }
-        }
-
-        public class FullUser
-        { 
-            public int Id { get; set; }
-            public string Email { get; set; }
-            public string Username { get; set; }
-            public string FullName { get; set; }
-            public int points { get; set; }
-            public bool isAdmin { get; set; }
-            public bool isActive { get; set; }
-
-            public FullUser(int id, string email, string username, string fullName, int points, bool isAdmin, bool isActive)
-            {
-                Id = id;
-                Email = email;
-                Username = username;
-                FullName = fullName;
-                this.points = points;
-                this.isAdmin = isAdmin;
-                this.isActive = isActive;
-            }
-        }
-
-        public class Order
-        {
-            public List<OrderItem> Items { get; set; }
-            public int Id { get; set; }
-            public int price { get; set; }
-            public bool paid { get; set; }
-            public DateTime timestamp { get; set; }
-            public string customer_name { get; set; }
-            public string message { get; set; }
-            public bool takeAway { get; set; }
-            public Order(List<OrderItem> items, int id, int price, bool paid, DateTime timestamp, string customer_name, string message, bool takeAway)
-            {
-                Items = items;
-                Id = id;
-                this.price = price;
-                this.paid = paid;
-                this.timestamp = timestamp;
-                this.customer_name = customer_name;
-                this.message = message;
-                this.takeAway = takeAway;
-            }
-        }
-
-        public class OrderItem
-        {
-            public string name { get; set; }
-            public List<string> modifications { get; set; }
-            public string category { get; set; }
-
-            public OrderItem(string name, List<string> modifications, string category)
-            {
-                this.name = name;
-                this.modifications = modifications;
-                this.category = category;
-            }
-
-            public override string ToString()
-            {
-                return $"{name} - {category}";
-            }
-        }
-
-        public class MenuItem
-        {
-            public int id { get; set; }
-            public string name { get; set; }
-            public int price { get; set; }
-            public bool available { get; set; }
-            public List<(string, int, bool)> modifications { get; set; } // név, ár, sauce e?
-            public string description { get; set; }
-            public string category { get; set; }
-            public Image img { get; set; }
-            public bool gluten { get; set; }
-            public bool lactose { get; set; }
-            public bool egg { get; set; }
-            public bool nuts { get; set; }
-
-            public MenuItem(int id, string name, int price, bool available, List<(string, int, bool)> modifications, string description, string category, Image img, bool gluten, bool lactose, bool egg, bool nuts)
-            {
-                this.id = id;
-                this.name = name;
-                this.price = price;
-                this.available = available;
-                this.modifications = modifications;
-                this.description = description;
-                this.category = category;
-                this.img = img;
-                this.gluten = gluten;
-                this.lactose = lactose;
-                this.egg = egg;
-                this.nuts = nuts;
-            }
-
-            public override string ToString()
-            {
-                var modificationsString = modifications != null && modifications.Count > 0
-                    ? string.Join(", ", modifications.Select(m => $"{m.Item1} Price: {m.Item2}, Sauce: {(m.Item3 ? "Yes" : "No")}"))
-                    : "No modifications";
-
-                return $"Id: {id}\n"+
-                       $"Name: {name}\n" +
-                       $"Price: {price}Ft\n" +
-                       $"Available: {available}\n" +
-                       $"Category: {category}\n" +
-                       $"Description: {description}\n" +
-                       $"Modifications: {modificationsString}\n" +
-                       $"Image: {img?.ToString() ?? "No Image"}";
-            }
-        }
-
-        private void toolStripLabel4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void toolStripLabel5_Click(object sender, EventArgs e)
-        {
-
         }
 
     }
