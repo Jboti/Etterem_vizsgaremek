@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useValidateToken } from '@/api/auth/authQuery';
 import type { placeOrderData } from '@/api/menuItems/items';
+import type { addressData } from '@/api/user/user';
 import { useGetUserInfo, usePlaceOrder } from '@/api/user/userQuery';
 import { useCartStore } from '@/stores/cartStore';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -22,6 +23,16 @@ const takeAway = ref<boolean>(false)
 const usePoints = ref<boolean>(false)
 const pointsUsed = ref<number>(0)
 const message = ref<string>("")
+const adressDataRef = ref<addressData>({
+  city:'',
+  street:'',
+  houseNumber:0,
+  panel:null,
+  floor:null,
+  door:null,
+  doorBell:null
+})
+
 
 // Modal actions
 const openModal = () => { isModalOpen.value = true }
@@ -57,36 +68,42 @@ const groupedItems = computed(() => {
 
 
 function placeOrder() {
-  const placeOrderDataRef = ref<placeOrderData>({
-    totalPrice: cartStore.totalPrice,
-    message: message.value == "" ? " " :  message.value, 
-    takeAway: takeAway.value,
-    dishIds: [],
-    dishAmounts: [],
-    dishCustomizations: [],
-    pointsUsed: pointsUsed.value
-  })
-
-  for (let i = 0; i < cartStore.items.length; i++) {
-    placeOrderDataRef.value.dishIds.push(cartStore.items[i].dishId)
-    placeOrderDataRef.value.dishAmounts.push(cartStore.items[i].quantity)
-    const options = (cartStore.items[i].sause ? cartStore.items[i].sause : '') + (cartStore.items[i].options ? ', '+cartStore.items[i].options : '')
-    placeOrderDataRef.value.dishCustomizations.push(options)
+  if(takeAway && (adressDataRef.value.city == '' || adressDataRef.value.street == '' || adressDataRef.value.houseNumber == 0)){
+    toast.error("Hiányzó kiszállítási adatok.")
+    return
   }
-
-  mutate(placeOrderDataRef.value,{
-    onSuccess(data) {
-      push({name:"order-placed",params:{id:data.id, price: (cartStore.totalPrice-pointsUsed.value)}})
-      cartStore.clearCart()
-      setTimeout(() => 
-        toast.success("Rendelés leadva!")
-      ,100)
-      
-    },
-    onError(error: any) {
-      toast.error(error.response?.data?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!")
+  else{
+    const placeOrderDataRef = ref<placeOrderData>({
+      totalPrice: cartStore.totalPrice,
+      message: message.value == "" ? " " :  message.value, 
+      takeAway: takeAway.value,
+      dishIds: [],
+      dishAmounts: [],
+      dishCustomizations: [],
+      pointsUsed: pointsUsed.value
+    })
+  
+    for (let i = 0; i < cartStore.items.length; i++) {
+      placeOrderDataRef.value.dishIds.push(cartStore.items[i].dishId)
+      placeOrderDataRef.value.dishAmounts.push(cartStore.items[i].quantity)
+      const options = (cartStore.items[i].sause ? cartStore.items[i].sause : '') + (cartStore.items[i].options ? ', '+cartStore.items[i].options : '')
+      placeOrderDataRef.value.dishCustomizations.push(options)
     }
-})
+  
+    mutate(placeOrderDataRef.value,{
+      onSuccess(data) {
+        push({name:"order-placed",params:{id:data.id, price: (cartStore.totalPrice-pointsUsed.value)}})
+        cartStore.clearCart()
+        setTimeout(() => 
+          toast.success("Rendelés leadva!")
+        ,100)
+        
+      },
+      onError(error: any) {
+        toast.error(error.response?.data?.errmessage || "Valami hiba történt, kérjük próbáld meg újra!")
+      }
+    })
+  }
 }
 
 onMounted(() => {
@@ -160,6 +177,18 @@ onMounted(() => {
       <v-divider class="mb-6 border-opacity-50"></v-divider>
       <v-textarea v-model="message" label="Megjegyzés" style=" width: 90%; margin: auto;" variant="solo-filled" clearable auto-grow ></v-textarea>
       <v-checkbox v-model="takeAway" label="Elvitel (+100 Ft)" color="success" style="width: 92.5%; margin: auto;" @change="takeAway ? cartStore.totalPrice += 100 : cartStore.totalPrice -= 100"></v-checkbox>
+      <div v-if="takeAway"  style="width: 92.5%; margin: auto;">
+        <v-card-title>Szállítási cím:</v-card-title>
+        <v-text-field v-model="adressDataRef.city" label="Város" variant="outlined" class="field"></v-text-field>
+        <v-text-field v-model="adressDataRef.street" label="Utca" variant="outlined" class="field"></v-text-field>
+        <v-text-field v-model="adressDataRef.houseNumber" label="Házszám" variant="outlined" class="field"></v-text-field>
+        <v-text-field v-model="adressDataRef.panel" label="Lépcsőház" variant="outlined" class="field"></v-text-field>
+        <div v-if="adressDataRef.panel != null">
+          <v-text-field v-model="adressDataRef.floor" label="Emelet" variant="outlined" class="field"></v-text-field>
+          <v-text-field v-model="adressDataRef.door" label="Ajtó" variant="outlined" class="field"></v-text-field>
+          <v-text-field v-model="adressDataRef.doorBell" label="Kapucsengő" variant="outlined" class="field"></v-text-field>
+        </div>
+      </div>
       <v-checkbox v-model="usePoints" label="Pont beváltás" color="success" style="width: 92.5%; margin: auto;" @change="!usePoints ? pointsUsed = 0 : pointsUsed" v-if="userInfoData.points > 0"></v-checkbox>
       <div v-if="usePoints"  style="width: 92.5%; margin: auto;">
         <v-card-title>Pontok: {{ userInfoData.points }} <a style="color: darkred;">- {{ pointsUsed }}</a></v-card-title>
