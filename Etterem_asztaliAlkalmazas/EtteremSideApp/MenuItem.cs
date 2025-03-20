@@ -17,12 +17,13 @@ namespace EtteremSideApp
         public string description { get; set; }
         public string category { get; set; }
         public Image img { get; set; }
+        public string imgBLOB { get; set; }
         public bool gluten { get; set; }
         public bool lactose { get; set; }
         public bool egg { get; set; }
         public bool nuts { get; set; }
 
-        public MenuItem(int id, string name, int price, bool available, List<(string, int, bool)> modifications, string description, string category, Image img, bool gluten, bool lactose, bool egg, bool nuts)
+        public MenuItem(int id, string name, int price, bool available, List<(string, int, bool)> modifications, string description, string category, Image img, string imgBLOB, bool gluten, bool lactose, bool egg, bool nuts)
         {
             this.id = id;
             this.name = name;
@@ -32,6 +33,7 @@ namespace EtteremSideApp
             this.description = description;
             this.category = category;
             this.img = img;
+            this.imgBLOB = imgBLOB;
             this.gluten = gluten;
             this.lactose = lactose;
             this.egg = egg;

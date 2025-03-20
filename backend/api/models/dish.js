@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.JSON,
           allowNull: true,
         },
-        description: {
+        description: { //lehessen benne szám!!!!!!!!!
           type: DataTypes.TEXT,
           allowNull: false,
           validate:{

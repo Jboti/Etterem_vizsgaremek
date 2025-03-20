@@ -1498,7 +1498,10 @@ namespace EtteremSideApp
 
         private void NewProductSaveButton_Click()
         {
-            currentIMGBlob = ConvertImageToBase64(selectedNewIMG);
+
+            currentIMGBlob = ConvertImageToBase64(selectedNewIMG);           
+
+            
             if (EmptyCheckNewProduct())
             {
                 List<(string, int)> cutomisations = new List<(string, int)>();
@@ -1576,12 +1579,20 @@ namespace EtteremSideApp
 
         private async void CreateNewProductRequest(string givenName, int givenPrice, List<(string, int)> givenCustomizationOptions, List<string> givenSauceOptions, string givenDescription, string givenType, string givenIMGblob, bool givenGluten, bool givenLactose, bool givenEgg, bool givenNuts)
         {
+            var customization_temp = givenCustomizationOptions.Count == 0
+                ? null
+                : givenCustomizationOptions.Select(option => new { name = option.Item1, price = option.Item2 }).ToList();
+
+            var sauce_temp = givenSauceOptions.Count == 0
+                ? null
+                : givenSauceOptions.Select(sauce => new { name = sauce }).ToList();
+
             var product = new
             {
                 name = givenName,
                 price = givenPrice,
-                customizationOptions = givenCustomizationOptions.Select(option => new { name = option.Item1, price = option.Item2 }),
-                sauceOptions = givenSauceOptions.Select(sauce => new { name = sauce }),
+                customizationOptions = customization_temp,
+                sauceOptions = sauce_temp,
                 description = givenDescription,
                 type = givenType,
                 image = givenIMGblob,
@@ -1637,6 +1648,7 @@ namespace EtteremSideApp
                 description: "",
                 category: "",
                 img: null,
+                imgBLOB: null,
                 gluten: false,
                 lactose: false,
                 egg: false,
@@ -1855,7 +1867,7 @@ namespace EtteremSideApp
             };
             pictureBox_Modify = new PictureBox
             {
-                Location = new Point(200, 515),
+                Location = new Point(310, 470),
                 Size = new Size(100, 100),
                 BorderStyle = BorderStyle.FixedSingle,
                 SizeMode = PictureBoxSizeMode.Zoom,
@@ -1865,7 +1877,7 @@ namespace EtteremSideApp
             Button imageButton = new Button
             {
                 Text = "Új kép kiválasztása",
-                Location = new Point(310, 588),
+                Location = new Point(150, 468),
                 Width = 150,
                 Height = 30
             };
@@ -2013,13 +2025,22 @@ namespace EtteremSideApp
 
             ReadNewProductOptionsDataFromDataGridView(ref cutomisations, ref sauces, optionsDataGridView_Modify);
 
-            PutDishModificationstRequest(selectedMenuItem.id,nameTextBox_Modify.Text, Convert.ToInt32(priceNumericUpDown_Modify.Value), cutomisations, sauces, descriptionTextBox_Modify.Text, typeComboBox_Modify.SelectedItem.ToString(), ConvertImageToBase64(selectedUpdateIMG), glutenCheckBox_Modify.Checked, lactoseCheckBox_Modify.Checked, eggCheckBox_Modify.Checked, nutsCheckBox_Modify.Checked);
+
+            //ha nem akarja módosítani a képet ne kelljen íjat kiválasztani
+            if (selectedMenuItem.imgBLOB.Length > 0 && selectedUpdateIMG == null)
+            {
+                PutDishModificationstRequest(selectedMenuItem.id, nameTextBox_Modify.Text, Convert.ToInt32(priceNumericUpDown_Modify.Value), cutomisations, sauces, descriptionTextBox_Modify.Text, typeComboBox_Modify.SelectedItem.ToString(), selectedMenuItem.imgBLOB, glutenCheckBox_Modify.Checked, lactoseCheckBox_Modify.Checked, eggCheckBox_Modify.Checked, nutsCheckBox_Modify.Checked);
+            }
+            else
+            {
+                string newIMGblob = ConvertImageToBase64(selectedUpdateIMG);
+                PutDishModificationstRequest(selectedMenuItem.id, nameTextBox_Modify.Text, Convert.ToInt32(priceNumericUpDown_Modify.Value), cutomisations, sauces, descriptionTextBox_Modify.Text, typeComboBox_Modify.SelectedItem.ToString(), newIMGblob, glutenCheckBox_Modify.Checked, lactoseCheckBox_Modify.Checked, eggCheckBox_Modify.Checked, nutsCheckBox_Modify.Checked);
+            }
         }
 
         private async void SearchButton_Dish_Click(object sender, EventArgs e)
         {
             //dish keresés gomb
-
             selectedMenuItems.Clear();
             selectedMenuItems = await getAllMenuItems();
 
@@ -2057,12 +2078,24 @@ namespace EtteremSideApp
                         string description = finalJsonElement[i].GetProperty("description").GetString();
                         string type = finalJsonElement[i].GetProperty("type").GetString();
                         Image img = null;
+                        string imgBLOB = finalJsonElement[i].GetProperty("img").GetString();
+
+                        var allergenablesArray = finalJsonElement[i].GetProperty("allergenables").EnumerateArray();
+                        List<string> allergyNamesList = new List<string>();
+
+                        foreach (var allergy in allergenablesArray)
+                        {
+                            var allergyName = allergy.GetProperty("allergy").GetProperty("name").GetString();
+                            allergyNamesList.Add(allergyName);
+                        }
+
+                        //MessageBox.Show(String.Join(", ", allergyNamesList) + " I:" + i.ToString());
 
                         //allergiákat nem kapja meg valami miatt !!!!!!!!
-                        bool gluten = true /*finalJsonElement[i].GetProperty("gluten").GetBoolean()*/;
-                        bool lactose = false /*finalJsonElement[i].GetProperty("lactose").GetBoolean()*/;
-                        bool egg = false /*finalJsonElement[i].GetProperty("egg").GetBoolean()*/;
-                        bool nuts = true /*finalJsonElement[i].GetProperty("nuts").GetBoolean()*/;
+                        bool gluten = allergyNamesList.Contains("gluten");
+                        bool lactose = allergyNamesList.Contains("lactose");
+                        bool egg = allergyNamesList.Contains("egg");
+                        bool nuts = allergyNamesList.Contains("gluten");
 
                         List<(string, int, bool)> modifications = new List<(string, int, bool)>(); // név, ár, sauce e?
 
@@ -2088,7 +2121,7 @@ namespace EtteremSideApp
                             modifications = null;
                         }
 
-                        MenuItem item = new MenuItem(id,name,price,available,modifications,description, type, img,gluten,lactose,egg,nuts);
+                        MenuItem item = new MenuItem(id,name,price,available,modifications,description, type, img,imgBLOB,gluten,lactose,egg,nuts);
                         items.Add(item);
                     }
 
@@ -2120,13 +2153,21 @@ namespace EtteremSideApp
 
         private async void PutDishModificationstRequest(int givenID, string givenName, int givenPrice, List<(string, int)> givenCustomizationOptions, List<string> givenSauceOptions, string givenDescription, string givenType, string givenIMGblob, bool givenGluten, bool givenLactose, bool givenEgg, bool givenNuts)
         {
+            var customization_temp = givenCustomizationOptions.Count == 0
+                ? null
+                : givenCustomizationOptions.Select(option => new { name = option.Item1, price = option.Item2 }).ToList();
+
+            var sauce_temp = givenSauceOptions.Count == 0
+                ? null
+                : givenSauceOptions.Select(sauce => new { name = sauce }).ToList();
+
             var product = new
             {
                 id = givenID,
                 name = givenName,
                 price = givenPrice,
-                customizationOptions = givenCustomizationOptions.Select(option => new { name = option.Item1, price = option.Item2 }),
-                sauceOptions = givenSauceOptions.Select(sauce => new { name = sauce }),
+                customizationOptions = customization_temp,
+                sauceOptions = sauce_temp,
                 description = givenDescription,
                 type = givenType,
                 image = givenIMGblob,
@@ -2135,6 +2176,7 @@ namespace EtteremSideApp
                 egg = givenEgg,
                 nuts = givenNuts
             };
+
 
             string jsonData = JsonSerializer.Serialize(product);
 

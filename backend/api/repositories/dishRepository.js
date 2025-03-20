@@ -60,9 +60,9 @@ class dishRepository
         return newDish
     }
 
-    async modifyDish(dish, allergies)
-    {
-        const modifiedDish = await this.Dish.update(
+    async modifyDish(dish, allergies) {
+        // Update the dish
+        await this.Dish.update(
             {
                 name: dish.name,
                 price: dish.price,
@@ -74,47 +74,55 @@ class dishRepository
                 img: dish.img
             },
             {
-                where:
-                {
-                    id:dish.id
-                }
+                where: { id: dish.id }
             }
-        )
+        );
+    
+        // Retrieve the updated dish
+        const modifiedDish = await this.Dish.findOne({ where: { id: dish.id } });
+    
+        if (!modifiedDish) {
+            throw new Error("Dish not found after update");
+        }
+    
+        // Handle allergies
         for (const allergyName in allergies) {
-                const allergy = await this.Allergy.findOne({
-                    where: { name: allergyName }
-                })
-
-                if (allergy) {
-                    if (allergies[allergyName]) {
-                        const existingAllergen = await this.Allergenables.findOne({
-                            where: {
-                                allergenable_type: 'dish',
-                                allergenable_id: modifiedDish.id,
-                                allergen_id: allergy.id
-                            }
-                        })
-                        // Ha az allergia 'true' és nem létezik már a kapcsolat, hozzáadjuk az allergént a Dish-hez
-                        if(!existingAllergen){
-                            await this.Allergenables.create({
-                                allergenable_type: 'dish',
-                                allergenable_id: modifiedDish.id,
-                                allergen_id: allergy.id
-                            })
+            const allergy = await this.Allergy.findOne({
+                where: { name: allergyName }
+            });
+    
+            if (allergy) {
+                if (allergies[allergyName]) {
+                    const existingAllergen = await this.Allergenables.findOne({
+                        where: {
+                            allergenable_type: 'dish',
+                            allergenable_id: modifiedDish.id,
+                            allergen_id: allergy.id
                         }
-                    } else {
-                        // Ha az allergia 'false', töröljük az allergént a Dish-től
-                        await this.Allergenables.destroy({
-                            where: {
-                                allergenable_type: 'dish',
-                                allergenable_id: modifiedDish.id,
-                                allergen_id: allergy.id
-                            }
-                        })
+                    });
+    
+                    // Add allergen if it doesn't exist
+                    if (!existingAllergen) {
+                        await this.Allergenables.create({
+                            allergenable_type: 'dish',
+                            allergenable_id: modifiedDish.id,
+                            allergen_id: allergy.id
+                        });
                     }
+                } else {
+                    // Remove allergen if it exists
+                    await this.Allergenables.destroy({
+                        where: {
+                            allergenable_type: 'dish',
+                            allergenable_id: modifiedDish.id,
+                            allergen_id: allergy.id
+                        }
+                    });
                 }
             }
-        return modifiedDish
+        }
+    
+        return modifiedDish;
     }
 }
 
