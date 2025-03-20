@@ -10,7 +10,7 @@ exports.createDish = async (req,res,next) =>
         if(!name || !price ||isNaN(price) || !type || !image ||!String(gluten) || !String(lactose) || !String(egg) || !String(nuts))
         {
             console.log("--------------------------------------------",name, price, sauceOptions ,customizationOptions, description, type, image, gluten, lactose, egg, nuts);
-            const error = new Error("Missing or wrong tpye of data!")
+            const error = new Error("Missing or wrong type of data!")
             error.status = 404
             throw error
         }
@@ -40,7 +40,7 @@ exports.createDish = async (req,res,next) =>
             error.status = 500
             throw error
         }
-        res.status(201).send("Successfully created new dish!")
+        res.status(201).json(dish)
         
     }catch(error){
         next(error)

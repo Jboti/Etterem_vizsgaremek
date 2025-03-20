@@ -63,7 +63,7 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.TEXT('long'), 
           allowNull: true,
           validate:{
-            isAlphanumeric:true
+            is: /^[a-zA-Z0-9!@#$%^&*()_+\-=<>?/{}[\]~.,;:'"\\|`]+$/
           }
         }
       },
