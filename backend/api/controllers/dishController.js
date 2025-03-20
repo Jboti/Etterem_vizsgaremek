@@ -65,8 +65,7 @@ exports.modifyDish = async (req,res,next) =>
         let {id, name, price, available, sauceOptions, customizationOptions, description, type, image, gluten, lactose, egg, nuts} = req.body
         id = Number(id)
         price = Number(price)
-        if(!id || isNaN(id) || !name || !price || isNaN(price) || !String(available) || !sauceOptions ||
-        !customizationOptions || !description || !type || !image  ||!String(gluten) || !String(lactose) || !String(egg) || !String(nuts))
+        if(!id || isNaN(id) || !name || !price || isNaN(price) || !String(available) || !description || !type || !image  ||!String(gluten) || !String(lactose) || !String(egg) || !String(nuts))
         {
             const error = new Error("Missing or wrong type of data!")
             error.status = 404

@@ -233,7 +233,7 @@ onMounted(() => {
                           <v-card class="ml-4 mr-4" style="background-color: rgba(255, 255, 255, .9); border-radius: 10px; box-shadow: 0 0 5px 2px black;">
                             <v-card-title v-if="dish.amount > 1" class="multiline-text">{{ dish.dish.name }} x {{ dish.amount }}</v-card-title>
                             <v-card-title v-else class="multiline-text">{{ dish.dish.name }}</v-card-title>
-                            <div v-if="dish.dish.type != 'Drink'">
+                            <div v-if="dish.dish.type != 'Drink' && dish.dish.type != 'SideDish'">
                               <div v-if="String(dish.customizations).split(',').length > 1">
                                 <v-card-title>Szósz: <v-card-subtitle class="multiline-text">{{ String(dish.customizations).split(',')[0].substring(1) }}</v-card-subtitle></v-card-title>
                                 <v-card-title>Módosítás: <v-card-subtitle class="multiline-text">{{ String(dish.customizations).split(',').splice(1).join(',').slice(0,-1) }}</v-card-subtitle></v-card-title>
