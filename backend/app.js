@@ -28,7 +28,12 @@ const errorHandler = require('./api/middlewares/errorHandler')
 const userRoutes = require('./api/routes/userRoutes')
 const purchaseRoutes = require('./api/routes/purchaseRoutes')
 const dishRoutes = require('./api/routes/dishRoutes')
-const testRouter = require('./api/routes/testRouter')
+
+// Swagger setup
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swaggerConfig');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 //ROUTES
 
@@ -36,8 +41,6 @@ app.use("/api/v1", userRoutes)
 app.use("/api/v1", purchaseRoutes)
 app.use("/api/v1",dishRoutes)
 
-//táblákat feltölti pár alap adattal teszthez, ez majd később törlésre kerül
-app.use("/test-data-create",testRouter)
 
 //errorHandlerek
 app.use(errorHandler.notFoundError)

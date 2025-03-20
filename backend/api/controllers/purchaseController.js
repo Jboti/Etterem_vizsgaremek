@@ -54,37 +54,48 @@ exports.placeOrder = async (req,res,next) =>
         const currentDate = new Date()
 
         const id = Number(req.uid)
-        let {totalPrice, message, takeAway, dishIds, dishAmounts, dishCustomizations, pointsUsed} = req.body
+        let {totalPrice, message, takeAway, dishIds, dishAmounts, dishCustomizations, pointsUsed, city, street, houseNumber, panel, floor, door, doorBell} = req.body
         
         totalPrice = Number(totalPrice)
+        houseNumber = Number(houseNumber)
+        floor = Number(floor)
+        door = Number(door)
+        doorBell = Number(doorBell)
         dishIds = dishIds.map(id => Number(id))
         dishAmounts = dishAmounts.map(amount => Number(amount))
         pointsUsed = Number(pointsUsed)
 
         if(!id || !totalPrice || !message || !String(takeAway) || !dishIds || !dishAmounts || !dishCustomizations || !String(pointsUsed)){
             const error = new Error("Missing data in placeOrder")
-            error.status = 404
+            error.status = 400
             throw error
         }
-        if(isNaN(id) || isNaN(totalPrice) || dishIds.some(id => isNaN(id)) || dishAmounts.some(amount => isNaN(amount)) || isNaN(pointsUsed))
+        if(isNaN(id) || isNaN(totalPrice) || dishIds.some(id => isNaN(id)) || dishAmounts.some(amount => isNaN(amount)) || isNaN(pointsUsed) || isNaN(houseNumber) || isNaN(floor) || isNaN(door) || isNaN(doorBell))
         {
             const error = new Error("Wrong type of data in placeOrder!")
-            error.status = 404
+            error.status = 400
             throw error
         }
 
         const purchase = {
             id: null,
             date: currentDate.toISOString(),
-            totalPrice: totalPrice,
-            message: message,
+            totalPrice,
+            message,
             isActive: true,
-            takeAway: takeAway
+            takeAway,
+            city,
+            street,
+            houseNumber,
+            panel,
+            floor,
+            door,    
+            doorBell
         }
         const dishInfo = {
-            dishIds: dishIds,
-            dishAmounts: dishAmounts,
-            dishCustomizations: dishCustomizations
+            dishIds,
+            dishAmounts,
+            dishCustomizations
         }
 
         const result = await orderConnectionService.createPurchaseConnection(id,purchase,dishInfo,pointsUsed)

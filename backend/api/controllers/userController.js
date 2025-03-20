@@ -12,11 +12,16 @@ exports.getUser = async (req,res,next) =>
         
         if(!id || isNaN(id)) {
             const error = new Error("User id not found or id is not a number!")
-            error.status = 404
+            error.status = 400
             throw error
         }
 
         const user = await userService.getUser(id)
+        if (!user) {
+            const error = new Error("User not found!")
+            error.status = 404
+            throw error
+        }
         res.status(200).json(user)
     } catch(error) {
         next(error)
@@ -39,11 +44,11 @@ exports.createUser = async (req, res, next) => {
         const { userName, fullName, email, password } = req.body
         if (!userName || !fullName || !email || !password) {
             const error = new Error("Missing data!")
-            error.status = 404
+            error.status = 400
             throw error
         }
         
-        const emailExists = await userService.checkForExistingEmail(email)
+        const emailExists = await userService.getUserByEmail(email)
         const userNameExists = await userService.checkForExistinguserName(userName)
         if(!emailExists) {
             if(!userNameExists) {
@@ -132,14 +137,14 @@ exports.verifyEmail = async (req, res, next) => {
         const { token } = req.body
         if (!token) {
             const error = new Error("No token provided!")
-            error.status = 403
+            error.status = 400
             throw error 
         }
 
         let id = null
         jwt.verify(token, process.env.JWT_KEY,(err,decoded) =>{
             if(err){
-                res.status(500).json({ errmessage:"Érvénytelen vagy lejárt munkamenet!"})
+                res.status(400).json({ errmessage:"Érvénytelen vagy lejárt munkamenet!"})
             }
             if(decoded.validLogin){
                 return res.status(403).json({ errmessage: 'Invalid token use.'})
@@ -148,17 +153,15 @@ exports.verifyEmail = async (req, res, next) => {
         })
         if (!id || isNaN(id)) {
             const error = new Error("Email verifying user ID not found or is not a number!")
-            error.status = 404
+            error.status = 400
             throw error
         }
 
         const result = await userService.verifyEmail(id)
-        if (!result) {
-            const error = new Error("User verification went wrong!")
-            error.status = 404
-            throw error
-        }
-        res.status(201).send("User activated!")
+        if (!result)
+            res.status(400).json({errmessage:"Hiba az email cím megerősítésénél!"})
+        else
+            res.status(200).send("User activated!")
     } catch (error) {
         next(error)
     }
@@ -171,7 +174,7 @@ exports.loginUser = async (req,res,next) =>
         if(!email || !password)
         {
             const error = new Error("Missing login data!")
-            error.status = 404
+            error.status = 400
             throw error
         }
 
@@ -180,7 +183,7 @@ exports.loginUser = async (req,res,next) =>
             res.status(404).json({errmessage:"Az email címmel nincs regisztálva felhasználó!"})
         }
         else if(user.isActive == false) {
-            res.status(404).json({errmessage:"A felhasználó nincs aktiválva, ha még nem aktiválta email címét tegye meg az azon kapott üzeneten keresztül! Más hiba esetén vegye fel velünk a kapcsolatot a: donercegled@gmail.com címen!"})
+            res.status(403).json({errmessage:"A felhasználó nincs aktiválva, ha még nem aktiválta email címét tegye meg az azon kapott üzeneten keresztül! Más hiba esetén vegye fel velünk a kapcsolatot a: donercegled@gmail.com címen!"})
         }
         else if(await bcrypt.compare(password, user.password)){
             const token = jwt.sign({ id:user.id, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" })   
@@ -208,7 +211,7 @@ exports.deleteUser = async (req,res,next) =>
         const id = Number(req.uid)
         if(!id || isNaN(id)){
             const error = new Error("User id not found or id is not a number!")
-            error.status = 404
+            error.status = 400
             throw error
         }
         await userService.deleteUser(id)
@@ -225,7 +228,7 @@ exports.changePassword = async (req, res, next) => {
         
         if (!id || isNaN(id) || !password) {
             const error = new Error("Missing or wrong type of data!")
-            error.status = 404
+            error.status = 400
             throw error
         }
         const passwordHash = await bcrypt.hash(password, salt)
@@ -248,7 +251,7 @@ exports.changeUserName = async(req,res,next) =>{
        
         if (!id || isNaN(id) || !userName || !password) {
             const error = new Error("Missing or wrong type of data!")
-            error.status = 404
+            error.status = 400
             throw error
         }
         
@@ -273,7 +276,7 @@ exports.sendEmail = async(req,res,next) =>{
     try {
         const { email } = req.body
 
-        const result = await userService.checkForExistingEmail(email)
+        const result = await userService.getUserByEmail(email)
         if(result){
             const token = jwt.sign({ id: result.id, validLogin:false }, process.env.JWT_KEY, { expiresIn: "30m" })
             const verificationLink = `http://localhost:5173/password-reset?token=${token}`
@@ -326,9 +329,9 @@ exports.sendEmail = async(req,res,next) =>{
             sendMail()
 
             
-            res.status(201).json(result)
+            res.status(200).json(result)
         }else
-            res.status(400).send("Failed to send out verification email!")
+            res.status(404).send("Failed to send out verification email!")
     } catch(error) {
         next(error)
     }
@@ -340,7 +343,7 @@ exports.getAdminUser = async (req,res,next) =>
         const {email, password} = req.body
         if(!email || !password){
             error = new Error("Missing data!")
-            error.status = 404
+            error.status = 400
             throw error
         }
 
@@ -349,16 +352,16 @@ exports.getAdminUser = async (req,res,next) =>
             res.status(404).json({errmessage:"Az email címmel nincs regisztálva felhasználó!"})
         }
         else if(user.isActive == false){
-            res.status(404).json({errmessage:"A felhasználó nincs aktiválva, ha még nem aktiválta email címét tegye meg az azon kapott üzeneten keresztül! Más hiba esetén vegye fel velünk a kapcsolatot a: donercegled@gmail.com címen!"})
+            res.status(403).json({errmessage:"A felhasználó nincs aktiválva, ha még nem aktiválta email címét tegye meg az azon kapott üzeneten keresztül! Más hiba esetén vegye fel velünk a kapcsolatot a: donercegled@gmail.com címen!"})
         }
         else if(await bcrypt.compare(password, user.password)){
             if(user.isAdmin)
-                res.status(200).json({email:user.email,userName:user.userName})
+                res.status(200).json({email:email,userName:user.userName})
             else
-                res.status(500).json({errmessage:"Nem admin fiók!"}) 
+                res.status(403).json({errmessage:"Nem admin fiók!"}) 
         }
         else
-            res.status(400).json({errmessage:"Helytelen email cím vagy jelszó!"})
+            res.status(401).json({errmessage:"Helytelen email cím vagy jelszó!"})
 
     } catch(error) {
         next(error)
@@ -377,7 +380,7 @@ exports.updateAllregies = async (req,res,next) =>
 
         if(!String(gluten) || !String(lactose) || !String(egg) || !String(nuts) || !id || isNaN(id)){
             const error = new Error("Missing or wrong form of data!")
-            error.status = 404
+            error.status = 400
             throw error
         }
 
@@ -422,12 +425,12 @@ exports.adminUserModify = async (req,res,next) =>
         const result = await userService.adminUserModify(newUserData)
         if(!result)
         {
-            const error = new Error("Admin user modify went wrong!")
-            error.status = 400
+            const error = new Error("Error in modifying user!")
+            error.status = 500
             throw error
         }
 
-        res.status(201).send("Successfully modified!")
+        res.status(200).send("Successfully modified!")
     } catch(error) {
         next(error)
     }
@@ -441,7 +444,7 @@ exports.deleteUserPasswordCheck = async (req,res,next) =>
         if(!email || !password)
         {
             const error = new Error("Missing data!")
-            error.status = 404
+            error.status = 400
             throw error
         }
 

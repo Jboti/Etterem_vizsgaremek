@@ -26,7 +26,7 @@ const message = ref<string>("")
 const adressDataRef = ref<addressData>({
   city:'',
   street:'',
-  houseNumber:0,
+  houseNumber:1,
   panel:null,
   floor:null,
   door:null,
@@ -68,7 +68,7 @@ const groupedItems = computed(() => {
 
 
 function placeOrder() {
-  if(takeAway && (adressDataRef.value.city == '' || adressDataRef.value.street == '' || adressDataRef.value.houseNumber == 0)){
+  if(takeAway.value && (adressDataRef.value.city == '' || adressDataRef.value.street == '' || adressDataRef.value.houseNumber == 0)){
     toast.error("Hiányzó kiszállítási adatok.")
     return
   }
@@ -80,7 +80,14 @@ function placeOrder() {
       dishIds: [],
       dishAmounts: [],
       dishCustomizations: [],
-      pointsUsed: pointsUsed.value
+      pointsUsed: pointsUsed.value,
+      city: takeAway.value ? adressDataRef.value.city : null,
+      street: takeAway.value ? adressDataRef.value.street : null,
+      houseNumber: takeAway.value ? adressDataRef.value.houseNumber : null,
+      panel: takeAway.value ? adressDataRef.value.panel : null,
+      floor: takeAway.value ? adressDataRef.value.floor : null,
+      door: takeAway.value ? adressDataRef.value.door : null,
+      doorBell: takeAway.value ? adressDataRef.value.doorBell : null
     })
   
     for (let i = 0; i < cartStore.items.length; i++) {
@@ -90,6 +97,7 @@ function placeOrder() {
       placeOrderDataRef.value.dishCustomizations.push(options)
     }
   
+    console.log(placeOrderDataRef.value)
     mutate(placeOrderDataRef.value,{
       onSuccess(data) {
         push({name:"order-placed",params:{id:data.id, price: (cartStore.totalPrice-pointsUsed.value)}})
@@ -179,14 +187,15 @@ onMounted(() => {
       <v-checkbox v-model="takeAway" label="Elvitel (+100 Ft)" color="success" style="width: 92.5%; margin: auto;" @change="takeAway ? cartStore.totalPrice += 100 : cartStore.totalPrice -= 100"></v-checkbox>
       <div v-if="takeAway"  style="width: 92.5%; margin: auto;">
         <v-card-title>Szállítási cím:</v-card-title>
-        <v-text-field v-model="adressDataRef.city" label="Város" variant="outlined" class="field"></v-text-field>
-        <v-text-field v-model="adressDataRef.street" label="Utca" variant="outlined" class="field"></v-text-field>
-        <v-text-field v-model="adressDataRef.houseNumber" label="Házszám" variant="outlined" class="field"></v-text-field>
-        <v-text-field v-model="adressDataRef.panel" label="Lépcsőház" variant="outlined" class="field"></v-text-field>
+        <v-card-subtitle class="mb-4">* : kötelező mező</v-card-subtitle>
+        <v-text-field v-model="adressDataRef.city" label="Város *" variant="outlined" class="field mx-6"></v-text-field>
+        <v-text-field v-model="adressDataRef.street" label="Utca *" variant="outlined" class="field mx-6"></v-text-field>
+        <v-number-input v-model="adressDataRef.houseNumber" label="Házszám *" variant="outlined" class="field mx-6" :min="1" :step="1"></v-number-input>
+        <v-text-field v-model="adressDataRef.panel" label="Lépcsőház" variant="outlined" class="field mx-6"></v-text-field>
         <div v-if="adressDataRef.panel != null">
-          <v-text-field v-model="adressDataRef.floor" label="Emelet" variant="outlined" class="field"></v-text-field>
-          <v-text-field v-model="adressDataRef.door" label="Ajtó" variant="outlined" class="field"></v-text-field>
-          <v-text-field v-model="adressDataRef.doorBell" label="Kapucsengő" variant="outlined" class="field"></v-text-field>
+          <v-number-input v-model="adressDataRef.floor" label="Emelet" variant="outlined" class="field mx-6" :min="1" :step="1"></v-number-input>
+          <v-number-input v-model="adressDataRef.door" label="Ajtó" variant="outlined" class="field mx-6" :min="1" :step="1"></v-number-input>
+          <v-number-input v-model="adressDataRef.doorBell" label="Kapucsengő" variant="outlined" class="field mx-6" :min="1" :step="1"></v-number-input>
         </div>
       </div>
       <v-checkbox v-model="usePoints" label="Pont beváltás" color="success" style="width: 92.5%; margin: auto;" @change="!usePoints ? pointsUsed = 0 : pointsUsed" v-if="userInfoData.points > 0"></v-checkbox>
