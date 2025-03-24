@@ -107,7 +107,7 @@
     "sqlite3": "^5.1.7",
     "sqlstring": "^2.3.3",
     "statuses": "^2.0.1",
-    "supertest": "^7.0.0",
+    "supertest": "^7.1.0",
     "supports-color": "^5.5.0",
     "to-regex-range": "^5.0.1",
     "toidentifier": "^1.0.1",

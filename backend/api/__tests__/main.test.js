@@ -86,7 +86,6 @@ describe("Controller tesztek", ()=>
                     .set("Content-Type", "application/json")
                     .send({
                         id:1,name:"TestDishNameUj"
-
                     });
 
                     expect(res.statusCode).toBe(404);
@@ -111,7 +110,7 @@ describe("Controller tesztek", ()=>
                     .send({
                         userName:"TestUserName",fullName:"TestFullName",email:"danikataurusz@gmail.com",password:'HelyesJszo123',
                     });
-                    //console.log("CREATEUSER ERRROR"+res.text);
+
                     expect(res.statusCode).toBe(201);
                 })
             
@@ -121,7 +120,7 @@ describe("Controller tesztek", ()=>
                     .send({
                         email:"danikataurusz@gmail.com",password:'HelyesJszo123',//hiányos adatok
                     });
-                    //console.log("CREATEUSER ERRROR"+res.text);
+
                     expect(res.statusCode).toBe(404);
                 })
 
