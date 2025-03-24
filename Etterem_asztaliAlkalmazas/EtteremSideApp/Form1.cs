@@ -205,6 +205,74 @@ namespace EtteremSideApp
                     int number_of_dishes = dishes.GetArrayLength();
                     List<OrderItem> items = new List<OrderItem>();
 
+                    string city = order.GetProperty("city").GetString();
+                    string street = order.GetProperty("street").GetString();                    
+
+                    string houseNumber = null;
+                    if (order.TryGetProperty("houseNumber", out JsonElement houseNumberElement) && houseNumberElement.ValueKind == JsonValueKind.Number)
+                    {
+                        houseNumber = houseNumberElement.GetInt32().ToString();
+                    }
+
+                    string panel = order.GetProperty("panel").GetString();
+
+                    string floor = null;
+                    if (order.TryGetProperty("floor", out JsonElement floorElement) && floorElement.ValueKind == JsonValueKind.Number)
+                    {
+                        floor = floorElement.GetInt32().ToString();
+                    }
+
+                    string door = null;
+                    if (order.TryGetProperty("door", out JsonElement doorElement) && doorElement.ValueKind == JsonValueKind.Number)
+                    {
+                        door = doorElement.GetInt32().ToString();
+                    }
+
+                    string doorBell = null;
+                    if (order.TryGetProperty("doorBell", out JsonElement doorBellElement) && doorBellElement.ValueKind == JsonValueKind.Number)
+                    {
+                        doorBell = doorBellElement.GetInt32().ToString();
+                    }
+
+                    List<(string,string)> locationData = new List<(string,string)> ();
+                    if (!string.IsNullOrEmpty(city))
+                    {
+                        locationData.Add(("Város: ", city));
+                    }
+
+                    if (!string.IsNullOrEmpty(street))
+                    {
+                        locationData.Add(("Utca: ", street));
+                    }
+
+                    if (!string.IsNullOrEmpty(houseNumber))
+                    {
+                        locationData.Add(("Ház szám: ", houseNumber));
+                    }
+
+                    if (!string.IsNullOrEmpty(panel))
+                    {
+                        locationData.Add(("Panel: ", panel));
+                    }
+
+                    if (!string.IsNullOrEmpty(floor))
+                    {
+                        locationData.Add(("Emelet: ", floor));
+                    }
+
+                    if (!string.IsNullOrEmpty(door))
+                    {
+                        locationData.Add(("Ajtó: ", door));
+                    }
+
+                    if (!string.IsNullOrEmpty(doorBell))
+                    {
+                        locationData.Add(("Csengő: ", doorBell));
+                    }
+
+
+
+
                     for (int j = 0; j < number_of_dishes; j++)
                     {
                         string dish_name = dishes[j].GetProperty("dish").GetProperty("name").GetString();
@@ -220,7 +288,7 @@ namespace EtteremSideApp
                             items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
                     }
 
-                    all_orders.Add(new Order(items, id, totalprice, true, date, name, message, takeAway));
+                    all_orders.Add(new Order(items, id, totalprice, true, date, name, message, takeAway,locationData));
                     Console.WriteLine("lefutott " + all_orders.Count());
                 }
             }
@@ -337,6 +405,72 @@ namespace EtteremSideApp
                     int number_of_dishes = dishes.GetArrayLength();
                     List<OrderItem> items = new List<OrderItem>();
 
+                    string city = order.GetProperty("city").GetString();
+                    string street = order.GetProperty("street").GetString();
+                    
+                    string houseNumber = null;
+                    if (order.TryGetProperty("houseNumber", out JsonElement houseNumberElement) && houseNumberElement.ValueKind == JsonValueKind.Number)
+                    {
+                        houseNumber = houseNumberElement.GetInt32().ToString();
+                    }
+
+                    string panel = order.GetProperty("panel").GetString();
+
+                    string floor = null;
+                    if (order.TryGetProperty("floor", out JsonElement floorElement) && floorElement.ValueKind == JsonValueKind.Number)
+                    {
+                        floor = floorElement.GetInt32().ToString();
+                    }
+
+                    string door = null;
+                    if (order.TryGetProperty("door", out JsonElement doorElement) && doorElement.ValueKind == JsonValueKind.Number)
+                    {
+                        door = doorElement.GetInt32().ToString();
+                    }
+
+                    string doorBell = null;
+                    if (order.TryGetProperty("doorBell", out JsonElement doorBellElement) && doorBellElement.ValueKind == JsonValueKind.Number)
+                    {
+                        doorBell = doorBellElement.GetInt32().ToString();
+                    }
+
+                    List<(string,string)> locationData = new List<(string,string)> ();
+
+                    if (!string.IsNullOrEmpty(city))
+                    {
+                        locationData.Add(("Város: ", city));
+                    }
+
+                    if (!string.IsNullOrEmpty(street))
+                    {
+                        locationData.Add(("Utca: ", street));
+                    }
+
+                    if (!string.IsNullOrEmpty(houseNumber))
+                    {
+                        locationData.Add(("Ház szám: ", houseNumber));
+                    }
+
+                    if (!string.IsNullOrEmpty(panel))
+                    {
+                        locationData.Add(("Panel: ", panel));
+                    }
+
+                    if (!string.IsNullOrEmpty(floor))
+                    {
+                        locationData.Add(("Emelet: ", floor));
+                    }
+
+                    if (!string.IsNullOrEmpty(door))
+                    {
+                        locationData.Add(("Ajtó: ", door));
+                    }
+
+                    if (!string.IsNullOrEmpty(doorBell))
+                    {
+                        locationData.Add(("Csengő: ", doorBell));
+                    }
+
                     for (int j = 0; j < number_of_dishes; j++)
                     {
                         string dish_name = dishes[j].GetProperty("dish").GetProperty("name").GetString();
@@ -353,7 +487,7 @@ namespace EtteremSideApp
                             items.Add(new OrderItem(dish_name, dish_customizations, dish_type));
                     }
 
-                    all_orders.Add(new Order(items, id, totalprice, true, date, name, message, takeAway));
+                    all_orders.Add(new Order(items, id, totalprice, true, date, name, message, takeAway, locationData));
                 }
 
                 //kell e frissítsen?
@@ -507,6 +641,10 @@ namespace EtteremSideApp
             allLabelHeight += AddLabel(orderPanel, $"Kifizetve: {(order.paid ? "Igen" : "Nem")}\n", ref currentTop, ref maxLabelWidth);
             allLabelHeight += AddLabel(orderPanel, $"Elvitelre: {(order.takeAway ? "Igen" : "Nem")}\n", ref currentTop, ref maxLabelWidth);
             allLabelHeight += AddLabel(orderPanel, $"Megjegyzés: {order.message}\n", ref currentTop, ref maxLabelWidth);
+            for (int i = 0; i < order.locationData.Count; i++)
+            {
+                allLabelHeight += AddLabel(orderPanel, order.locationData[i].Item1 + order.locationData[i].Item2+"\n", ref currentTop, ref maxLabelWidth);
+            }
 
             AddSeparator(orderPanel, ref currentTop);
             allLabelHeight += 5;
@@ -818,7 +956,7 @@ namespace EtteremSideApp
 
         public async Task<string> getLogin(string givenEmail, string givenPw)
         {
-            string url = "http://localhost:3000/api/v1/admin-user";
+            string url = "http://localhost:3000/api/v1/admin-login";
             var credentials = new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("email", givenEmail),

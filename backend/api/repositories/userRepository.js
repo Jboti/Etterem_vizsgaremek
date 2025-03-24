@@ -24,12 +24,10 @@ class userRepository
                     {
                         model: this.Allergenable,
                         as: 'allergenables',
-                        attributes: ['allergenable_type'],
                         include:[
                             {
                                 model:this.Allergy,
                                 as: 'allergy',
-                                attributes: ['name']
                             }
                         ]
                     }
@@ -39,7 +37,9 @@ class userRepository
 
     async getAllUser()
     {
-        return await this.User.findAll({})
+        return await this.User.findAll({
+            attributes:['id','created','userName','fullName','email','points','isAdmin','isActive']
+        })
     }
 
     async updateUserName(user)
@@ -106,7 +106,8 @@ class userRepository
                 where:
                 {
                     email:email
-                }
+                },
+                attributes: ['id','userName','password','isActive','isAdmin']
             })
     }
 

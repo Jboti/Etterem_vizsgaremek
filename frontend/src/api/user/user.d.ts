@@ -14,8 +14,8 @@ export type addressData = {
     city: string,
     street: string,
     houseNumber: number,
-    panel: number | null,
-    floor: number | null,
-    door: number | null,
-    doorBell: number | null
+    panel: string | null,
+    floor: string | null,
+    door: string | null,
+    doorBell: string | null
 }

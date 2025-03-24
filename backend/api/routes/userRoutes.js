@@ -5,10 +5,9 @@ const userController = require('../controllers/userController')
 const userAuth = require('../middlewares/userAuth')
 
 
-// user data
-router.get("/user", userAuth.authenticateToken ,userController.getUser)
 router.get("/users", userController.getAllUser)
-router.post("/admin-user",userController.getAdminUser)
+router.get("/user", userAuth.authenticateToken ,userController.getUser)
+router.post("/admin-login",userController.getAdminUser)
 
 //auth
 router.post("/authenticate-token",userAuth.authenticateToken,userController.authenticateToken)

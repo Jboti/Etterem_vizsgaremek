@@ -32,11 +32,6 @@ class UserService
         return await userRepository.checkForExistinguserName(userName)
     }
 
-    async checkForExistingEmail(email)
-    {
-        return await userRepository.getUserByEmail(email)
-    }
-
     async getUserByEmail(email)
     {
         return await userRepository.getUserByEmail(email)

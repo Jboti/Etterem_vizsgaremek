@@ -39,5 +39,12 @@ export type placeOrderData = {
     dishIds:number[],
     dishAmounts:number[],
     dishCustomizations:string[],
-    pointsUsed: number
+    pointsUsed: number,
+    city: string | null,
+    street: string | null,
+    houseNumber: number | null,
+    panel: string | null,
+    floor: string | null,
+    door: string | null,
+    doorBell: string | null
 }

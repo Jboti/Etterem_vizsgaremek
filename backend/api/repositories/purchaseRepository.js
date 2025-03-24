@@ -84,7 +84,7 @@ class purchaseRepository
                     attributes: ["customizations", "amount"] 
                 }
             ],
-            attributes: ["id", "date","totalPrice","message","takeAway"] 
+            attributes: ["id", "date","totalPrice","message","takeAway","city","street","houseNumber","panel","floor","door","doorBell"] 
         })
     }
     
