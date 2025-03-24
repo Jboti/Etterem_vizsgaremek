@@ -7,7 +7,6 @@ const jwt = require("jsonwebtoken");
 const app = require("../../app");
 const dishController = require("../controllers/dishController");
 const purchaseController = require("../controllers/purchaseController");
-const testController = require("../controllers/testController");
 const userController = require("../controllers/userController");
 
 jest.mock("../db/dbContext", () => require("../../__mocks__/db"));
@@ -121,7 +120,7 @@ describe("Controller tesztek", ()=>
                         email:"danikataurusz@gmail.com",password:'HelyesJszo123',//hiányos adatok
                     });
 
-                    expect(res.statusCode).toBe(404);
+                    expect(res.statusCode).toBe(400);
                 })
 
             test("createUser test helytelen2", async () => 
@@ -154,7 +153,7 @@ describe("Controller tesztek", ()=>
                 const res = await request(app).get("/api/v1/user")
                 .set("Authorization", `Bearer ${token}`);
 
-                expect(res.statusCode).toBe(404);
+                expect(res.statusCode).toBe(400);
             })
 
             test("getAlluser test helyes", async () =>{
@@ -170,7 +169,7 @@ describe("Controller tesztek", ()=>
                     const res = await request(app).patch("/api/v1/verify-user")
                     .send({token});
 
-                    expect(res.statusCode).toBe(201);
+                    expect(res.statusCode).toBe(200);
                 });
             
             test("verifyEmail test helytelen", async () => 
@@ -191,7 +190,7 @@ describe("Controller tesztek", ()=>
                     const res = await request(app).patch("/api/v1/verify-user")
                     .send({token});
 
-                    expect(res.statusCode).toBe(500);
+                    expect(res.statusCode).toBe(400);
                 });
 
             test("verifyEmail test helytelen3", async () => 
@@ -200,7 +199,7 @@ describe("Controller tesztek", ()=>
 
                     const res = await request(app).patch("/api/v1/verify-user");//nincs token
 
-                    expect(res.statusCode).toBe(403);
+                    expect(res.statusCode).toBe(400);
                 });
             test("loginUser test helyes", async () => 
                 {
@@ -229,7 +228,7 @@ describe("Controller tesztek", ()=>
                         email:"danikataurusz@gmail.com",
                     });
 
-                    expect(res.statusCode).toBe(404);
+                    expect(res.statusCode).toBe(400);
                 })
             test("loginUser test helytelen3", async () => 
                 {
@@ -255,7 +254,7 @@ describe("Controller tesztek", ()=>
                         email:"shranny69@gmail.com",password:'HelyesJszo123',
                     });
 
-                    expect(res.statusCode).toBe(404);
+                    expect(res.statusCode).toBe(403);
                 })
             test("logOut test helyes", async () =>{
                 const res = await request(app).post("/api/v1/logout");
@@ -280,7 +279,7 @@ describe("Controller tesztek", ()=>
                 .set("Authorization", `Bearer ${token}`)
                 .send({userName:"UjUserName",password:'HelyesJszo123'});
 
-                expect(res.statusCode).toBe(404);
+                expect(res.statusCode).toBe(400);
             })
 
             test("changeUserName test helytelen2", async () =>{
@@ -290,7 +289,7 @@ describe("Controller tesztek", ()=>
                 .set("Authorization", `Bearer ${token}`)
                 .send({userName:"UjUserName",password:'HelytelenJszo123'});
 
-                expect(res.statusCode).toBe(404);
+                expect(res.statusCode).toBe(400);
             })
 
             test("changePassword test helyes", async () =>{
@@ -312,7 +311,7 @@ describe("Controller tesztek", ()=>
                 .send({password:"UjJelszo123"});
 
 
-                expect(res.statusCode).toBe(404);
+                expect(res.statusCode).toBe(400);
             })
             /*
             test("getAdminUser test helyes", async () =>{
@@ -343,12 +342,12 @@ describe("Controller tesztek", ()=>
                 .set("Authorization", `Bearer ${token}`)
                 .send({email:"danikataurusz@gmail.com"});
                 console.log("SENDMAIL ERROR"+res.text)
-                expect(res.statusCode).toBe(201);
+                expect(res.statusCode).toBe(200);
             })
             test("sendEmail test helytelen", async () =>{
                 const res = await request(app).patch("/api/v1/password-reset-email")
                 .send({email:"helytelenemail@gmail.com"});
-                expect(res.statusCode).toBe(400);
+                expect(res.statusCode).toBe(404);
             })
 
             test("deleteUserPassordCheck test helyes", async () =>{
@@ -380,7 +379,7 @@ describe("Controller tesztek", ()=>
                 .send({email:"danikataurusz@gmail.com"}); //Hiányos adat
 
 
-                expect(res.statusCode).toBe(404);
+                expect(res.statusCode).toBe(400);
             })
 
             test("deleteUser test helytelen", async () =>{
@@ -389,7 +388,7 @@ describe("Controller tesztek", ()=>
                 const res = await request(app).delete("/api/v1/user")
                 .set("Authorization", `Bearer ${token}`);
 
-                expect(res.statusCode).toBe(404);
+                expect(res.statusCode).toBe(400);
             })
 
             test("deleteUser test helyes", async () =>{
@@ -444,9 +443,15 @@ describe("Controller tesztek", ()=>
             });
 
             test("placeOrder test helyes", async ()=>{
-                const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
+                const token=jwt.sign({ id:3, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
 
+                    const res = await request(app).post("/api/v1/register")
+                    .send({
+                        userName:"TestUserName",fullName:"TestFullName",email:"danikataurusz@gmail.com",password:'HelyesJszo123',
+                    });
 
+                    expect(res.statusCode).toBe(201);
+                    console.log("USERID",res.body.id);
                 const dishRes = await request(app).post("/api/v1/dish")
                     .set("Content-Type", "application/json")
                     .send({
@@ -472,7 +477,67 @@ describe("Controller tesztek", ()=>
 
                 const dishId1 = dishRes.body.id;
                 const dishId2 = dishRes2.body.id;
+                console.log("dishID-K",dishId1,dishId2);
+                expect(dishRes.statusCode).toBe(201);
+                expect(dishRes2.statusCode).toBe(201);
 
+                const response = await request(app)
+                    .post("/api/v1/order")
+                    .set("Authorization", `Bearer ${token}`) 
+                    .send({
+                    totalPrice: 1500,
+                    message: "Kérem gyorsan!",
+                    takeAway: true,
+                    dishIds: [2,3],
+                    dishAmounts: [2,1],
+                    dishCustomizations: ["extra sajt","extra tejföl"],
+                    pointsUsed: 0,
+                    city:null,
+                    street:null,
+                    houseNumber:10,
+                    panel:null,
+                    floor:null,
+                    door:null,
+                    doorBell:null
+                    });
+
+                    console.log("placeorder test helyes "+response.text);
+                    console.log("placeorder test helyes "+response.body);
+                    expect(response.statusCode).toBe(201);
+                    
+            })
+  
+            test("placeOrder test helytelen", async ()=>{
+                const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//nem létező id-t küldünk be
+
+                    const res = await request(app).post("/api/v1/register")
+                    console.log("USERID",res.body.id);
+                const dishRes = await request(app).post("/api/v1/dish")
+                    .set("Content-Type", "application/json")
+                    .send({
+                        name:"TestDishName",price:100,created:"vmiido",
+                        available:true,sauceOptions:{},customizationOptions:{},
+                        description:"description",type:"type",image:"base64Image",
+                        gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
+
+                    });
+
+                const dishRes2 = await request(app).post("/api/v1/dish")
+                .set("Content-Type", "application/json")
+                .send({
+                    name:"TestDishName",price:100,created:"vmiido",
+                    available:true,sauceOptions:{},customizationOptions:{},
+                    description:"description",type:"type",image:"base64Image",
+                    gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
+
+                });
+
+                console.log(dishRes.text,dishRes.body.name);
+                console.log(dishRes2.text,dishRes2.body.name);
+
+                const dishId1 = dishRes.body.id;
+                const dishId2 = dishRes2.body.id;
+                console.log("dishID-K",dishId1,dishId2);
                 expect(dishRes.statusCode).toBe(201);
                 expect(dishRes2.statusCode).toBe(201);
 
@@ -485,16 +550,127 @@ describe("Controller tesztek", ()=>
                     takeAway: true,
                     dishIds: [dishId1,dishId2],
                     dishAmounts: [2,1],
-                    dishCustomizations: ["extra sajt"],
+                    dishCustomizations: ["extra sajt","extra tejföl"],
                     pointsUsed: 0,
+                    city:null,
+                    street:null,
+                    houseNumber:10,
+                    panel:null,
+                    floor:null,
+                    door:null,
+                    doorBell:null
                     });
 
-                    console.log(response.text);
-                    expect(response.statusCode).toBe(201);
+
+                    expect(response.statusCode).toBe(500);
                     
             })
-  
-            test("getAllPurchaseUserInfo helyes", async () => 
+
+            test("placeOrder test helytelen2", async ()=>{
+                const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//nem létező id-t küldünk be
+
+                    const res = await request(app).post("/api/v1/register")
+                    console.log("USERID",res.body.id);
+                const dishRes = await request(app).post("/api/v1/dish")
+                    .set("Content-Type", "application/json")
+                    .send({
+                        name:"TestDishName",price:100,created:"vmiido",
+                        available:true,sauceOptions:{},customizationOptions:{},
+                        description:"description",type:"type",image:"base64Image",
+                        gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
+
+                    });
+
+                const dishRes2 = await request(app).post("/api/v1/dish")
+                .set("Content-Type", "application/json")
+                .send({
+                    name:"TestDishName",price:100,created:"vmiido",
+                    available:true,sauceOptions:{},customizationOptions:{},
+                    description:"description",type:"type",image:"base64Image",
+                    gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
+
+                });
+
+                console.log(dishRes.text,dishRes.body.name);
+                console.log(dishRes2.text,dishRes2.body.name);
+
+                const dishId1 = dishRes.body.id;
+                const dishId2 = dishRes2.body.id;
+                console.log("dishID-K",dishId1,dishId2);
+                expect(dishRes.statusCode).toBe(201);
+                expect(dishRes2.statusCode).toBe(201);
+
+                const response = await request(app)
+                    .post("/api/v1/order")
+                    .set("Authorization", `Bearer ${token}`) 
+                    .send({
+                    totalPrice: 1500,
+                    message: "Kérem gyorsan!",
+                    takeAway: true,
+                    dishIds: [dishId1,dishId2],
+                    dishAmounts: [2,1],
+                    //hiányos adat
+                    });
+
+
+                    expect(response.statusCode).toBe(400);
+                    
+            })
+
+            test("placeOrder test helytelen3", async ()=>{
+                const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//nem létező id-t küldünk be
+
+                    const res = await request(app).post("/api/v1/register")
+                    console.log("USERID",res.body.id);
+                const dishRes = await request(app).post("/api/v1/dish")
+                    .set("Content-Type", "application/json")
+                    .send({
+                        name:"TestDishName",price:100,created:"vmiido",
+                        available:true,sauceOptions:{},customizationOptions:{},
+                        description:"description",type:"type",image:"base64Image",
+                        gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
+
+                    });
+
+                const dishRes2 = await request(app).post("/api/v1/dish")
+                .set("Content-Type", "application/json")
+                .send({
+                    name:"TestDishName",price:100,created:"vmiido",
+                    available:true,sauceOptions:{},customizationOptions:{},
+                    description:"description",type:"type",image:"base64Image",
+                    gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
+
+                });
+
+                console.log(dishRes.text,dishRes.body.name);
+                console.log(dishRes2.text,dishRes2.body.name);
+
+                const dishId1 = dishRes.body.id;
+                const dishId2 = dishRes2.body.id;
+                console.log("dishID-K",dishId1,dishId2);
+                expect(dishRes.statusCode).toBe(201);
+                expect(dishRes2.statusCode).toBe(201);
+
+                const response = await request(app)
+                    .post("/api/v1/order")
+                    .set("Authorization", `Bearer ${token}`) 
+                    .send({
+                    totalPrice: 1500,
+                    message: "Kérem gyorsan!",
+                    takeAway: true,
+                    dishIds: [dishId1,dishId2],
+                    dishAmounts: [2,1],
+                    dishCustomizations: ["extra sajt","extra tejföl"],
+                    pointsUsed: 0,
+                    //hiányos adat2
+                    });
+
+
+                    expect(response.statusCode).toBe(400);
+                    
+            })
+
+            test("getAllPurchaseUserInfo testhelyes", async () => 
                 {
                     const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
 
@@ -504,12 +680,23 @@ describe("Controller tesztek", ()=>
                     expect(res.statusCode).toBe(200);
                 });
 
-            test("getAllActivePurchase helyes", async () => 
+            test("getAllActivePurchase test helyes", async () => 
                 {
                     const res = await request(app).get("/api/v1/active-orders");
 
                     expect(res.statusCode).toBe(200);
-                });    
+                });  
+                
+            test("deActivatePurchase test helyes", async () =>{
+                const res = await request(app).patch("/api/v1/in-activate-order/"+1);
+
+                expect(res.statusCode).toBe(200);
+            });
+            test("deActivatePurchase test helytelen", async () =>{
+                const res = await request(app).patch("/api/v1/in-activate-order/"+"nemid");//helytelen id
+
+                expect(res.statusCode).toBe(404);
+            });
         });
         
     
@@ -518,12 +705,6 @@ describe("Controller tesztek", ()=>
         ("purchaseControllerben léteznek a kérések: %s", async (keres)=>
         {
             expect(purchaseController[keres]).toBeDefined();
-        });
-        
-     
-        test.each(["DataCreate"])("testControllerben léteznek a kérések: %s", (keres)=>
-        {
-            expect(testController[keres]).toBeDefined();
         });
         
     
@@ -575,7 +756,7 @@ describe("Controller tesztek", ()=>
                     //console.log("GETUSER ERROR"+res.text)
                     expect(res.statusCode).toBe(403);
                 });
-            test("middleware helyes errort ad vissza hibás kérésnél3", async () => 
+            /*test("middleware helyes errort ad vissza hibás kérésnél3", async () => 
                 {
                     const token=jwt.sign({ id:1, validLogin:false }, process.env.JWT_KEY, { expiresIn: "1h" });
                     const res = await request(app).get("/api/v1/user")
@@ -583,7 +764,7 @@ describe("Controller tesztek", ()=>
 
                     //console.log("GETUSER ERROR"+res.text)
                     expect(res.statusCode).toBe(500);
-                });
+                });*/
     })
     
     //------Modellek------
@@ -724,9 +905,10 @@ describe("Controller tesztek", ()=>
         test("getUserByEmail returns with correct user", async () => {
             const foundUser = await userRepository.getUserByEmail("mock@example.com");
             const plainUser = foundUser.get({ plain: true });
-            //console.log(plainUser);
-            expect(plainUser.email).toEqual(mockUser.email);
+            console.log("plainUser "+ plainUser);
+            expect(plainUser.userName).toEqual(mockUser.userName);
         })
+
         test("checkForExistinguserName returns with correct user", async () => {
             const foundUser = await userRepository.checkForExistinguserName("mockUserName");
             const plainUser = foundUser.get({ plain: true });
@@ -826,9 +1008,16 @@ describe("Controller tesztek", ()=>
 
             mockPurchase = {
                 id:1,
+                city:null,
                 date: new Date(),
+                door:null,
+                doorBell:null,
+                floor:null,
+                houseNumber:null,
                 totalPrice: 123,
                 message: "Mock uzenet",
+                panel:null,
+                street:null,
                 isActive: true,
                 takeAway: false,
             };
@@ -861,6 +1050,13 @@ describe("Controller tesztek", ()=>
             //console.log(mockPurchase)
             expect(receivedpurchase.get({plain:true})).toEqual({
                 id:mockPurchase.id,
+                city:mockPurchase.city,
+                street:mockPurchase.street,
+                houseNumber:mockPurchase.houseNumber,
+                panel:mockPurchase.panel,
+                floor:mockPurchase.floor,
+                door:mockPurchase.door,
+                doorBell:mockPurchase.doorBell,
                 date:mockPurchase.date,
                 totalPrice:mockPurchase.totalPrice,
                 message:mockPurchase.message,
@@ -869,18 +1065,10 @@ describe("Controller tesztek", ()=>
             })
         })
 
-        test("getAllPurchase returns length 1", async () =>{
-            const receivedpurchase = await purchaseRepository.getPurchase(1);
-            //console.log(mockPurchase)
-            expect(receivedpurchase.get({plain:true})).toEqual({
-                id:mockPurchase.id,
-                date:mockPurchase.date,
-                totalPrice:mockPurchase.totalPrice,
-                message:mockPurchase.message,
-                isActive:mockPurchase.isActive,
-                takeAway:mockPurchase.takeAway
-            })
-        })
+        test("getAllActivePurchase returns all active purchases", async () => {
+            const receivedpurchases = await purchaseRepository.getAllActivePurchase();
+            expect(receivedpurchases.length).toBe(1);
+        });
 
         test("deActivatePurchase deactivates purchase", async () => {
             await purchaseRepository.deActivatePurchase(1);

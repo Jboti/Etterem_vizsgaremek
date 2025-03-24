@@ -40,7 +40,7 @@ exports.createDish = async (req,res,next) =>
             error.status = 500
             throw error
         }
-        res.status(201).json(dish)
+        res.status(201).json(result)
         
     }catch(error){
         next(error)
