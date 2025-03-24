@@ -44,7 +44,7 @@ export type placeOrderData = {
     street: string | null,
     houseNumber: number | null,
     panel: string | null,
-    floor: number | null,
-    door: number | null,
-    doorBell: number | null
+    floor: string | null,
+    door: string | null,
+    doorBell: string | null
 }

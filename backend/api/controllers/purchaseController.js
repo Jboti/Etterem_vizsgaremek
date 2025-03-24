@@ -58,9 +58,6 @@ exports.placeOrder = async (req,res,next) =>
         
         totalPrice = Number(totalPrice)
         houseNumber = Number(houseNumber)
-        floor = Number(floor)
-        door = Number(door)
-        doorBell = Number(doorBell)
         dishIds = dishIds.map(id => Number(id))
         dishAmounts = dishAmounts.map(amount => Number(amount))
         pointsUsed = Number(pointsUsed)
@@ -70,7 +67,7 @@ exports.placeOrder = async (req,res,next) =>
             error.status = 400
             throw error
         }
-        if(isNaN(id) || isNaN(totalPrice) || dishIds.some(id => isNaN(id)) || dishAmounts.some(amount => isNaN(amount)) || isNaN(pointsUsed) || isNaN(houseNumber) || isNaN(floor) || isNaN(door) || isNaN(doorBell))
+        if(isNaN(id) || isNaN(totalPrice) || dishIds.some(id => isNaN(id)) || dishAmounts.some(amount => isNaN(amount)) || isNaN(pointsUsed) || isNaN(houseNumber))
         {
             const error = new Error("Wrong type of data in placeOrder!")
             error.status = 400

@@ -193,9 +193,9 @@ onMounted(() => {
         <v-number-input v-model="adressDataRef.houseNumber" label="Házszám *" variant="outlined" class="field mx-6" :min="1" :step="1"></v-number-input>
         <v-text-field v-model="adressDataRef.panel" label="Lépcsőház" variant="outlined" class="field mx-6"></v-text-field>
         <div v-if="adressDataRef.panel != null">
-          <v-number-input v-model="adressDataRef.floor" label="Emelet" variant="outlined" class="field mx-6" :min="1" :step="1"></v-number-input>
-          <v-number-input v-model="adressDataRef.door" label="Ajtó" variant="outlined" class="field mx-6" :min="1" :step="1"></v-number-input>
-          <v-number-input v-model="adressDataRef.doorBell" label="Kapucsengő" variant="outlined" class="field mx-6" :min="1" :step="1"></v-number-input>
+          <v-text-field v-model="adressDataRef.floor" label="Emelet" variant="outlined" class="field mx-6"></v-text-field>
+          <v-text-field v-model="adressDataRef.door" label="Ajtó" variant="outlined" class="field mx-6"></v-text-field>
+          <v-text-field v-model="adressDataRef.doorBell" label="Kapucsengő" variant="outlined" class="field mx-6"></v-text-field>
         </div>
       </div>
       <v-checkbox v-model="usePoints" label="Pont beváltás" color="success" style="width: 92.5%; margin: auto;" @change="!usePoints ? pointsUsed = 0 : pointsUsed" v-if="userInfoData.points > 0"></v-checkbox>
