@@ -9,6 +9,7 @@ export type dishData = {
     description: string,
     type: string,
     img: Blob,
+    allergenables: Array | null,
     filter?: any;
 }
 

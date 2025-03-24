@@ -23,7 +23,7 @@ const navigateTo = (routeName: string) => {
   <v-app>
     <v-main class="fill-height background-image" style=" --v-layout-bottom: 0px;">
       <!-- <VueQueryDevtools /> -->
-      <RouterView />
+      <RouterView/>
     </v-main>
     <v-navigation-drawer style="transform: translateY(0%)" location="bottom" app>
       <v-footer class="pt-1" style="background: linear-gradient(to right, black, #B71C1C, black);">

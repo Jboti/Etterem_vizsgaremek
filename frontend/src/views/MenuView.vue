@@ -135,8 +135,8 @@ const isUserAllergic = (dish:any) : boolean =>{
   )
 }
 
-const allergenInHun = (allergen) : string =>{
-  return allergen.allergy.name == 'gluten' ? 'Glutén' : allergen.allergy.name == 'lactose' ? 'Laktóz' : allergen.allergy.name == 'egg' ? 'Tójás' : 'Magvak'
+const allergenInHun = (allergen:any) : string =>{
+  return allergen.allergy.name == 'gluten' ? 'Glutén' : allergen.allergy.name == 'lactose' ? 'Laktóz' : allergen.allergy.name == 'egg' ? 'Tojás' : 'Magvak'
 }
 
 // Rendezés
@@ -188,7 +188,7 @@ onMounted(() => {
     <v-row>
       <template v-if="!selectedCategory" v-for="(dishes,index) in groupedItems" :key="index">
       <v-col 
-        v-for="(dish, index) in dishes"
+        v-for="(dish, index) in dishes.filter(d => d.available)"
         :key="`${dish.id}`"
         cols="12" sm="6" md="4" xl="3"
       >
@@ -220,7 +220,7 @@ onMounted(() => {
       </template>
       <template v-else>
         <v-col 
-        v-for="(dish, index) in selectedData"
+        v-for="(dish, index) in selectedData.filter((d:any) => d.available)"
         :key="`${dish.id}`"
         cols="12" sm="6" md="4" xl="3"
       >
@@ -266,7 +266,7 @@ onMounted(() => {
           <v-card-text v-if="selectedDish">
             <p class="mb-2"><b>Ár:</b> {{ selectedDish.price }} Ft</p>
             <p class="my-2"><b>Leírás:</b> {{ selectedDish.description }}</p>
-            <div v-if="selectedDish?.allergenables.length>0">
+            <div v-if="selectedDish?.allergenables?.length >0">
               <p><b>Allergének:</b></p>
               <ul class="mx-6">
                 <li v-for="allergen in selectedDish.allergenables" :key="allergen">
