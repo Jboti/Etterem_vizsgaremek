@@ -17,7 +17,8 @@ namespace EtteremSideApp
         public string customer_name { get; set; }
         public string message { get; set; }
         public bool takeAway { get; set; }
-        public Order(List<OrderItem> items, int id, int price, bool paid, DateTime timestamp, string customer_name, string message, bool takeAway)
+        public List<(string,string)> locationData { get; set; }
+        public Order(List<OrderItem> items, int id, int price, bool paid, DateTime timestamp, string customer_name, string message, bool takeAway, List<(string, string)> locationData)
         {
             Items = items;
             Id = id;
@@ -27,6 +28,7 @@ namespace EtteremSideApp
             this.customer_name = customer_name;
             this.message = message;
             this.takeAway = takeAway;
+            this.locationData = locationData;
         }
     }
 }
