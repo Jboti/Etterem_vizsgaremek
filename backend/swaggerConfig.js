@@ -1,22 +1,31 @@
-const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerAutogen = require('swagger-autogen')()
 
-const options = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'API Dokumentáció',
-      version: '1.0.0',
-      description: 'Az API leírása.',
-    },
-    servers: [
-      {
-        url: 'http://localhost:3000',
-      },
-    ],
+const doc = {
+  info: {
+    title: "API Dokumentáció",
+    description: "Az API leírása.",
   },
-  apis: ['./api/routes/*.js'], // Path to the API docs
+  host: "localhost:3000",
+  schemes: ['http'],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+    },
+  },
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
 };
 
-const swaggerSpec = swaggerJSDoc(options);
+const outPutFile = './swagger_output.json'
+const endpointsFiles = ['./api/routes/*.js']
 
-module.exports = swaggerSpec;
+swaggerAutogen(outPutFile, endpointsFiles, doc).then(() => {
+  require('./app.js')
+})

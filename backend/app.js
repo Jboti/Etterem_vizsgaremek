@@ -30,9 +30,9 @@ const purchaseRoutes = require('./api/routes/purchaseRoutes')
 const dishRoutes = require('./api/routes/dishRoutes')
 
 // Swagger setup
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./swaggerConfig');
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+const swaggerUi = require('swagger-ui-express')
+const swaggerDocument = require('./swagger_output.json')
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 
 //ROUTES
