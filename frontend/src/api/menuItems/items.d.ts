@@ -4,11 +4,11 @@ export type dishData = {
     created: Date,
     price: number,
     available: boolean,
-    sauceOptions: sauseOptions,
-    customizationOptions: CustomizationOptions,
+    sauceOptions: sauseOptions[],
+    customizationOptions: CustomizationOptions[],
     description: string,
     type: string,
-    img: Blob,
+    img: string,
     allergenables: Array | null,
     filter?: any;
 }

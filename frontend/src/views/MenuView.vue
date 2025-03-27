@@ -188,27 +188,26 @@ onMounted(() => {
     <v-row>
       <template v-if="!selectedCategory" v-for="(dishes,index) in groupedItems" :key="index">
       <v-col 
-        v-for="(dish, index) in dishes.filter(d => d.available)"
-        :key="`${dish.id}`"
+        v-for="dish in dishes.filter(d => d.available)" :key="`${dish.id}`"
         cols="12" sm="6" md="4" xl="3"
-      >
-        <v-card class="mx-auto mb-6 dish-card" max-width="344" style="background-color: whitesmoke; box-shadow: 0 0 20px 8px black inset, 0 0 5px 2px black; color: black;" :style="`background-image: url(data:image/png;base64,${dish.img});`">
+        >
+        <v-card class="mx-auto mb-6 dish-card" max-width="344" :style="`background-image: url(data:image/png;base64,${dish.img});`">
           <div style="width: 344px; height: 344px;">
             <v-icon 
               v-if="isUserAllergic(dish)" 
               color="red"
               title="Vigyázz: Valószínűleg allergiás vagy erre az ételre!"
-              style="position: absolute; top: 15px; left: 15px; z-index: 2; font-size: 52px; padding-bottom: 4px; text-shadow: 1.5px 1.5px 2px darkred; border-radius: 25%; background-color: rgba(0, 0, 0, 0.6);"
+              class="allergy-warning"
             >
               mdi-exclamation-thick
             </v-icon>
           </div>
-          <v-card-text style="border-top-left-radius: 40px; border-top-right-radius: 40px; background-color: rgba(255, 255, 255, 0.5); box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.4);">
+          <v-card-text class="dish-card-text">
             <div class="mt-4 dish-data-box">
               <div class="ml-2 mr-2 dish-data">
-                <div><b>{{ dish.name }} <a v-if="isUserAllergic(dish)" style="color: red;">!</a></b></div>
-                <div v-if="dish.type == 'Drink'">{{ dish.price }}+50 Ft</div>
-                <div v-else>{{ dish.price }} Ft</div>
+                <b>{{ dish.name }}</b>
+                <p v-if="dish.type == 'Drink'">{{ dish.price }}+50 Ft</p>
+                <p v-else>{{ dish.price }} Ft</p>
               </div>
               <v-btn class="pl-4 pr-4 pt-2 pb-2 cartButtons" @click="handleAddToCartClicked(dish)">
                 <b>Kosárba</b>
@@ -220,7 +219,7 @@ onMounted(() => {
       </template>
       <template v-else>
         <v-col 
-        v-for="(dish, index) in selectedData.filter((d:any) => d.available)"
+        v-for="dish in selectedData.filter((d:any) => d.available)"
         :key="`${dish.id}`"
         cols="12" sm="6" md="4" xl="3"
       >
@@ -341,6 +340,25 @@ onMounted(() => {
   transform: scale(1.05) translateY(-3%);
   box-shadow: 0 0 5px 5px black inset, 0 0 5px 2px black;
   border-color: black;
+}
+
+.dish-card-text{
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+  background-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.4);
+}
+
+.allergy-warning{
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 2;
+  font-size: 52px;
+  padding-bottom: 4px;
+  text-shadow: 1.5px 1.5px 2px darkred;
+  border-radius: 25%;
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 .dish-data{

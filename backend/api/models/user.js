@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.STRING(225),
           allowNull: false,
           validate:{
-            isAlphanumeric:true
+            is:/^[A-Za-záÁéÉöÖőŐóÓüÜűŰúÚíÍ][A-Za-z0-9_áÁéÉöÖőŐóÓüÜűŰúÚíÍ\s]{5,18}$/
           }
         },
         fullName: {
@@ -40,9 +40,9 @@ module.exports = (sequelize, DataTypes) => {
         password: {
           type: DataTypes.STRING(255),
           allowNull: false,
-          /*validate:{
-            is: /^(?=.*[a-záéöőóüűú])(?=.*[A-ZÁÉÖŐÓÜŰÚ])(?=.*\d)[a-zA-ZáÁéÉöÖőŐóÓüÜűŰúÚ\d]{8,}$/  //a jelszó heshelve van így a a megfelelő formátumot a frontenden,- regisztrációkor nézzük
-          }*/
+          // validate:{
+          //   is: /^[2a-b]\$10\$.{22}\$.+/
+          // }
         },
         points: {
           type: DataTypes.INTEGER,

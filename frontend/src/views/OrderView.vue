@@ -184,7 +184,7 @@ onMounted(() => {
       <v-card-title style="text-align: center; font-weight: bold; font-size: clamp(1rem, 3.5dvh, 3rem);">Rendelés</v-card-title>
       <v-divider class="mb-6 border-opacity-50"></v-divider>
       <v-textarea v-model="message" label="Megjegyzés" style=" width: 90%; margin: auto;" variant="solo-filled" clearable auto-grow ></v-textarea>
-      <v-checkbox v-model="takeAway" label="Elvitel (+100 Ft)" color="success" style="width: 92.5%; margin: auto;" @change="takeAway ? cartStore.totalPrice += 100 : cartStore.totalPrice -= 100"></v-checkbox>
+      <v-checkbox v-model="takeAway" label="Kiszállítás (+100 Ft)" color="success" style="width: 92.5%; margin: auto;" @change="takeAway ? cartStore.totalPrice += 100 : cartStore.totalPrice -= 100"></v-checkbox>
       <div v-if="takeAway"  style="width: 92.5%; margin: auto;">
         <v-card-title>Szállítási cím:</v-card-title>
         <v-card-subtitle class="mb-4">* : kötelező mező</v-card-subtitle>
