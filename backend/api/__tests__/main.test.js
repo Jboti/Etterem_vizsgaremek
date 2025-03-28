@@ -243,10 +243,10 @@ describe("Controller tesztek", ()=>
                 {
                     const resreg = await request(app).post("/api/v1/register")
                     .send({
-                        userName:"TestNemAktivaltUserName",fullName:"TestNemAktivaltFullName",email:"shranny69@gmail.com",password:'HelyesJszo123',
+                        userName:"TestNemAktivalt",fullName:"TestNemAktivaltFullName",email:"shranny69@gmail.com",password:'HelyesJszo123',
                     });
 
-                    //console.log("CREATEUSER ERRROR"+res.text);
+                    console.log("CREATEUSER ERRROR"+resreg.text);
                     expect(resreg.statusCode).toBe(201);
 
                     const res = await request(app).post("/api/v1/login")
