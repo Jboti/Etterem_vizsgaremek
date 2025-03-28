@@ -52,7 +52,6 @@ describe("Controller tesztek", ()=>
 
             test("createDish test helyes", async () => 
                 {
-                    const base64Image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=";
                     const res = await request(app).post("/api/v1/dish")
                     .set("Content-Type", "application/json")
                     .send({
@@ -62,7 +61,6 @@ describe("Controller tesztek", ()=>
                         gluten:"glutén",lactose:"lactose",egg:"egg",nuts:"nuts"
 
                     });
-                    console.log("createDish jó ertek",res.body.id, res.text);
                     expect(res.statusCode).toBe(201);
                     
                 })
@@ -129,7 +127,6 @@ describe("Controller tesztek", ()=>
                     .send({
                         userName:"TestUserName",fullName:"TestFullName",email:"shranny69@gmail.com",password:'HelyesJszo123',
                     });
-                    //console.log("CREATEUSER ERRROR"+res.text);
                     expect(res.statusCode).toBe(409);
                 })
             test("createUser test helytelen3", async () => 
@@ -138,7 +135,6 @@ describe("Controller tesztek", ()=>
                     .send({
                         userName:"TestUjUserName",fullName:"TestFullName",email:"danikataurusz@gmail.com",password:'HelyesJszo123',
                     });
-                    //console.log("CREATEUSER ERRROR"+res.text);
                     expect(res.statusCode).toBe(409);
                 })
             test("getUser test helyes", async () =>{
@@ -246,7 +242,6 @@ describe("Controller tesztek", ()=>
                         userName:"TestNemAktivalt",fullName:"TestNemAktivaltFullName",email:"shranny69@gmail.com",password:'HelyesJszo123',
                     });
 
-                    console.log("CREATEUSER ERRROR"+resreg.text);
                     expect(resreg.statusCode).toBe(201);
 
                     const res = await request(app).post("/api/v1/login")
@@ -313,35 +308,12 @@ describe("Controller tesztek", ()=>
 
                 expect(res.statusCode).toBe(400);
             })
-            /*
-            test("getAdminUser test helyes", async () =>{
-                const registrationres =await request(app).post("/api/v1/register")
-                    .send({
-                        userName:"AdminUserName",fullName:"AdminFullName",email:"shranny69@gmail.com",password:'AdminJszo123',isAdmin:true
-                    });
-                expect(registrationres.statusCode).toBe(201);
-
-                const token=jwt.sign({ id:2, validLogin:false }, process.env.JWT_KEY, { expiresIn: "1h" });
-
-
-                    const resverify = await request(app).patch("/api/v1/verify-user")
-                    .send({token});
-
-                    expect(resverify.statusCode).toBe(201);
-
-                const res = await request(app).post("/api/v1/admin-user")
-                .send({email:"shranny69@gmail.com",password:'AdminJszo123'});     
-                
-                console.log("GETADMINUSER ERROR"+res.text)
-                expect(res.statusCode).toBe(200);       
-            }) */                                   //NEM LEHET TESZTELNI MERT NEM KÉSZÜL ADMIN USER
 
             test("sendEmail test helyes", async () =>{
                 const token=jwt.sign({id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });
                 const res = await request(app).patch("/api/v1/password-reset-email")
                 .set("Authorization", `Bearer ${token}`)
                 .send({email:"danikataurusz@gmail.com"});
-                console.log("SENDMAIL ERROR"+res.text)
                 expect(res.statusCode).toBe(200);
             })
             test("sendEmail test helytelen", async () =>{
@@ -357,7 +329,6 @@ describe("Controller tesztek", ()=>
                 .set("Authorization", `Bearer ${token}`)
                 .send({email:"danikataurusz@gmail.com",password:'UjJelszo123'}); //Új jelszó amit fent beállítottunk a changePassword test-ben
 
-                //console.log("DELETEUSERPASSORDCHECK ERROR"+res.text)
                 expect(res.statusCode).toBe(200);
             })
             test("deleteUserPasswordCheck test helytelen", async () =>{
@@ -427,7 +398,6 @@ describe("Controller tesztek", ()=>
                 .set("Authorization", `Bearer ${token}`)
                 .send({gluten:"glutén",lactose:'laktóz',egg:"tojás"});//hiányos adat
 
-                //console.log("UPDATEALLERGIES ERROR"+res.text)
                 expect(res.statusCode).toBe(200);
             })
 
@@ -451,7 +421,6 @@ describe("Controller tesztek", ()=>
                     });
 
                     expect(res.statusCode).toBe(201);
-                    console.log("USERID",res.body.id);
                 const dishRes = await request(app).post("/api/v1/dish")
                     .set("Content-Type", "application/json")
                     .send({
@@ -472,12 +441,8 @@ describe("Controller tesztek", ()=>
 
                 });
 
-                console.log(dishRes.text,dishRes.body.name);
-                console.log(dishRes2.text,dishRes2.body.name);
-
                 const dishId1 = dishRes.body.id;
                 const dishId2 = dishRes2.body.id;
-                console.log("dishID-K",dishId1,dishId2);
                 expect(dishRes.statusCode).toBe(201);
                 expect(dishRes2.statusCode).toBe(201);
 
@@ -488,7 +453,7 @@ describe("Controller tesztek", ()=>
                     totalPrice: 1500,
                     message: "Kérem gyorsan!",
                     takeAway: true,
-                    dishIds: [2,3],
+                    dishIds: [dishId1,dishId2],
                     dishAmounts: [2,1],
                     dishCustomizations: ["extra sajt","extra tejföl"],
                     pointsUsed: 0,
@@ -501,8 +466,6 @@ describe("Controller tesztek", ()=>
                     doorBell:null
                     });
 
-                    console.log("placeorder test helyes "+response.text);
-                    console.log("placeorder test helyes "+response.body);
                     expect(response.statusCode).toBe(201);
                     
             })
@@ -511,7 +474,6 @@ describe("Controller tesztek", ()=>
                 const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//nem létező id-t küldünk be
 
                     const res = await request(app).post("/api/v1/register")
-                    console.log("USERID",res.body.id);
                 const dishRes = await request(app).post("/api/v1/dish")
                     .set("Content-Type", "application/json")
                     .send({
@@ -532,12 +494,8 @@ describe("Controller tesztek", ()=>
 
                 });
 
-                console.log(dishRes.text,dishRes.body.name);
-                console.log(dishRes2.text,dishRes2.body.name);
-
                 const dishId1 = dishRes.body.id;
                 const dishId2 = dishRes2.body.id;
-                console.log("dishID-K",dishId1,dishId2);
                 expect(dishRes.statusCode).toBe(201);
                 expect(dishRes2.statusCode).toBe(201);
 
@@ -570,7 +528,6 @@ describe("Controller tesztek", ()=>
                 const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//nem létező id-t küldünk be
 
                     const res = await request(app).post("/api/v1/register")
-                    console.log("USERID",res.body.id);
                 const dishRes = await request(app).post("/api/v1/dish")
                     .set("Content-Type", "application/json")
                     .send({
@@ -591,12 +548,9 @@ describe("Controller tesztek", ()=>
 
                 });
 
-                console.log(dishRes.text,dishRes.body.name);
-                console.log(dishRes2.text,dishRes2.body.name);
-
                 const dishId1 = dishRes.body.id;
                 const dishId2 = dishRes2.body.id;
-                console.log("dishID-K",dishId1,dishId2);
+
                 expect(dishRes.statusCode).toBe(201);
                 expect(dishRes2.statusCode).toBe(201);
 
@@ -621,7 +575,7 @@ describe("Controller tesztek", ()=>
                 const token=jwt.sign({ id:1, validLogin:true }, process.env.JWT_KEY, { expiresIn: "1h" });//nem létező id-t küldünk be
 
                     const res = await request(app).post("/api/v1/register")
-                    console.log("USERID",res.body.id);
+
                 const dishRes = await request(app).post("/api/v1/dish")
                     .set("Content-Type", "application/json")
                     .send({
@@ -642,12 +596,9 @@ describe("Controller tesztek", ()=>
 
                 });
 
-                console.log(dishRes.text,dishRes.body.name);
-                console.log(dishRes2.text,dishRes2.body.name);
-
                 const dishId1 = dishRes.body.id;
                 const dishId2 = dishRes2.body.id;
-                console.log("dishID-K",dishId1,dishId2);
+
                 expect(dishRes.statusCode).toBe(201);
                 expect(dishRes2.statusCode).toBe(201);
 
@@ -753,18 +704,9 @@ describe("Controller tesztek", ()=>
                     const res = await request(app).get("/api/v1/user")
                     .set("Authorization", `Bearer ${token}`);
 
-                    //console.log("GETUSER ERROR"+res.text)
                     expect(res.statusCode).toBe(403);
                 });
-            /*test("middleware helyes errort ad vissza hibás kérésnél3", async () => 
-                {
-                    const token=jwt.sign({ id:1, validLogin:false }, process.env.JWT_KEY, { expiresIn: "1h" });
-                    const res = await request(app).get("/api/v1/user")
-                    .set("Authorization", `Helytelen ${token}`);
 
-                    //console.log("GETUSER ERROR"+res.text)
-                    expect(res.statusCode).toBe(500);
-                });*/
     })
     
     //------Modellek------
@@ -892,20 +834,11 @@ describe("Controller tesztek", ()=>
         
         
 
-        /*test("verifyEmail verifies email", async () => { nem tesztelem le mert a getUser nem tér vissza az isActive al és nem tudom letesztelni a változást a mockUserben
-            const receivedUser = await userRepository.getUser(1);
-            console.log(mockUser,"AAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-            console.log(await userRepository.verifyEmail(1))
-            await userRepository.verifyEmail(1);
-            expect(mockUser.isActive).toEqual(true)
-            
-        })*/
 
         
         test("getUserByEmail returns with correct user", async () => {
             const foundUser = await userRepository.getUserByEmail("mock@example.com");
             const plainUser = foundUser.get({ plain: true });
-            console.log("plainUser "+ plainUser);
             expect(plainUser.userName).toEqual(mockUser.userName);
         })
 
@@ -1023,15 +956,13 @@ describe("Controller tesztek", ()=>
             };
 
             const createdPurchase = await purchaseRepository.createPurchase(mockPurchase);
-            //console.log("Mock purchase:", createdPurchase);
 
 
             mockorder_connection = {
                 user_id: createdUser.id,
                 order_id: createdPurchase.id, // Helyesen kapcsoljuk az ID-t
             };
-
-            //console.log("mockorder_connection: ",mockorder_connection);    
+ 
 
             dishInfo = {
                 dishIds: 1,
@@ -1039,15 +970,13 @@ describe("Controller tesztek", ()=>
                 dishCustomizations: {"customizationId":'as'},
             };
 
-            //console.log("dishInfo: ",dishInfo);
 
         })
-        
-        //console.log("DISHINFO KINN",dishInfo);
+
 
         test("getPurchase returns mockpurchase", async () =>{
             const receivedpurchase = await purchaseRepository.getPurchase(1);
-            //console.log(mockPurchase)
+
             expect(receivedpurchase.get({plain:true})).toEqual({
                 id:mockPurchase.id,
                 city:mockPurchase.city,
@@ -1080,7 +1009,7 @@ describe("Controller tesztek", ()=>
             mockPurchase.message = "new message";
             await purchaseRepository.updatePurchaseMessage(mockPurchase);
             const receivedpurchase = await purchaseRepository.getPurchase(1);
-            //console.log("received: ",receivedpurchase);
+
             expect(receivedpurchase.message).toEqual("new message");
         });
 
