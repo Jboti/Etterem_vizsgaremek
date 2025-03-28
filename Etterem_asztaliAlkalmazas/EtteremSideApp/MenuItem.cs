@@ -39,21 +39,5 @@ namespace EtteremSideApp
             this.egg = egg;
             this.nuts = nuts;
         }
-
-        public override string ToString()
-        {
-            var modificationsString = modifications != null && modifications.Count > 0
-                ? string.Join(", ", modifications.Select(m => $"{m.Item1} Price: {m.Item2}, Sauce: {(m.Item3 ? "Yes" : "No")}"))
-                : "No modifications";
-
-            return $"Id: {id}\n" +
-                   $"Name: {name}\n" +
-                   $"Price: {price}Ft\n" +
-                   $"Available: {available}\n" +
-                   $"Category: {category}\n" +
-                   $"Description: {description}\n" +
-                   $"Modifications: {modificationsString}\n" +
-                   $"Image: {img?.ToString() ?? "No Image"}";
-        }
     }
 }

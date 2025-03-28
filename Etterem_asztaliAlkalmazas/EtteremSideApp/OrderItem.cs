@@ -18,10 +18,5 @@ namespace EtteremSideApp
             this.modifications = modifications;
             this.category = category;
         }
-
-        public override string ToString()
-        {
-            return $"{name} - {category}";
-        }
     }
 }

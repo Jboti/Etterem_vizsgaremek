@@ -24,8 +24,8 @@ namespace EtteremSideApp
         //------Global values------\\
         private System.Windows.Forms.Timer clockTimer;
         Random rand = new Random();
-        private int refetchIntervall = 2000;
-        static bool conn_alive = false;
+        public int refetchIntervall = 2000;
+        public static bool conn_alive = false;
         public static List<Order> all_orders = new List<Order>();
         public static bool must_Update;
         public static int previousOrdersCount = 0;
@@ -925,7 +925,7 @@ namespace EtteremSideApp
                 toolStripSeparator7.Visible = true;
 
 
-                toolStripLabel3.Visible = false; //ne legyen bejelentkezés gomb amíg be van jelentkezve valaki
+                toolStripLabel3.Visible = false;
                 toolStripLabel6.Visible = true;
                 toolStripLabel7.Visible = true;
                 toolStripLabel8.Visible = true;
